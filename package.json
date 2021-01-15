@@ -1,0 +1,16 @@
+{
+  "name": "virtual6809",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jest-each": "^26.6.2",
+    "node-constants": "0.0.2"
+  }
+}
