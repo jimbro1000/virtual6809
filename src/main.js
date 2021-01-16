@@ -1,52 +1,64 @@
 const Memory = require("./memory/memory_factory.js");
 const Font = require("./font.js").halfSet;
 
+const displayWidth = 640;
+const displayHeight = 480;
+const screenWidth = 256;
+const screenHeight = 192;
+const zoom = 2;
+
 window.onload = () => {
     let vdgTranslate = (char, row) => {
         return Font[char * 8 + row % 8];
     }
+    let div = (a, b) => {
+        return Math.floor(a / b);
+    }
     let render = (offset) => {
-        let memAddress = 0x200;
-        let row = 0;
-        for (let x = 0; x < width; ++x) {
-            for (let y = 0; y < height; ++y) {
+        const overscanVertical = div(displayHeight - (screenHeight * zoom), 2);
+        const overscanHorizontal = div(displayWidth - (screenWidth * zoom), 2);
+        for (let y = 0; y < height; ++y) {
+            for (let x = 0; x < width; ++x) {
                 const pixelIndex = (y * width + x) * 4;
                 let red = 0
                 let blue = 0
                 let green = 0
-                let alpha = 0
-                if (y < 96 || y > 480 || x < 64 || x > 576) {
+                let alpha = 255
+                if (y < overscanVertical || y >= (displayHeight - overscanVertical) ||
+                    x < overscanHorizontal || x >= (displayWidth - overscanHorizontal)) {
                     // do nothing, just overscan
                 } else {
-                    const column = (x - 64) % 8;
-                    const row = Math.floor((y - 96) / 8);
-                    const charRow = (y - 96) % 8;
-                    const screenAddress = memAddress + column + row * 32;
+                    const screenX = div(x - overscanHorizontal, zoom);
+                    const screenY = div(y - overscanVertical, zoom);
+                    const column = div(screenX, 8);
+                    const row = div(screenY, 8);
+                    const charRow = screenY % 8;
+                    const screenAddress = videoAddress + column + row * 32;
                     const memByte = memory.read(screenAddress);
                     const lookup = vdgTranslate(memByte, charRow);
-                    let mask = 0x80 >> (x % 8);
+                    const mask = 0x80 >> (screenX % 8);
                     if (!(lookup & mask)) {
+                        red = 255;
                         green = 255;
+                        blue = 255;
                     }
                 }
                 imageData.data[pixelIndex] = red;
                 imageData.data[pixelIndex + 1] = green;
                 imageData.data[pixelIndex + 2] = blue;
-                imageData.data[pixelIndex + 3] = 255;
+                imageData.data[pixelIndex + 3] = alpha;
             }
         }
     }
 
-// open page DOM
-// define document outline
     const bodyNode = document.body;
     let display = document.createElement('div');
     display.id = "display";
     bodyNode.append(display);
     let canvas = document.createElement("canvas");
     canvas.id = "screen";
-    canvas.width = 640;
-    canvas.height = 576;
+    canvas.width = displayWidth;
+    canvas.height = displayHeight;
     display.append(canvas);
 
     const context = canvas.getContext("2d");
@@ -60,7 +72,7 @@ window.onload = () => {
     const videoAddress = 0x200;
     let index = videoAddress;
     message.forEach( char => {
-        memory.write(index, char.charCodeAt(0));
+        memory.write(index++, char.charCodeAt(0));
     });
 
     let main = (tframe) => {
