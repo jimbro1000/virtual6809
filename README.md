@@ -28,7 +28,7 @@ CPU interaction.
 ## Processor ##
 
 The CPU emulation is based on a strict read/process/write cycle as detailed in the 
-6809 assembly language programming book by Leventhal. The aim is achieve the same 
+6809 assembly language programming book by Leventhal. The aim is to achieve the same 
 instruction timing.
 
 The emulated processor can operate at any clock speed within the limits of the 
@@ -38,8 +38,12 @@ hardware.
 ## Video ##
 
 The VDG is not an emulation, it is an approximation of the original hardware to
-provide a more palatable experience than the 6847 reference hardware.
+provide a more palatable experience than the 6847 reference hardware. The 
+implication of this is that the multiplexing required to avoid bus contention is
+not present.
 
 VDG timing is independent of the actual cpu clock so display artifacts will be
 radically different from the real components. The timing can be locked to the 
 cpu clock if desired.
+
+## References ##

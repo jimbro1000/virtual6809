@@ -1,16 +1,24 @@
 {
   "name": "virtual6809",
   "version": "1.0.0",
-  "description": "",
+  "description": "Emulation of Motorola 6809 design",
+  "repository": "https://github.com/jimbro1000/virtual6809",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "budo src/main.js"
   },
   "keywords": [],
-  "author": "",
+  "author": {
+    "name": "Julian Brown",
+    "email": "julian@the-lair.org.uk"
+  },
   "license": "ISC",
   "dependencies": {
-    "jest-each": "^26.6.2",
+    "budo": "^11.6.4",
     "node-constants": "0.0.2"
+  },
+  "devDependencies": {
+    "jest-each": "^26.6.2"
   }
 }

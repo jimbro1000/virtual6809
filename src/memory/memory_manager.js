@@ -24,6 +24,12 @@ class manager {
             return 0;
         }
     }
+
+    write = (address, byte) => {
+        if (this.address_map[address] !== undefined) {
+            this.address_map[address].setMemory(address,byte);
+        }
+    }
 }
 
 module.exports = { manager }
