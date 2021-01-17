@@ -35,4 +35,11 @@ describe("6809 cpu", () => {
             });
         });
     });
+
+    describe("cpu operation", () => {
+        let subject;
+        beforeEach(() => {
+            subject = new cpu();
+        });
+    });
 });

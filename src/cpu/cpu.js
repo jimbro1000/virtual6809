@@ -50,8 +50,9 @@ class cpu {
     }
 
     fetchNextByte() {
-        const value = this.memory.read(this.PC);
-        this.PC += 1;
+        let address = this.PC.fetch();
+        const value = this.memory.read(address++);
+        this.PC.set(address);
         return value;
     }
 
