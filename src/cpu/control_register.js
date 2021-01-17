@@ -3,7 +3,7 @@ const cpus = require("../../src/cpu/cpu_constants");
 
 class control_register extends Cpu_Register.cpu_register {
     constructor() {
-        super(cpus.SHORT, "cc", null);
+        super(cpus.SHORT, "CC", null);
     }
 
     set(value) {
