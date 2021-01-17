@@ -15,38 +15,6 @@ class cpu_register {
         }
     }
 
-    overflow(value) {
-        cc(value, cpus.OVERFLOW);
-    }
-
-    zero(value) {
-        cc(value, cpus.ZERO);
-    }
-
-    carry(value) {
-        cc(value, cpus.CARRY);
-    }
-
-    negative(value) {
-        cc(value, cpus.NEGATIVE);
-    }
-
-    halfcarry(value) {
-        cc(value, cpus.HALFCARRY);
-    }
-
-    entire(value) {
-        cc(value, cpus.ENTIRE);
-    }
-
-    irq(value) {
-        cc(value, cpus.IRQ);
-    }
-
-    firq(value) {
-        cc(value, cpus.FIRQ);
-    }
-
     cc(value, bit) {
         if (this.control !== undefined) {
             if (value) {
@@ -55,6 +23,30 @@ class cpu_register {
                 this.control.clear(bit);
             }
         }
+    }
+
+    overflow(value) {
+        this.cc(value, cpus.OVERFLOW);
+    }
+
+    zero(value) {
+        this.cc(value, cpus.ZERO);
+    }
+
+    carry(value) {
+        this.cc(value, cpus.CARRY);
+    }
+
+    negative(value) {
+        this.cc(value, cpus.NEGATIVE);
+    }
+
+    halfcarry(value) {
+        this.cc(value, cpus.HALFCARRY);
+    }
+
+    entire(value) {
+        this.cc(value, cpus.ENTIRE);
     }
 
     load(value) {
