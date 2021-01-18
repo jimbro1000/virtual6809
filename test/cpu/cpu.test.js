@@ -179,5 +179,21 @@ describe("6809 cpu", () => {
             expect(subject.registers.get("PC").fetch()).toBe(0x8000);
             expect(subject.mode).toBe(cpus.NEXT);
         });
+
+        it("ABX adds B unsigned to X", () => {
+            const code = [0x3a];
+            loadMemory(0x0000, code);
+            subject.registers.get("PC").set(0x0000);
+            subject.registers.get("B").set(0xff);
+            subject.registers.get("X").set(0x1000);
+            let cycle_count = 3;
+            while (cycle_count > 0) {
+                subject.cycle();
+                cycle_count--;
+            }
+            expect(subject.registers.get("PC").fetch()).toBe(0x0001);
+            expect(subject.mode).toBe(cpus.NEXT);
+            expect(subject.registers.get("X").fetch()).toBe(0x10ff);
+        });
     });
 });
