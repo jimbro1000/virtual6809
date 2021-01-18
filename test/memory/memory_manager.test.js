@@ -26,5 +26,9 @@ describe("memory manager", () => {
             const actual = memory.read(address);
             expect(actual).toBe(expected);
         });
+
+        it("returns a zero byte if the address is unreadable", () => {
+            expect(memory.read(0x8000)).toBe(0);
+        });
     });
 });

@@ -33,20 +33,8 @@ class cpu_register {
         this.cc(value, cpus.ZERO);
     }
 
-    carry(value) {
-        this.cc(value, cpus.CARRY);
-    }
-
     negative(value) {
         this.cc(value, cpus.NEGATIVE);
-    }
-
-    halfcarry(value) {
-        this.cc(value, cpus.HALFCARRY);
-    }
-
-    entire(value) {
-        this.cc(value, cpus.ENTIRE);
     }
 
     load(value) {

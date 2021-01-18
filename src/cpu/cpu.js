@@ -100,11 +100,22 @@ class cpu {
         this.instruction = action;
         this.addressMode = action.mode;
         this.object = this.registers.get(action.object);
-        if (action.scale === 1) {
-            this.mode = cpus.DIRECTPAGE;
-        } else {
+        // if (action.scale === 1) {
+        //     this.mode = cpus.DIRECTPAGE;
+        // } else {
             this.mode = cpus.HIGHADDRESS;
-        }
+        // }
+    }
+
+    unconditional_jump_group = (action) => {
+        this.instruction = action;
+        this.addressMode = action.mode;
+        this.object = this.PC;
+        // if (action.scale === 1) {
+        //     this.mode = cpus.DIRECTPAGE;
+        // } else {
+            this.mode = cpus.HIGHADDRESS;
+        // }
     }
 
     next_instruction_state = () => {
@@ -113,13 +124,15 @@ class cpu {
         const action = this.instructions[this.operation];
         if (action.mode === "fetch") {
             this.operation = next_byte << 8;
-        } else if (action.instruction === "NULL") {
-            this.clearInstruction();
+        } else if (action.operation === "NOP") {
+            this.mode = cpus.BUSY;
         } else {
             if (action.group === "LD") {
                 this.load_instruction_group(action);
             } else if (action.group === "ST") {
                 this.store_instruction_group(action);
+            } else if (action.group === "JMP") {
+                this.unconditional_jump_group(action);
             }
         }
     }
@@ -148,10 +161,15 @@ class cpu {
     address_low_byte_state = () => {
         const next_byte = this.fetchNextByte();
         this.workingValue |= next_byte;
-        if (this.object.size === cpus.SHORT) {
-            this.mode = cpus.WRITELOW;
-        } else {
-            this.mode = cpus.WRITEHIGH;
+        if (this.instruction.group === "ST") {
+            if (this.object.size === cpus.SHORT) {
+                this.mode = cpus.WRITELOW;
+            } else {
+                this.mode = cpus.WRITEHIGH;
+            }
+        } else if (this.instruction.group === "JMP") {
+            this.PC.set(this.workingValue);
+            this.mode = cpus.BUSY;
         }
     }
 
