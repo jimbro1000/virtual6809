@@ -16,6 +16,20 @@ class cpu {
         this.addressMode = null;
         this.scale = 0;
         this.workingValue = 0;
+        this.stateModel = this.map_state_to_action();
+    }
+
+    map_state_to_action() {
+        let result = {};
+        result[cpus.NEXT] = this.next_instruction_state;
+        result[cpus.HIGHDATA] = this.data_high_byte_state;
+        result[cpus.LOWDATA] = this.data_low_byte_state;
+        result[cpus.HIGHADDRESS] = this.address_high_byte_state;
+        result[cpus.LOWADDRESS] = this.address_low_byte_state;
+        result[cpus.WRITEHIGH] = this.write_high_byte_state;
+        result[cpus.WRITELOW] = this.write_low_byte_state;
+        result[cpus.BUSY] = this.busy_state;
+        return result;
     }
 
     set_register_literal(register, literal_value) {
@@ -67,37 +81,96 @@ class cpu {
     }
 
     cycle() {
-        if (this.mode === cpus.NEXT) {
-            const next_byte = this.fetchNextByte();
-            this.operation += next_byte;
-            const action = this.instructions[this.operation];
-            if (action.mode === "fetch") {
-                // multi-byte instruction
-                this.operation = next_byte << 8;
-            } else if (action.group === "LD") {
-                this.instruction = action;
-                this.addressMode = action.mode;
-                this.object = this.registers.get(action.object);
-                if (action.scale === 1) {
-                    this.mode = cpus.DATA;
-                } else {
-                    this.mode = cpus.HIGHDATA;
-                }
-            }
-        } else if (this.mode === cpus.DATA) {
-            const next_byte = this.fetchNextByte();
-            this.object.load(next_byte);
-            this.clearInstruction();
-        } else if (this.mode === cpus.HIGHDATA) {
-            const next_byte = this.fetchNextByte();
-            this.workingValue = next_byte << 8;
+        const lambda = this.stateModel[this.mode];
+        lambda();
+    }
+
+    load_instruction_group = (action) => {
+        this.instruction = action;
+        this.addressMode = action.mode;
+        this.object = this.registers.get(action.object);
+        if (action.scale === 1) {
             this.mode = cpus.LOWDATA;
-        } else if (this.mode === cpus.LOWDATA) {
-            const next_byte = this.fetchNextByte();
-            this.workingValue |= next_byte;
-            this.object.load(this.workingValue);
-            this.clearInstruction();
+        } else {
+            this.mode = cpus.HIGHDATA;
         }
+    }
+
+    store_instruction_group = (action) => {
+        this.instruction = action;
+        this.addressMode = action.mode;
+        this.object = this.registers.get(action.object);
+        if (action.scale === 1) {
+            this.mode = cpus.DIRECTPAGE;
+        } else {
+            this.mode = cpus.HIGHADDRESS;
+        }
+    }
+
+    next_instruction_state = () => {
+        const next_byte = this.fetchNextByte();
+        this.operation |= next_byte;
+        const action = this.instructions[this.operation];
+        if (action.mode === "fetch") {
+            this.operation = next_byte << 8;
+        } else if (action.instruction === "NULL") {
+            this.clearInstruction();
+        } else {
+            if (action.group === "LD") {
+                this.load_instruction_group(action);
+            } else if (action.group === "ST") {
+                this.store_instruction_group(action);
+            }
+        }
+    }
+
+    data_high_byte_state = () => {
+        const next_byte = this.fetchNextByte();
+        this.workingValue = next_byte << 8;
+        this.mode = cpus.LOWDATA;
+    }
+
+    data_low_byte_state = () => {
+        const next_byte = this.fetchNextByte();
+        this.workingValue |= next_byte;
+        if (this.instruction.group === "LD") {
+            this.object.load(this.workingValue);
+        }
+        this.clearInstruction();
+    }
+
+    address_high_byte_state = () => {
+        const next_byte = this.fetchNextByte();
+        this.workingValue = next_byte << 8;
+        this.mode = cpus.LOWADDRESS;
+    }
+
+    address_low_byte_state = () => {
+        const next_byte = this.fetchNextByte();
+        this.workingValue |= next_byte;
+        if (this.object.size === cpus.SHORT) {
+            this.mode = cpus.WRITELOW;
+        } else {
+            this.mode = cpus.WRITEHIGH;
+        }
+    }
+
+    write_high_byte_state = () => {
+        if (this.instruction.group === "ST") {
+            this.memory.write(this.workingValue++, (this.object.fetch() & 0xff00) >> 8);
+        }
+        this.mode = cpus.WRITELOW;
+    }
+
+    write_low_byte_state = () => {
+        if (this.instruction.group === "ST") {
+            this.memory.write(this.workingValue, this.object.save() & 0xff);
+            this.mode = cpus.BUSY;
+        }
+    }
+
+    busy_state = () => {
+        this.clearInstruction();
     }
 }
 
