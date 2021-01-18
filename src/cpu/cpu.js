@@ -29,6 +29,7 @@ class cpu {
         result[cpus.WRITEHIGH] = this.write_high_byte_state;
         result[cpus.WRITELOW] = this.write_low_byte_state;
         result[cpus.BUSY] = this.busy_state;
+        result[cpus.ABX] = this.process_action_state;
         return result;
     }
 
@@ -118,6 +119,15 @@ class cpu {
         // }
     }
 
+    process_action_state = () => {
+        if (this.instruction.operation === "ABX") {
+            let X = this.registers.get("X");
+            let B = this.registers.get("B");
+            X.set(X.fetch() + B.fetch());
+            this.mode = cpus.BUSY;
+        }
+    }
+
     next_instruction_state = () => {
         const next_byte = this.fetchNextByte();
         this.operation |= next_byte;
@@ -126,6 +136,9 @@ class cpu {
             this.operation = next_byte << 8;
         } else if (action.operation === "NOP") {
             this.mode = cpus.BUSY;
+        } else if (action.operation === "ABX") {
+            this.mode = cpus.ABX;
+            this.instruction = action;
         } else {
             if (action.group === "LD") {
                 this.load_instruction_group(action);

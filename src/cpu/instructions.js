@@ -54,6 +54,9 @@ instructions = {
     0x12: {
         "operation": "NOP"
     },
+    0x3a: {
+        "operation": "ABX"
+    },
     0x7e: {
         "operation": "JMP",
         "group": "JMP",
