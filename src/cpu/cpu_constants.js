@@ -14,7 +14,13 @@ define("ENTIRE", 0x80);
 // instruction mode
 define("LITERAL", 0);
 // cpu state
-define("NEXT", 1);
-define("DATA", 2);
-define("HIGHDATA", 3);
-define("LOWDATA", 4);
+define("NEXT", 1); // get next byte
+define("DATA", 2); // read data byte
+define("HIGHDATA", 3); // read data high byte
+define("LOWDATA", 4); // read data low byte
+define("HIGHADDRESS", 5); // read address high byte
+define("LOWADDRESS", 6); // read address low byte
+define("WRITEVALUE", 7); // write data byte
+define("WRITEHIGH", 8); // write data high byte
+define("WRITELOW", 9); // write data low byte
+define("BUSY", 10);
