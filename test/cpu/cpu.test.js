@@ -57,6 +57,23 @@ describe("6809 cpu", () => {
                 expect(subject.registers.get("X").fetch()).toBe(0x55ff);
             });
         });
+
+        describe("direct mode", () => {
+            let subject;
+            beforeEach(() => {
+                subject = new cpu(factory("D4"));
+            });
+            it("combines a short register with DP to generate a 16bit address", () => {
+                subject.memory.write(0x0000, 0x55);
+                subject.PC.set(0x0000);
+                const register = subject.registers.get("DP");
+                register.set(0x80);
+                subject.mode = cpus.DIRECT;
+                subject.cycle();
+                subject.cycle();
+                expect(subject.workingValue).toBe(0x8055);
+            });
+        });
     });
 
     describe("cpu operation", () => {
