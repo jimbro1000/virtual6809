@@ -54,4 +54,4 @@ instructions = {
     }
 };
 
-module.exports = instructions;
+module.exports = { instructions }

@@ -9,7 +9,7 @@ class cpu {
         this.memory = memory_manager;
         this.mode = cpus.NEXT;
         this.instructions = instructions;
-        this.pc = this.registers.get("PC");
+        this.PC = this.registers.get("PC");
         this.operation = null;
         this.instruction = null;
         this.object = null;
@@ -63,13 +63,14 @@ class cpu {
         this.workingValue = 0;
         this.scale = 0;
         this.mode = cpus.NEXT;
-        this.operation = null;
+        this.operation = 0;
     }
 
     cycle() {
         if (this.mode === cpus.NEXT) {
             const next_byte = this.fetchNextByte();
-            const action = this.instructions(next_byte);
+            this.operation += next_byte;
+            const action = this.instructions[this.operation];
             if (action.mode === "fetch") {
                 // multi-byte instruction
                 this.operation = next_byte << 8;
