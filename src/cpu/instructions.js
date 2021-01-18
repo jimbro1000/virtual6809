@@ -1,6 +1,9 @@
 instructions = {
-    0x00: {
-        "operation": "NULL"
+    0x0e: {
+        "operation": "JMP",
+        "group": "JMP",
+        "mode": "direct",
+        "scale": 1
     },
     0x10: {
         "operation": "extended instruction",
@@ -47,6 +50,15 @@ instructions = {
         "mode": "extended",
         "scale": 2,
         "object": "S"
+    },
+    0x12: {
+        "operation": "NOP"
+    },
+    0x7e: {
+        "operation": "JMP",
+        "group": "JMP",
+        "mode": "extended",
+        "scale": 2
     },
     0x86: {
         "operation": "LDA",

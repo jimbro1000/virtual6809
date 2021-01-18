@@ -122,4 +122,34 @@ describe("register prototype", () => {
             expect(cc.value & cpus.NEGATIVE).toBe(cpus.NEGATIVE);
         });
     });
-})
+});
+
+describe("control register", () => {
+    let cc;
+    beforeEach(() => {
+        cc = new Control_Register.control_register();
+    });
+
+    it("overrides set to OR against existing value", () => {
+        cc.value = 0xaa;
+        cc.set(0x57);
+        expect(cc.value).toBe(0xff);
+    });
+
+    it("clear will mask out against the existing value", () => {
+        cc.value = 0xff;
+        cc.clear(0x55);
+        expect(cc.value).toBe(0xaa);
+    });
+
+    it("load sets the register value", () => {
+        cc.value = 0x55;
+        cc.load(0xaa);
+        expect(cc.value).toBe(0xaa);
+    });
+
+    it("overrides save to simply return the value", () => {
+        cc.value = 0x55;
+        expect(cc.save()).toBe(0x55);
+    });
+});

@@ -35,6 +35,27 @@ describe("6809 cpu", () => {
                 subject.set_register_literal_high(register, value);
                 expect(register.fetch()).toBe(expected);
             });
+
+            it("has a helper to load a short value into a register by name", () => {
+                const register = subject.registers.get("A");
+                register.set(0);
+                subject.set_register_literal("A", 20);
+                expect(subject.registers.get("A").fetch()).toBe(20);
+            });
+
+            it("has a helper to load a short value into the low byte a register by name", () => {
+                const register = subject.registers.get("X");
+                register.set(65535);
+                subject.set_register_literal_low("X", 0x55);
+                expect(subject.registers.get("X").fetch()).toBe(0xff55);
+            });
+
+            it("has a helper to load a short value into the high byte a register by name", () => {
+                const register = subject.registers.get("X");
+                register.set(65535);
+                subject.set_register_literal_high("X", 0x55);
+                expect(subject.registers.get("X").fetch()).toBe(0x55ff);
+            });
         });
     });
 
@@ -133,6 +154,29 @@ describe("6809 cpu", () => {
             }
             const actual = subject.memory.read(at_address) << 8 | subject.memory.read(at_address + 1)
             expect(actual).toBe(expected);
+            expect(subject.mode).toBe(cpus.NEXT);
+        });
+
+        it("process a nop instruction", () => {
+            const code = [0x12];
+            loadMemory(0x0000,code);
+            subject.registers.get("PC").set(0x0000);
+            subject.cycle();
+            subject.cycle();
+            expect(subject.registers.get("PC").fetch()).toBe(0x0001);
+            expect(subject.mode).toBe(cpus.NEXT);
+        });
+
+        it("process an extended jmp to reload the program counter", () => {
+            const code = [0x7e,0x80,0x00];
+            loadMemory(0x0000, code);
+            subject.registers.get("PC").set(0x0000);
+            let cycle_count = 4;
+            while (cycle_count > 0) {
+                subject.cycle();
+                cycle_count--;
+            }
+            expect(subject.registers.get("PC").fetch()).toBe(0x8000);
             expect(subject.mode).toBe(cpus.NEXT);
         });
     });
