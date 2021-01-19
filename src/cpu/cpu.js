@@ -159,17 +159,14 @@ class cpu {
     }
 
     build_direct_page_address_in_W = () => {
-        // const next_byte = this.fetchNextByte();
         this.W.set((this.registers.get("DP").fetch() << 8) | this.fetchNextByte());
     }
 
     read_next_high_data_byte_from_PC = () => {
-        // const next_byte = this.fetchNextByte();
         this.W.set(this.fetchNextByte() << 8);
     }
 
     read_next_low_data_byte_from_PC = () => {
-        // const next_byte = this.fetchNextByte();
         this.object.load(this.W.fetch() | this.fetchNextByte());
     }
 
