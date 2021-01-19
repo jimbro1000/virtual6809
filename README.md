@@ -27,7 +27,7 @@ CPU interaction.
 
 ## Processor ##
 
-The CPU emulation is based on a strict read/process/write cycle as detailed in the 
+The CPU emulation is based on a strict read/process/write cpu cycle as detailed in the 
 6809 assembly language programming book by Leventhal[1]. The aim is to achieve the same 
 instruction timing.
 
