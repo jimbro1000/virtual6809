@@ -21,7 +21,8 @@ define("WRITEHIGH", 5); // write data high byte
 define("WRITELOW", 6); // write data low byte
 define("READHIGH", 7); // read high byte to object
 define("READLOW", 8); // read low byte to object
-define("READADDHIGH", 9); // read high byte to W
-define("READADDLOW", 10); // read low byte to W
+define("READADHIGH", 9); // read high byte to AD
+define("READADLOW", 10); // read low byte to AD
 define("ADDTGTOOB", 11); // add b to object, result in W
 define("BUSY", 12); // busy doing nothing
+define("READWLOW", 13); // read low byte to W

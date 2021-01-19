@@ -29,30 +29,32 @@ class cpu {
         result["READLOW"] = cpus.READLOW;
         result["WRITEHIGH"] = cpus.WRITEHIGH;
         result["WRITELOW"] = cpus.WRITELOW;
-        result["READADDHIGH"] = cpus.READADDHIGH;
-        result["READADDLOW"] = cpus.READADDLOW;
+        result["READADHIGH"] = cpus.READADHIGH;
+        result["READADLOW"] = cpus.READADLOW;
         result["TFRWTOOB"] = cpus.TFRWTOOB;
         result["TFRWTOTG"] = cpus.TFRWTOTG;
         result["BUSY"] = cpus.BUSY;
         result["ADDTGTOOB"] = cpus.ADDTGTOOB;
+        result["READWLOW"] = cpus.READWLOW;
         return result;
     }
 
     map_code_to_lambda() {
         let result = {};
-        result[cpus.NEXT] = this.next_instruction_state;
-        result[cpus.FETCH] = this.next_instruction_state;
-        result[cpus.DIRECT] = this.generate_direct_state;
-        result[cpus.READHIGH] = this.data_high_byte_state;
-        result[cpus.READLOW] = this.data_low_byte_state;
-        result[cpus.WRITEHIGH] = this.write_high_byte_state;
-        result[cpus.WRITELOW] = this.write_low_byte_state;
-        result[cpus.READADDHIGH] = this.address_high_byte_state;
-        result[cpus.READADDLOW] = this.address_low_byte_state;
+        result[cpus.NEXT] = this.fetch_next_instruction_from_PC;
+        result[cpus.FETCH] = this.fetch_next_instruction_from_PC;
+        result[cpus.DIRECT] = this.build_direct_page_address_in_W;
+        result[cpus.READHIGH] = this.read_next_high_data_byte_from_PC;
+        result[cpus.READLOW] = this.read_next_low_data_byte_from_PC;
+        result[cpus.READWLOW] = this.read_next_low_data_byte_to_W_from_PC;
+        result[cpus.WRITEHIGH] = this.write_object_high_byte_to_AD;
+        result[cpus.WRITELOW] = this.write_object_low_byte_to_AD;
+        result[cpus.READADHIGH] = this.read_next_high_data_byte_from_AD;
+        result[cpus.READADLOW] = this.read_next_low_data_byte_from_AD;
         result[cpus.TFRWTOOB] = this.transfer_w_to_object;
         result[cpus.TFRWTOTG] = this.transfer_w_to_target;
         result[cpus.BUSY] = this.busy_state;
-        result[cpus.ADDTGTOOB] = this.process_action_state;
+        result[cpus.ADDTGTOOB] = this.add_target_to_object;
         return result;
     }
 
@@ -120,17 +122,19 @@ class cpu {
         }
     }
 
-    process_action_state = () => {
+    add_target_to_object = () => {
         this.W.set(this.object.fetch() + this.target.fetch());
     }
 
-    next_instruction_state = () => {
+    fetch_next_instruction_from_PC = () => {
         const next_byte = this.fetchNextByte();
         this.operation |= next_byte;
         const action = this.instructions[this.operation];
+        if (typeof action === 'undefined') {
+            throw "illegal instruction";
+        }
         if (action.mode === "fetch") {
             this.operation = next_byte << 8;
-            this.mode = cpus.FETCH;
             this.code = [cpus.FETCH];
         } else {
             this.instruction = action;
@@ -146,44 +150,51 @@ class cpu {
 
     transfer_w_to_object = () => {
         this.object.set(this.W.fetch());
+        this.W.set(0);
     }
 
     transfer_w_to_target = () => {
         this.target.set(this.W.fetch());
+        this.W.set(0);
     }
 
-    generate_direct_state = () => {
-        const next_byte = this.fetchNextByte();
-        this.W.set((this.registers.get("DP").fetch() << 8) | next_byte);
+    build_direct_page_address_in_W = () => {
+        // const next_byte = this.fetchNextByte();
+        this.W.set((this.registers.get("DP").fetch() << 8) | this.fetchNextByte());
     }
 
-    data_high_byte_state = () => {
-        const next_byte = this.fetchNextByte();
+    read_next_high_data_byte_from_PC = () => {
+        // const next_byte = this.fetchNextByte();
+        this.W.set(this.fetchNextByte() << 8);
+    }
+
+    read_next_low_data_byte_from_PC = () => {
+        // const next_byte = this.fetchNextByte();
+        this.object.load(this.W.fetch() | this.fetchNextByte());
+    }
+
+    read_next_high_data_byte_from_AD = () => {
+        let AD = this.AD.fetch();
+        const next_byte = this.memory.read(AD++);
         this.W.set(next_byte << 8);
+        this.AD.set(AD);
     }
 
-    data_low_byte_state = () => {
-        const next_byte = this.fetchNextByte();
-        this.object.load(this.W.fetch() | next_byte);
+    read_next_low_data_byte_from_AD = () => {
+        this.object.load(this.W.fetch() | this.memory.read(this.AD.fetch()));
     }
 
-    address_high_byte_state = () => {
-        const next_byte = this.fetchNextByte();
-        this.W.set(next_byte << 8);
+    read_next_low_data_byte_to_W_from_PC = () => {
+        this.W.set(this.W.fetch() | this.fetchNextByte());
     }
 
-    address_low_byte_state = () => {
-        const next_byte = this.fetchNextByte();
-        this.W.set(this.W.fetch() | next_byte);
-    }
-
-    write_high_byte_state = () => {
+    write_object_high_byte_to_AD = () => {
         let AD = this.AD.fetch();
         this.memory.write(AD++, (this.object.fetch() & 0xff00) >> 8);
         this.AD.set(AD);
     }
 
-    write_low_byte_state = () => {
+    write_object_low_byte_to_AD = () => {
         this.memory.write(this.AD.fetch(), this.object.save() & 0xff);
     }
 
