@@ -14,13 +14,14 @@ define("ENTIRE", 0x80);
 // instruction mode
 define("LITERAL", 0);
 // cpu state
-define("NEXT", 1); // get next byte
+define("NEXT", 0); // get new instruction
+define("FETCH", 1); // get next byte of instruction
 define("ABX", 2); // read data byte
 define("HIGHDATA", 3); // read data high byte
 define("LOWDATA", 4); // read data low byte
 define("HIGHADDRESS", 5); // read address high byte
 define("LOWADDRESS", 6); // read address low byte
-// define("WRITEVALUE", 7); // write data byte
+define("DIRECT", 7); // generate direct page address
 define("WRITEHIGH", 8); // write data high byte
 define("WRITELOW", 9); // write data low byte
 define("BUSY", 10);

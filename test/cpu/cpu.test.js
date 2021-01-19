@@ -3,6 +3,15 @@ const each = require("jest-each").default
 const {cpu} = require("../../src/cpu/cpu");
 const cpus = require("../../src/cpu/cpu_constants");
 
+function run_to_next(subject) {
+    let cycles = 0;
+    do {
+        subject.cycle();
+        cycles++;
+    } while (subject.mode !== cpus.NEXT);
+    return cycles;
+}
+
 describe("6809 cpu", () => {
     describe("address mode translation", () => {
         describe("literal mode", () => {
@@ -57,6 +66,24 @@ describe("6809 cpu", () => {
                 expect(subject.registers.get("X").fetch()).toBe(0x55ff);
             });
         });
+
+        describe("direct mode", () => {
+            let subject;
+            beforeEach(() => {
+                subject = new cpu(factory("D4"));
+            });
+            it("combines a short register with DP to generate a 16bit address", () => {
+                subject.memory.write(0x0000, 0x55);
+                subject.PC.set(0x0000);
+                const register = subject.registers.get("DP");
+                register.set(0x80);
+                subject.mode = cpus.DIRECT;
+                subject.instruction = { "operation": "NOP" };
+                subject.cycle();
+                subject.cycle();
+                expect(subject.workingValue).toBe(0x8055);
+            });
+        });
     });
 
     describe("cpu operation", () => {
@@ -72,35 +99,32 @@ describe("6809 cpu", () => {
         }
 
         each([
-            [0x0,"A",[0x86,0x20],0x20],[0x0,"A",[0x86,0xff],0xff],
-            [0x0,"B",[0xc6,0x22],0x22],[0x0,"B",[0xc6,0xf0],0xf0]
+            [0x0,"A",[0x86,0x20],0x20,2],[0x0,"A",[0x86,0xff],0xff,2],
+            [0x0,"B",[0xc6,0x22],0x22,2],[0x0,"B",[0xc6,0xf0],0xf0,2]
         ]).
         it("processes a load instruction from memory into an 8 bit register",
-            (address, register_name, code, expected) => {
+            (address, register_name, code, expected, cycles) => {
             loadMemory(address, code);
             subject.registers.get("PC").set(address);
             subject.registers.get(register_name).set(0);
-            subject.cycle();
-            subject.cycle();
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
             expect(subject.registers.get(register_name).fetch()).toBe(expected);
         });
 
         each([
-            [0x0,"X",[0xbe,0x20,0x55],0x2055],[0x0,"X",[0xbe,0xff,0x01],0xff01],
-            [0x0,"Y",[0x10,0xbe,0x20,0x55],0x2055],[0x0,"Y",[0x10,0xbe,0xff,0x01],0xff01],
-            [0x0,"S",[0x10,0xce,0x20,0x55],0x2055],[0x0,"S",[0x10,0xce,0xff,0x01],0xff01],
-            [0x0,"U",[0xce,0x20,0x55],0x2055],[0x0,"U",[0xce,0xff,0x01],0xff01]
+            [0x0,"X",[0xbe,0x20,0x55],0x2055,3],[0x0,"X",[0xbe,0xff,0x01],0xff01,3],
+            [0x0,"Y",[0x10,0xbe,0x20,0x55],0x2055,4],[0x0,"Y",[0x10,0xbe,0xff,0x01],0xff01,4],
+            [0x0,"S",[0x10,0xce,0x20,0x55],0x2055,4],[0x0,"S",[0x10,0xce,0xff,0x01],0xff01,4],
+            [0x0,"U",[0xce,0x20,0x55],0x2055,3],[0x0,"U",[0xce,0xff,0x01],0xff01,3]
         ]).
         it("processes a load instruction from memory into a 16bit register",
-            (address, register_name, code, expected) => {
+            (address, register_name, code, expected, cycles) => {
             loadMemory(address, code);
             subject.registers.get("PC").set(address);
             subject.registers.get(register_name).set(0);
-            let cycle_count = code.length;
-            while (cycle_count > 0) {
-                subject.cycle();
-                cycle_count--;
-            }
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
             expect(subject.registers.get(register_name).fetch()).toBe(expected);
         });
 
@@ -128,11 +152,23 @@ describe("6809 cpu", () => {
             loadMemory(address, code);
             subject.registers.get("PC").set(address);
             subject.registers.get(register_name).set(expected);
-            let cycle_count = cycles;
-            while (cycle_count > 0) {
-                subject.cycle();
-                cycle_count--;
-            }
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.memory.read(at_address)).toBe(expected);
+        });
+
+        each([
+            [0x0,"A",0x20,[0x97,0x00],0x10,0x2000, 4],[0x0,"A",0x20,[0x97,0x00],0xff,0x2000, 4],
+            [0x0,"B",0x22,[0xd7,0x00],0xff,0x2200, 4],[0x0,"B",0x10,[0xd7,0x10],0xf0,0x1010, 4]
+        ]).
+        it("processes a store instruction to direct page memory from an 8 bit register",
+            (address, register_name, page, code, expected, at_address, cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("DP").set(page);
+            subject.registers.get(register_name).set(expected);
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
             expect(subject.memory.read(at_address)).toBe(expected);
         });
 
@@ -147,11 +183,27 @@ describe("6809 cpu", () => {
             loadMemory(address, code);
             subject.registers.get("PC").set(address);
             subject.registers.get(register_name).set(expected);
-            let cycle_count = cycles;
-            while (cycle_count > 0) {
-                subject.cycle();
-                cycle_count--;
-            }
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            const actual = subject.memory.read(at_address) << 8 | subject.memory.read(at_address + 1)
+            expect(actual).toBe(expected);
+            expect(subject.mode).toBe(cpus.NEXT);
+        });
+
+        each([
+            [0x0,"X",0x20,[0x9f,0x00],0x1020,0x2000, 5],[0x0,"X",0x20,[0x9f,0x00],0xffff,0x2000, 5],
+            [0x0,"Y",0x22,[0x10,0x9f,0x00],0xff55,0x2200, 6],[0x0,"Y",0x10,[0x10,0x9f,0x10],0xf0ff,0x1010, 6],
+            [0x0,"S",0x20,[0x10,0xdf,0x00],0x1020,0x2000, 6],[0x0,"S",0x20,[0x10,0xdf,0x00],0xfff0,0x2000, 6],
+            [0x0,"U",0x22,[0xdf,0x00],0xff55,0x2200, 5],[0x0,"U",0x10,[0xdf,0x10],0xf0ff,0x1010, 5]
+        ]).
+        it("processes a store instruction to direct page memory from a 16 bit register",
+            (address, register_name, page, code, expected, at_address, cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("DP").set(page);
+            subject.registers.get(register_name).set(expected);
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
             const actual = subject.memory.read(at_address) << 8 | subject.memory.read(at_address + 1)
             expect(actual).toBe(expected);
             expect(subject.mode).toBe(cpus.NEXT);
@@ -161,8 +213,8 @@ describe("6809 cpu", () => {
             const code = [0x12];
             loadMemory(0x0000,code);
             subject.registers.get("PC").set(0x0000);
-            subject.cycle();
-            subject.cycle();
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(2);
             expect(subject.registers.get("PC").fetch()).toBe(0x0001);
             expect(subject.mode).toBe(cpus.NEXT);
         });
@@ -171,11 +223,8 @@ describe("6809 cpu", () => {
             const code = [0x7e,0x80,0x00];
             loadMemory(0x0000, code);
             subject.registers.get("PC").set(0x0000);
-            let cycle_count = 4;
-            while (cycle_count > 0) {
-                subject.cycle();
-                cycle_count--;
-            }
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(4);
             expect(subject.registers.get("PC").fetch()).toBe(0x8000);
             expect(subject.mode).toBe(cpus.NEXT);
         });
@@ -186,11 +235,8 @@ describe("6809 cpu", () => {
             subject.registers.get("PC").set(0x0000);
             subject.registers.get("B").set(0xff);
             subject.registers.get("X").set(0x1000);
-            let cycle_count = 3;
-            while (cycle_count > 0) {
-                subject.cycle();
-                cycle_count--;
-            }
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(3);
             expect(subject.registers.get("PC").fetch()).toBe(0x0001);
             expect(subject.mode).toBe(cpus.NEXT);
             expect(subject.registers.get("X").fetch()).toBe(0x10ff);
