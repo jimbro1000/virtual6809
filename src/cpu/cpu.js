@@ -15,7 +15,6 @@ class cpu {
         this.AD = this.registers.get("AD");
         this.CC = this.registers.get("CC");
         this.operation = null;
-        this.instruction = null;
         this.object = null;
         this.target = null;
         this.codes = this.map_code_name_to_code();
@@ -36,6 +35,8 @@ class cpu {
         result["BUSY"] = cpus.BUSY;
         result["ADDTGTOOB"] = cpus.ADDTGTOOB;
         result["READWLOW"] = cpus.READWLOW;
+        result["READLOWCOMPARE"] = cpus.READLOWCOMPARE;
+        result["READADLOWCOMPARE"] = cpus.READADLOWCOMPARE;
         return result;
     }
 
@@ -55,6 +56,8 @@ class cpu {
         result[cpus.TFRWTOTG] = this.transfer_w_to_target;
         result[cpus.BUSY] = this.busy_state;
         result[cpus.ADDTGTOOB] = this.add_target_to_object;
+        result[cpus.READLOWCOMPARE] = this.read_and_compare_low_byte;
+        result[cpus.READADLOWCOMPARE] = this.read_ad_and_compare_low_byte;
         return result;
     }
 
@@ -104,12 +107,10 @@ class cpu {
     }
 
     clearInstruction() {
-        this.instruction = null;
         this.object = null;
         this.target = null;
         this.W.set(0);
         this.AD.set(0);
-        this.scale = 0;
         this.code = [cpus.NEXT];
         this.operation = 0;
     }
@@ -137,7 +138,6 @@ class cpu {
             this.operation = next_byte << 8;
             this.code = [cpus.FETCH];
         } else {
-            this.instruction = action;
             if (typeof action.object !== 'undefined') {
                 this.object = this.registers.get(action.object);
             }
@@ -200,6 +200,65 @@ class cpu {
 
     busy_state = () => {
         //do nothing
+    }
+
+    read_and_compare_low_byte = () => {
+        this.compare_low_byte(this.fetchNextByte())
+    }
+
+    read_ad_and_compare_low_byte = () => {
+        this.compare_low_byte(this.memory.read(this.AD.fetch()));
+    }
+
+    compare_low_byte = (n) => {
+        this.W.set(n);
+        this.complement(this.W, cpus.SHORT);
+        const w = this.W.fetch();
+        const o = this.object.fetch();
+        const temp = w + o;
+        const masked = temp & 0xff;
+        if (masked === 0) {
+            this.CC.set(cpus.ZERO);
+        } else {
+            this.CC.clear(cpus.ZERO);
+        }
+        if (masked & 0x80) {
+            this.CC.set(cpus.NEGATIVE);
+        } else {
+            this.CC.clear(cpus.NEGATIVE);
+        }
+        if (temp !== masked) {
+            this.CC.set(cpus.OVERFLOW);
+        } else {
+            this.CC.clear(cpus.OVERFLOW);
+        }
+        if (n > o) {
+            this.CC.set(cpus.CARRY);
+        } else {
+            this.CC.clear(cpus.CARRY);
+        }
+    }
+
+    complement = (register, scale) => {
+        let value = register.fetch();
+        if (scale === cpus.SHORT) {
+            value = value & 0xff;
+            value = this.xor(value, scale);
+            value += 1;
+        }
+        register.set(value);
+    }
+
+    xor = (value, scale) => {
+        let mask = 0x01;
+        let result = 0;
+        for (let index = 0; index < scale; index ++) {
+            if ((value & mask) === 0) {
+                result |= mask;
+            }
+            mask = mask << 1
+        }
+        return result;
     }
 }
 

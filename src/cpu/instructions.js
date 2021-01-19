@@ -11,6 +11,10 @@ instructions = {
         "operation": "extended instruction",
         "mode": "fetch"
     },
+    0x11: {
+        "operation": "extended instruction",
+        "mode": "fetch"
+    },
     0x109e: {
         "operation": "LDY",
         "mode": "direct",
@@ -103,12 +107,29 @@ instructions = {
             "READHIGH", "READLOW", "TFRWTOOB"
         ]
     },
+    0x81: {
+        "operation": "CMPA",
+        "mode": "immediate",
+        "object": "A",
+        "code": [
+            "READLOWCOMPARE"
+        ]
+    },
     0x86: {
         "operation": "LDA",
         "mode": "immediate",
         "object": "A",
         "code": [
             "READLOW"
+        ]
+    },
+    0x91: {
+        "operation": "CMPA",
+        "mode": "direct",
+        "object": "A",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "READADLOWCOMPARE"
         ]
     },
     0x96: {
@@ -147,6 +168,15 @@ instructions = {
             "DIRECT", "TFRWTOTG", "WRITEHIGH", "WRITELOW"
         ]
     },
+    0xb1: {
+        "operation": "CMPA",
+        "mode": "extended",
+        "object": "A",
+        "target": "AD",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "READADLOWCOMPARE"
+        ]
+    },
     0xb6: {
         "operation": "LDA",
         "mode": "extended",
@@ -182,6 +212,14 @@ instructions = {
             "READHIGH", "READWLOW", "TFRWTOTG", "WRITEHIGH", "WRITELOW"
         ]
     },
+    0xc1: {
+        "operation": "CMPB",
+        "mode": "immediate",
+        "object": "B",
+        "code": [
+            "READLOWCOMPARE"
+        ]
+    },
     0xc6: {
         "operation": "LDB",
         "mode": "immediate",
@@ -204,6 +242,15 @@ instructions = {
         "object": "U",
         "code": [
             "READHIGH", "READLOW"
+        ]
+    },
+    0xd1: {
+        "operation": "CMPB",
+        "mode": "direct",
+        "object": "B",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "READADLOWCOMPARE"
         ]
     },
     0xd6: {
@@ -249,6 +296,15 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "WRITEHIGH", "WRITELOW"
+        ]
+    },
+    0xf1: {
+        "operation": "CMPB",
+        "mode": "extended",
+        "object": "B",
+        "target": "AD",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "READADLOWCOMPARE"
         ]
     },
     0xf6: {
