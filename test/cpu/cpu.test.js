@@ -8,7 +8,7 @@ function run_to_next(subject) {
     do {
         subject.cycle();
         cycles++;
-    } while (subject.mode !== cpus.NEXT);
+    } while (subject.code[0] !== cpus.NEXT);
     return cycles;
 }
 
@@ -66,24 +66,6 @@ describe("6809 cpu", () => {
                 expect(subject.registers.get("X").fetch()).toBe(0x55ff);
             });
         });
-
-        describe("direct mode", () => {
-            let subject;
-            beforeEach(() => {
-                subject = new cpu(factory("D4"));
-            });
-            it("combines a short register with DP to generate a 16bit address", () => {
-                subject.memory.write(0x0000, 0x55);
-                subject.PC.set(0x0000);
-                const register = subject.registers.get("DP");
-                register.set(0x80);
-                subject.mode = cpus.DIRECT;
-                subject.instruction = { "operation": "NOP" };
-                subject.cycle();
-                subject.cycle();
-                expect(subject.workingValue).toBe(0x8055);
-            });
-        });
     });
 
     describe("cpu operation", () => {
@@ -92,8 +74,8 @@ describe("6809 cpu", () => {
             subject = new cpu(factory("D64"));
         });
 
-        loadMemory = (address, bytes) => {
-            for (let index=0; index<bytes.length; ++index) {
+        let loadMemory = (address, bytes) => {
+            for (let index = 0; index < bytes.length; ++index) {
                 subject.memory.write(address + index, bytes[index]);
             }
         }
@@ -187,7 +169,6 @@ describe("6809 cpu", () => {
             expect(cycle_count).toBe(cycles);
             const actual = subject.memory.read(at_address) << 8 | subject.memory.read(at_address + 1)
             expect(actual).toBe(expected);
-            expect(subject.mode).toBe(cpus.NEXT);
         });
 
         each([
@@ -206,7 +187,6 @@ describe("6809 cpu", () => {
             expect(cycle_count).toBe(cycles);
             const actual = subject.memory.read(at_address) << 8 | subject.memory.read(at_address + 1)
             expect(actual).toBe(expected);
-            expect(subject.mode).toBe(cpus.NEXT);
         });
 
         it("process a nop instruction", () => {
@@ -226,7 +206,6 @@ describe("6809 cpu", () => {
             let cycle_count = run_to_next(subject);
             expect(cycle_count).toBe(4);
             expect(subject.registers.get("PC").fetch()).toBe(0x8000);
-            expect(subject.mode).toBe(cpus.NEXT);
         });
 
         it("ABX adds B unsigned to X", () => {
@@ -238,7 +217,6 @@ describe("6809 cpu", () => {
             let cycle_count = run_to_next(subject);
             expect(cycle_count).toBe(3);
             expect(subject.registers.get("PC").fetch()).toBe(0x0001);
-            expect(subject.mode).toBe(cpus.NEXT);
             expect(subject.registers.get("X").fetch()).toBe(0x10ff);
         });
     });

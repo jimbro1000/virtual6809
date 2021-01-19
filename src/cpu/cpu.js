@@ -8,31 +8,59 @@ class cpu {
         this.registers = new register_manager();
         this.memory = memory_manager;
         this.mode = cpus.NEXT;
+        this.code = [cpus.NEXT];
         this.instructions = instructions;
         this.PC = this.registers.get("PC");
+        this.W = this.registers.get("W");
+        this.AD = this.registers.get("AD");
+        this.CC = this.registers.get("CC");
         this.operation = null;
         this.instruction = null;
         this.object = null;
-        this.addressMode = null;
-        this.scale = 0;
-        this.workingValue = 0;
-        this.stateModel = this.map_state_to_action();
+        this.target = null;
+        this.codes = this.map_code_name_to_code();
+        this.lambdas = this.map_code_to_lambda();
     }
 
-    map_state_to_action() {
+    map_code_name_to_code() {
+        let result = {};
+        result["DIRECT"] = cpus.DIRECT;
+        result["READHIGH"] = cpus.READHIGH;
+        result["READLOW"] = cpus.READLOW;
+        result["WRITEHIGH"] = cpus.WRITEHIGH;
+        result["WRITELOW"] = cpus.WRITELOW;
+        result["READADDHIGH"] = cpus.READADDHIGH;
+        result["READADDLOW"] = cpus.READADDLOW;
+        result["TFRWTOOB"] = cpus.TFRWTOOB;
+        result["TFRWTOTG"] = cpus.TFRWTOTG;
+        result["BUSY"] = cpus.BUSY;
+        result["ADDTGTOOB"] = cpus.ADDTGTOOB;
+        return result;
+    }
+
+    map_code_to_lambda() {
         let result = {};
         result[cpus.NEXT] = this.next_instruction_state;
         result[cpus.FETCH] = this.next_instruction_state;
-        result[cpus.HIGHDATA] = this.data_high_byte_state;
-        result[cpus.LOWDATA] = this.data_low_byte_state;
-        result[cpus.HIGHADDRESS] = this.address_high_byte_state;
-        result[cpus.LOWADDRESS] = this.address_low_byte_state;
+        result[cpus.DIRECT] = this.generate_direct_state;
+        result[cpus.READHIGH] = this.data_high_byte_state;
+        result[cpus.READLOW] = this.data_low_byte_state;
         result[cpus.WRITEHIGH] = this.write_high_byte_state;
         result[cpus.WRITELOW] = this.write_low_byte_state;
+        result[cpus.READADDHIGH] = this.address_high_byte_state;
+        result[cpus.READADDLOW] = this.address_low_byte_state;
+        result[cpus.TFRWTOOB] = this.transfer_w_to_object;
+        result[cpus.TFRWTOTG] = this.transfer_w_to_target;
         result[cpus.BUSY] = this.busy_state;
-        result[cpus.ABX] = this.process_action_state;
-        result[cpus.DIRECT] = this.generate_direct_state;
+        result[cpus.ADDTGTOOB] = this.process_action_state;
         return result;
+    }
+
+    populate_code_stack(instruction_code) {
+        this.code = [];
+        for (let index=instruction_code.length-1;index>=0;index--) {
+            this.code.push(this.codes[instruction_code[index]]);
+        }
     }
 
     set_register_literal(register, literal_value) {
@@ -75,60 +103,25 @@ class cpu {
 
     clearInstruction() {
         this.instruction = null;
-        this.addressMode = null;
         this.object = null;
-        this.workingValue = 0;
+        this.target = null;
+        this.W.set(0);
+        this.AD.set(0);
         this.scale = 0;
-        this.mode = cpus.NEXT;
+        this.code = [cpus.NEXT];
         this.operation = 0;
     }
 
     cycle() {
-        const lambda = this.stateModel[this.mode];
+        const lambda = this.lambdas[this.code.pop()];
         lambda();
-    }
-
-    load_instruction_group = (action) => {
-        this.instruction = action;
-        this.addressMode = action.mode;
-        this.object = this.registers.get(action.object);
-        if (action.scale === 1) {
-            this.mode = cpus.LOWDATA;
-        } else {
-            this.mode = cpus.HIGHDATA;
+        if (this.code.length === 0) {
+            this.clearInstruction();
         }
-    }
-
-    store_instruction_group = (action) => {
-        this.instruction = action;
-        this.addressMode = action.mode;
-        this.object = this.registers.get(action.object);
-        if (action.scale === 1) {
-            this.workingValue = this.registers.get("DP").fetch() << 8;
-            this.mode = cpus.LOWADDRESS;
-        } else {
-            this.mode = cpus.HIGHADDRESS;
-        }
-    }
-
-    unconditional_jump_group = (action) => {
-        this.instruction = action;
-        this.addressMode = action.mode;
-        this.object = this.PC;
-        // if (action.scale === 1) {
-        //     this.mode = cpus.DIRECT;
-        // } else {
-            this.mode = cpus.HIGHADDRESS;
-        // }
     }
 
     process_action_state = () => {
-        if (this.instruction.operation === "ABX") {
-            let X = this.registers.get("X");
-            let B = this.registers.get("B");
-            X.set(X.fetch() + B.fetch());
-            this.mode = cpus.BUSY;
-        }
+        this.W.set(this.object.fetch() + this.target.fetch());
     }
 
     next_instruction_state = () => {
@@ -138,81 +131,64 @@ class cpu {
         if (action.mode === "fetch") {
             this.operation = next_byte << 8;
             this.mode = cpus.FETCH;
-        } else if (action.operation === "NOP") {
-            this.mode = cpus.BUSY;
-        } else if (action.operation === "ABX") {
-            this.mode = cpus.ABX;
-            this.instruction = action;
+            this.code = [cpus.FETCH];
         } else {
-            if (action.group === "LD") {
-                this.load_instruction_group(action);
-            } else if (action.group === "ST") {
-                this.store_instruction_group(action);
-            } else if (action.group === "JMP") {
-                this.unconditional_jump_group(action);
+            this.instruction = action;
+            if (typeof action.object !== 'undefined') {
+                this.object = this.registers.get(action.object);
             }
+            if (typeof action.target !== 'undefined') {
+                this.target = this.registers.get(action.target);
+            }
+            this.populate_code_stack(action.code);
         }
     }
 
+    transfer_w_to_object = () => {
+        this.object.set(this.W.fetch());
+    }
+
+    transfer_w_to_target = () => {
+        this.target.set(this.W.fetch());
+    }
+
     generate_direct_state = () => {
-        this.workingValue = this.registers.get("DP").fetch() << 8;
-        this.mode = cpus.LOWADDRESS;
+        const next_byte = this.fetchNextByte();
+        this.W.set((this.registers.get("DP").fetch() << 8) | next_byte);
     }
 
     data_high_byte_state = () => {
         const next_byte = this.fetchNextByte();
-        this.workingValue = next_byte << 8;
-        this.mode = cpus.LOWDATA;
+        this.W.set(next_byte << 8);
     }
 
     data_low_byte_state = () => {
         const next_byte = this.fetchNextByte();
-        this.workingValue |= next_byte;
-        if (this.instruction.group === "LD") {
-            this.object.load(this.workingValue);
-        }
-        this.clearInstruction();
+        this.object.load(this.W.fetch() | next_byte);
     }
 
     address_high_byte_state = () => {
         const next_byte = this.fetchNextByte();
-        this.workingValue = next_byte << 8;
-        this.mode = cpus.LOWADDRESS;
+        this.W.set(next_byte << 8);
     }
 
     address_low_byte_state = () => {
         const next_byte = this.fetchNextByte();
-        this.workingValue |= next_byte;
-        if (this.instruction.group === "ST") {
-            if (this.object.size === cpus.SHORT) {
-                this.mode = cpus.WRITELOW;
-            } else {
-                this.mode = cpus.WRITEHIGH;
-            }
-        } else if (this.instruction.group === "JMP") {
-            this.PC.set(this.workingValue);
-            this.mode = cpus.BUSY;
-        } else {
-            this.mode = cpus.BUSY;
-        }
+        this.W.set(this.W.fetch() | next_byte);
     }
 
     write_high_byte_state = () => {
-        if (this.instruction.group === "ST") {
-            this.memory.write(this.workingValue++, (this.object.fetch() & 0xff00) >> 8);
-        }
-        this.mode = cpus.WRITELOW;
+        let AD = this.AD.fetch();
+        this.memory.write(AD++, (this.object.fetch() & 0xff00) >> 8);
+        this.AD.set(AD);
     }
 
     write_low_byte_state = () => {
-        if (this.instruction.group === "ST") {
-            this.memory.write(this.workingValue, this.object.save() & 0xff);
-            this.mode = cpus.BUSY;
-        }
+        this.memory.write(this.AD.fetch(), this.object.save() & 0xff);
     }
 
     busy_state = () => {
-        this.clearInstruction();
+        //do nothing
     }
 }
 
