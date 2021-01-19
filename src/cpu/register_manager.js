@@ -14,7 +14,10 @@ class register_manager {
             "Y" : new Cpu_Register.cpu_register(cpus.LONG, "Y", this.cc),
             "S" : new Cpu_Register.cpu_register(cpus.LONG, "S", this.cc),
             "U" : new Cpu_Register.cpu_register(cpus.LONG, "U", this.cc),
-            "PC" : new Cpu_Register.cpu_register(cpus.LONG, "PC", this.cc)
+            "PC" : new Cpu_Register.cpu_register(cpus.LONG, "PC", this.cc),
+            //internal registers
+            "W" : new Cpu_Register.cpu_register(cpus.LONG, "W", this.cc),
+            "AD" : new Cpu_Register.cpu_register(cpus.LONG, "AD", this.cc)
         }
     }
 
