@@ -28,3 +28,5 @@ define("BUSY", 12); // busy doing nothing
 define("READWLOW", 13); // read low byte to W
 define("READLOWCOMPARE", 14); // read low byte to W and compare with object
 define("READADLOWCOMPARE", 15); // read byte from AD to w and compare with object
+define("COMPAREW", 16); // compare W against object
+define("READADWLOW", 17); // read low byte to W from AD

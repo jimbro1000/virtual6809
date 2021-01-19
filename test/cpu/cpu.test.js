@@ -271,8 +271,8 @@ describe("6809 cpu", () => {
         });
 
         each([[0x0,"A",0x20,[0x81,0x20],0x6,2],  // equals = zero + overflow
-            [0x0,"A",0x20,[0x81,0x21],0x9,2], // more than = negative + carry
-            [0x0,"A",0x20,[0x81,0x1f],0x2,2], // less than = overflow
+            [0x0,"A",0x20,[0x81,0x21],0x8,2], // more than = negative
+            [0x0,"A",0x20,[0x81,0x1f],0x3,2], // less than = overflow + carry (borrow)
             [0x0,"B",0x55,[0xc1,0x55],0x6,2]]
         ).
         it("Compares an 8 bit register against immediate memory",
@@ -307,14 +307,51 @@ describe("6809 cpu", () => {
         ).
         it("Compares an 8 bit register against extended memory",
             (address, register, value, code, expected, at_address, cycles) => {
-                loadMemory(address, code)
-                subject.registers.get("PC").set(address);
-                subject.registers.get(register).set(value);
-                subject.memory.write(at_address, value);
-                const cc_mask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW | cpus.CARRY;
-                let cycle_count = run_to_next(subject);
-                expect(cycle_count).toBe(cycles);
-                expect(subject.CC.save() & cc_mask).toBe(expected);
-            });
+            loadMemory(address, code)
+            subject.registers.get("PC").set(address);
+            subject.registers.get(register).set(value);
+            subject.memory.write(at_address, value);
+            const cc_mask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW | cpus.CARRY;
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.CC.save() & cc_mask).toBe(expected);
+        });
+
+        each([
+            [0x0000,"X",[0x8c, 0x55, 0xaa],0x55aa,0x06,4],
+            [0x0000,"Y",[0x10, 0x8c, 0x55, 0xaa],0x55aa,0x06,5],
+            [0x0000,"S",[0x11, 0x8c, 0x55, 0xaa],0x55aa,0x06,5],
+            [0x0000,"U",[0x11, 0x83, 0x55, 0xaa],0x55aa,0x06,5]
+        ]).
+        it("Compares a 16 bit register against immediate memory",
+            (address, register, code, value, expected, cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get(register).set(value);
+            const cc_mask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW | cpus.CARRY;
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.CC.save() & cc_mask).toBe(expected);
+        });
+
+        each([
+            [0x0000,"X",0x10,[0x9c,0xaa],0x55aa,0x10aa,0x06,6],
+            [0x0000,"Y",0x11,[0x10,0x9c,0xaa],0x55aa,0x11aa,0x06,7],
+            [0x0000,"S",0x12,[0x11,0x9c,0xaa],0x55aa,0x12aa,0x06,7],
+            [0x0000,"U",0x13,[0x11,0x93,0xaa],0x55aa,0x13aa,0x06,7]
+        ]).
+        it("Compares a 16 bit register against direct memory",
+            (address, register, page, code, value, at_address, expected, cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("DP").set(page);
+            subject.registers.get(register).set(value);
+            subject.memory.write(at_address, (value & 0xff00) >> 8);
+            subject.memory.write(at_address + 1, value & 0xff);
+            const cc_mask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW | cpus.CARRY;
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.CC.save() & cc_mask).toBe(expected);
+        });
     });
 });

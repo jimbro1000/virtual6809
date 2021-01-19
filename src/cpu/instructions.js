@@ -11,9 +11,22 @@ instructions = {
         "operation": "extended instruction",
         "mode": "fetch"
     },
-    0x11: {
-        "operation": "extended instruction",
-        "mode": "fetch"
+    0x108c: {
+        "operation": "CMPY",
+        "mode": "immediate",
+        "object": "Y",
+        "code": [
+            "READHIGH", "READWLOW", "COMPAREW"
+        ]
+    },
+    0x109c: {
+        "operation": "CMPY",
+        "mode": "direct",
+        "object": "Y",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "READADHIGH", "READADWLOW", "COMPAREW"
+        ]
     },
     0x109e: {
         "operation": "LDY",
@@ -85,6 +98,44 @@ instructions = {
             "READHIGH", "READWLOW", "TFRWTOTG", "WRITEHIGH", "WRITELOW"
         ]
     },
+    0x11: {
+        "operation": "extended instruction",
+        "mode": "fetch"
+    },
+    0x1183: {
+        "operation": "CMPU",
+        "mode": "immediate",
+        "object": "U",
+        "code": [
+            "READHIGH", "READWLOW", "COMPAREW"
+        ]
+    },
+    0x118c: {
+        "operation": "CMPS",
+        "mode": "immediate",
+        "object": "S",
+        "code": [
+            "READHIGH", "READWLOW", "COMPAREW"
+        ]
+    },
+    0x1193: {
+        "operation": "CMPU",
+        "mode": "direct",
+        "object": "U",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "READADHIGH", "READADWLOW", "COMPAREW"
+        ]
+    },
+    0x119c: {
+        "operation": "CMPS",
+        "mode": "direct",
+        "object": "S",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "READADHIGH", "READADWLOW", "COMPAREW"
+        ]
+    },
     0x12: {
         "operation": "NOP",
         "code": [
@@ -123,6 +174,14 @@ instructions = {
             "READLOW"
         ]
     },
+    0x8c: {
+        "operation": "CMPX",
+        "mode": "immediate",
+        "object": "X",
+        "code": [
+            "READHIGH", "READWLOW", "COMPAREW"
+        ]
+    },
     0x91: {
         "operation": "CMPA",
         "mode": "direct",
@@ -148,6 +207,15 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "WRITELOW"
+        ]
+    },
+    0x9c: {
+        "operation": "CMPX",
+        "mode": "direct",
+        "object": "X",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "READADHIGH", "READADWLOW", "COMPAREW"
         ]
     },
     0x9e: {

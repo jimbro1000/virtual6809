@@ -30,6 +30,7 @@ class cpu {
         result["WRITELOW"] = cpus.WRITELOW;
         result["READADHIGH"] = cpus.READADHIGH;
         result["READADLOW"] = cpus.READADLOW;
+        result["READADWLOW"] = cpus.READADWLOW;
         result["TFRWTOOB"] = cpus.TFRWTOOB;
         result["TFRWTOTG"] = cpus.TFRWTOTG;
         result["BUSY"] = cpus.BUSY;
@@ -37,6 +38,7 @@ class cpu {
         result["READWLOW"] = cpus.READWLOW;
         result["READLOWCOMPARE"] = cpus.READLOWCOMPARE;
         result["READADLOWCOMPARE"] = cpus.READADLOWCOMPARE;
+        result["COMPAREW"] = cpus.COMPAREW;
         return result;
     }
 
@@ -52,12 +54,14 @@ class cpu {
         result[cpus.WRITELOW] = this.write_object_low_byte_to_AD;
         result[cpus.READADHIGH] = this.read_next_high_data_byte_from_AD;
         result[cpus.READADLOW] = this.read_next_low_data_byte_from_AD;
+        result[cpus.READADWLOW] = this.read_next_low_data_byte_to_W_from_AD;
         result[cpus.TFRWTOOB] = this.transfer_w_to_object;
         result[cpus.TFRWTOTG] = this.transfer_w_to_target;
         result[cpus.BUSY] = this.busy_state;
         result[cpus.ADDTGTOOB] = this.add_target_to_object;
         result[cpus.READLOWCOMPARE] = this.read_and_compare_low_byte;
         result[cpus.READADLOWCOMPARE] = this.read_ad_and_compare_low_byte;
+        result[cpus.COMPAREW] = this.compare_w_with_word;
         return result;
     }
 
@@ -185,6 +189,10 @@ class cpu {
         this.W.set(this.W.fetch() | this.fetchNextByte());
     }
 
+    read_next_low_data_byte_to_W_from_AD = () => {
+        this.W.set(this.W.fetch() | this.memory.read(this.AD.fetch()));
+    }
+
     write_object_high_byte_to_AD = () => {
         let AD = this.AD.fetch();
         this.memory.write(AD++, (this.object.fetch() & 0xff00) >> 8);
@@ -214,22 +222,36 @@ class cpu {
         const o = this.object.fetch();
         const temp = w + o;
         const masked = temp & 0xff;
+        this.check_cc(n, w, o, temp, masked);
+    }
+
+    compare_w_with_word = () => {
+        const n = this.W.fetch();
+        this.complement(this.W, cpus.LONG);
+        const w = this.W.fetch();
+        const o = this.object.fetch();
+        const temp = w + o;
+        const masked = temp & 0xffff;
+        this.check_cc(n, w, o, temp, masked);
+    }
+
+    check_cc = (initial, complement, object, sum, masked) => {
         if (masked === 0) {
             this.CC.set(cpus.ZERO);
         } else {
             this.CC.clear(cpus.ZERO);
         }
-        if (masked & 0x80) {
+        if ((masked & 0x80) !== 0) {
             this.CC.set(cpus.NEGATIVE);
         } else {
             this.CC.clear(cpus.NEGATIVE);
         }
-        if (temp !== masked) {
+        if (sum !== masked) {
             this.CC.set(cpus.OVERFLOW);
         } else {
             this.CC.clear(cpus.OVERFLOW);
         }
-        if (n > o) {
+        if (initial < object) {
             this.CC.set(cpus.CARRY);
         } else {
             this.CC.clear(cpus.CARRY);
@@ -240,6 +262,10 @@ class cpu {
         let value = register.fetch();
         if (scale === cpus.SHORT) {
             value = value & 0xff;
+            value = this.xor(value, scale);
+            value += 1;
+        } else {
+            value = value & 0xffff
             value = this.xor(value, scale);
             value += 1;
         }
