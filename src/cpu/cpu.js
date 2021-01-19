@@ -22,6 +22,7 @@ class cpu {
     map_state_to_action() {
         let result = {};
         result[cpus.NEXT] = this.next_instruction_state;
+        result[cpus.FETCH] = this.next_instruction_state;
         result[cpus.HIGHDATA] = this.data_high_byte_state;
         result[cpus.LOWDATA] = this.data_low_byte_state;
         result[cpus.HIGHADDRESS] = this.address_high_byte_state;
@@ -30,6 +31,7 @@ class cpu {
         result[cpus.WRITELOW] = this.write_low_byte_state;
         result[cpus.BUSY] = this.busy_state;
         result[cpus.ABX] = this.process_action_state;
+        result[cpus.DIRECT] = this.generate_direct_state;
         return result;
     }
 
@@ -101,11 +103,12 @@ class cpu {
         this.instruction = action;
         this.addressMode = action.mode;
         this.object = this.registers.get(action.object);
-        // if (action.scale === 1) {
-        //     this.mode = cpus.DIRECTPAGE;
-        // } else {
+        if (action.scale === 1) {
+            this.workingValue = this.registers.get("DP").fetch() << 8;
+            this.mode = cpus.LOWADDRESS;
+        } else {
             this.mode = cpus.HIGHADDRESS;
-        // }
+        }
     }
 
     unconditional_jump_group = (action) => {
@@ -113,7 +116,7 @@ class cpu {
         this.addressMode = action.mode;
         this.object = this.PC;
         // if (action.scale === 1) {
-        //     this.mode = cpus.DIRECTPAGE;
+        //     this.mode = cpus.DIRECT;
         // } else {
             this.mode = cpus.HIGHADDRESS;
         // }
@@ -134,6 +137,7 @@ class cpu {
         const action = this.instructions[this.operation];
         if (action.mode === "fetch") {
             this.operation = next_byte << 8;
+            this.mode = cpus.FETCH;
         } else if (action.operation === "NOP") {
             this.mode = cpus.BUSY;
         } else if (action.operation === "ABX") {
@@ -148,6 +152,11 @@ class cpu {
                 this.unconditional_jump_group(action);
             }
         }
+    }
+
+    generate_direct_state = () => {
+        this.workingValue = this.registers.get("DP").fetch() << 8;
+        this.mode = cpus.LOWADDRESS;
     }
 
     data_high_byte_state = () => {
@@ -182,6 +191,8 @@ class cpu {
             }
         } else if (this.instruction.group === "JMP") {
             this.PC.set(this.workingValue);
+            this.mode = cpus.BUSY;
+        } else {
             this.mode = cpus.BUSY;
         }
     }

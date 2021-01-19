@@ -14,7 +14,8 @@ define("ENTIRE", 0x80);
 // instruction mode
 define("LITERAL", 0);
 // cpu state
-define("NEXT", 1); // get next byte
+define("NEXT", 0); // get new instruction
+define("FETCH", 1); // get next byte of instruction
 define("ABX", 2); // read data byte
 define("HIGHDATA", 3); // read data high byte
 define("LOWDATA", 4); // read data low byte

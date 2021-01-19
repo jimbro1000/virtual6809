@@ -1,20 +1,22 @@
-const Manager = require("../../src/memory/memory_manager");
-const Chip = require("../../src/memory/memory_chip");
+const {manager} = require("../../src/memory/memory_manager");
+const {chip} = require("../../src/memory/memory_chip");
 const chips = require("../../src/memory/memory_constants.js");
 
 let factory = (model) => {
-    let manager;
+    let memory_def = [];
     if (model === "D64") {
-        manager = new Manager.manager([
-            [new Chip.chip(chips.RAM, chips.K32), 0x0],
-            [new Chip.chip(chips.ROM, chips.K16), 0x8000],
-            [new Chip.chip(chips.MAPPED, chips.K8), 0xc000]
-        ]);
+        memory_def = [
+            [new chip(chips.RAM, chips.K32), 0x0],
+            [new chip(chips.ROM, chips.K16), 0x8000],
+            [new chip(chips.MAPPED, chips.K8), 0xc000]
+        ];
     }
-    if (model === "D4") {
-        manager = new Manager.manager([new Chip.chip(chips.RAM, chips.K4), 0x0]);
+    else if (model === "D4") {
+        memory_def = [
+            [new chip(chips.RAM, chips.K4), 0x0]
+        ];
     }
-    return manager;
+    return new manager(memory_def);
 }
 
 module.exports = { factory }
