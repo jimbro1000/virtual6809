@@ -15,7 +15,6 @@ class cpu {
         this.AD = this.registers.get("AD");
         this.CC = this.registers.get("CC");
         this.operation = null;
-        this.instruction = null;
         this.object = null;
         this.target = null;
         this.codes = this.map_code_name_to_code();
@@ -31,11 +30,15 @@ class cpu {
         result["WRITELOW"] = cpus.WRITELOW;
         result["READADHIGH"] = cpus.READADHIGH;
         result["READADLOW"] = cpus.READADLOW;
+        result["READADWLOW"] = cpus.READADWLOW;
         result["TFRWTOOB"] = cpus.TFRWTOOB;
         result["TFRWTOTG"] = cpus.TFRWTOTG;
         result["BUSY"] = cpus.BUSY;
         result["ADDTGTOOB"] = cpus.ADDTGTOOB;
         result["READWLOW"] = cpus.READWLOW;
+        result["READLOWCOMPARE"] = cpus.READLOWCOMPARE;
+        result["READADLOWCOMPARE"] = cpus.READADLOWCOMPARE;
+        result["COMPAREW"] = cpus.COMPAREW;
         return result;
     }
 
@@ -51,10 +54,14 @@ class cpu {
         result[cpus.WRITELOW] = this.write_object_low_byte_to_AD;
         result[cpus.READADHIGH] = this.read_next_high_data_byte_from_AD;
         result[cpus.READADLOW] = this.read_next_low_data_byte_from_AD;
+        result[cpus.READADWLOW] = this.read_next_low_data_byte_to_W_from_AD;
         result[cpus.TFRWTOOB] = this.transfer_w_to_object;
         result[cpus.TFRWTOTG] = this.transfer_w_to_target;
         result[cpus.BUSY] = this.busy_state;
         result[cpus.ADDTGTOOB] = this.add_target_to_object;
+        result[cpus.READLOWCOMPARE] = this.read_and_compare_low_byte;
+        result[cpus.READADLOWCOMPARE] = this.read_ad_and_compare_low_byte;
+        result[cpus.COMPAREW] = this.compare_w_with_word;
         return result;
     }
 
@@ -104,12 +111,10 @@ class cpu {
     }
 
     clearInstruction() {
-        this.instruction = null;
         this.object = null;
         this.target = null;
         this.W.set(0);
         this.AD.set(0);
-        this.scale = 0;
         this.code = [cpus.NEXT];
         this.operation = 0;
     }
@@ -137,7 +142,6 @@ class cpu {
             this.operation = next_byte << 8;
             this.code = [cpus.FETCH];
         } else {
-            this.instruction = action;
             if (typeof action.object !== 'undefined') {
                 this.object = this.registers.get(action.object);
             }
@@ -159,17 +163,14 @@ class cpu {
     }
 
     build_direct_page_address_in_W = () => {
-        // const next_byte = this.fetchNextByte();
         this.W.set((this.registers.get("DP").fetch() << 8) | this.fetchNextByte());
     }
 
     read_next_high_data_byte_from_PC = () => {
-        // const next_byte = this.fetchNextByte();
         this.W.set(this.fetchNextByte() << 8);
     }
 
     read_next_low_data_byte_from_PC = () => {
-        // const next_byte = this.fetchNextByte();
         this.object.load(this.W.fetch() | this.fetchNextByte());
     }
 
@@ -188,6 +189,10 @@ class cpu {
         this.W.set(this.W.fetch() | this.fetchNextByte());
     }
 
+    read_next_low_data_byte_to_W_from_AD = () => {
+        this.W.set(this.W.fetch() | this.memory.read(this.AD.fetch()));
+    }
+
     write_object_high_byte_to_AD = () => {
         let AD = this.AD.fetch();
         this.memory.write(AD++, (this.object.fetch() & 0xff00) >> 8);
@@ -200,6 +205,67 @@ class cpu {
 
     busy_state = () => {
         //do nothing
+    }
+
+    read_and_compare_low_byte = () => {
+        this.compare_low_byte(this.fetchNextByte())
+    }
+
+    read_ad_and_compare_low_byte = () => {
+        this.compare_low_byte(this.memory.read(this.AD.fetch()));
+    }
+
+    compare_low_byte = (n) => {
+        this.W.set(n);
+        this.complement(this.W, cpus.SHORT);
+        const w = this.W.fetch();
+        const o = this.object.fetch();
+        const temp = w + o;
+        const masked = temp & 0xff;
+        this.check_cc(n, w, o, temp, masked);
+    }
+
+    compare_w_with_word = () => {
+        const n = this.W.fetch();
+        this.complement(this.W, cpus.LONG);
+        const w = this.W.fetch();
+        const o = this.object.fetch();
+        const temp = w + o;
+        const masked = temp & 0xffff;
+        this.check_cc(n, w, o, temp, masked);
+    }
+
+    check_cc = (initial, complement, object, sum, masked) => {
+        this.CC.zero(masked === 0);
+        this.CC.negative((masked & 0x80) !== 0);
+        this.CC.overflow(sum !== masked);
+        this.CC.carry(initial < object);
+    }
+
+    complement = (register, scale) => {
+        let value = register.fetch();
+        if (scale === cpus.SHORT) {
+            value = value & 0xff;
+            value = this.xor(value, scale);
+            value += 1;
+        } else {
+            value = value & 0xffff
+            value = this.xor(value, scale);
+            value += 1;
+        }
+        register.set(value);
+    }
+
+    xor = (value, scale) => {
+        let mask = 0x01;
+        let result = 0;
+        for (let index = 0; index < scale; index ++) {
+            if ((value & mask) === 0) {
+                result |= mask;
+            }
+            mask = mask << 1
+        }
+        return result;
     }
 }
 

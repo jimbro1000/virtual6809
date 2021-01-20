@@ -80,15 +80,30 @@ describe("6809 cpu", () => {
             }
         }
 
+        function prepare_test(address, code, register, value) {
+            loadMemory(address, code)
+            subject.registers.get("PC").set(address);
+            subject.registers.get(register).set(value);
+        }
+
+        function prepare_word_comparison(address, code, value, at_address, register) {
+            prepare_test(address, code, register, value);
+            subject.memory.write(at_address, (value & 0xff00) >> 8);
+            subject.memory.write(at_address + 1, value & 0xff);
+        }
+
+        function prepare_byte_comparison(address, code, value, at_address, register) {
+            prepare_test(address, code, register, value);
+            subject.memory.write(at_address, value & 0xff);
+        }
+
         each([
             [0x0,"A",[0x86,0x20],0x20,2],[0x0,"A",[0x86,0xff],0xff,2],
             [0x0,"B",[0xc6,0x22],0x22,2],[0x0,"B",[0xc6,0xf0],0xf0,2]
         ]).
         it("processes a load instruction from memory into an 8 bit register",
             (address, register_name, code, expected, cycles) => {
-            loadMemory(address, code);
-            subject.registers.get("PC").set(address);
-            subject.registers.get(register_name).set(0);
+            prepare_test(address, code, register_name, 0);
             let cycle_count = run_to_next(subject);
             expect(cycle_count).toBe(cycles);
             expect(subject.registers.get(register_name).fetch()).toBe(expected);
@@ -100,10 +115,7 @@ describe("6809 cpu", () => {
         ]).
         it("processes a load instruction from direct memory into an 8 bit register",
             (address, register_name, page, code, expected, at_address, cycles) => {
-                loadMemory(address, code);
-                subject.memory.write(at_address, expected);
-                subject.registers.get("PC").set(address);
-                subject.registers.get(register_name).set(0);
+                prepare_byte_comparison(address, code, expected, at_address, register_name);
                 subject.registers.get("DP").set(page);
                 let cycle_count = run_to_next(subject);
                 expect(cycle_count).toBe(cycles);
@@ -116,10 +128,7 @@ describe("6809 cpu", () => {
         ]).
         it("processes a load instruction from extended memory into an 8 bit register",
             (address, register_name, code, expected, at_address, cycles) => {
-                loadMemory(address, code);
-                subject.memory.write(at_address, expected);
-                subject.registers.get("PC").set(address);
-                subject.registers.get(register_name).set(0);
+                prepare_byte_comparison(address, code, expected, at_address, register_name);
                 let cycle_count = run_to_next(subject);
                 expect(cycle_count).toBe(cycles);
                 expect(subject.registers.get(register_name).fetch()).toBe(expected);
@@ -133,9 +142,7 @@ describe("6809 cpu", () => {
         ]).
         it("processes a load instruction from memory into a 16bit register",
             (address, register_name, code, expected, cycles) => {
-            loadMemory(address, code);
-            subject.registers.get("PC").set(address);
-            subject.registers.get(register_name).set(0);
+            prepare_test(address, code, register_name, 0);
             let cycle_count = run_to_next(subject);
             expect(cycle_count).toBe(cycles);
             expect(subject.registers.get(register_name).fetch()).toBe(expected);
@@ -149,12 +156,8 @@ describe("6809 cpu", () => {
         ]).
         it("processes a load instruction from direct memory into a 16bit register",
             (address, register_name, page, code, expected, at_address, cycles) => {
-                loadMemory(address, code);
-                subject.registers.get("PC").set(address);
-                subject.registers.get(register_name).set(0);
+                prepare_word_comparison(address, code, expected, at_address, register_name);
                 subject.registers.get("DP").set(page);
-                subject.memory.write(at_address, (expected & 0xff00) >> 8);
-                subject.memory.write(at_address + 1, expected & 0xff);
                 let cycle_count = run_to_next(subject);
                 expect(cycle_count).toBe(cycles);
                 expect(subject.registers.get(register_name).fetch()).toBe(expected);
@@ -181,9 +184,7 @@ describe("6809 cpu", () => {
         ]).
         it("processes a store instruction to memory from an 8 bit register",
             (address, register_name, code, expected, at_address, cycles) => {
-            loadMemory(address, code);
-            subject.registers.get("PC").set(address);
-            subject.registers.get(register_name).set(expected);
+            prepare_test(address, code, register_name, expected);
             let cycle_count = run_to_next(subject);
             expect(cycle_count).toBe(cycles);
             expect(subject.memory.read(at_address)).toBe(expected);
@@ -195,10 +196,8 @@ describe("6809 cpu", () => {
         ]).
         it("processes a store instruction to direct page memory from an 8 bit register",
             (address, register_name, page, code, expected, at_address, cycles) => {
-            loadMemory(address, code);
-            subject.registers.get("PC").set(address);
+            prepare_test(address, code, register_name, expected);
             subject.registers.get("DP").set(page);
-            subject.registers.get(register_name).set(expected);
             let cycle_count = run_to_next(subject);
             expect(cycle_count).toBe(cycles);
             expect(subject.memory.read(at_address)).toBe(expected);
@@ -212,9 +211,7 @@ describe("6809 cpu", () => {
         ]).
         it("processes a store instruction to memory from a 16 bit register",
             (address, register_name, code, expected, at_address, cycles) => {
-            loadMemory(address, code);
-            subject.registers.get("PC").set(address);
-            subject.registers.get(register_name).set(expected);
+            prepare_test(address, code, register_name, expected);
             let cycle_count = run_to_next(subject);
             expect(cycle_count).toBe(cycles);
             const actual = subject.memory.read(at_address) << 8 | subject.memory.read(at_address + 1)
@@ -229,10 +226,8 @@ describe("6809 cpu", () => {
         ]).
         it("processes a store instruction to direct page memory from a 16 bit register",
             (address, register_name, page, code, expected, at_address, cycles) => {
-            loadMemory(address, code);
-            subject.registers.get("PC").set(address);
+            prepare_test(address, code, register_name, expected);
             subject.registers.get("DP").set(page);
-            subject.registers.get(register_name).set(expected);
             let cycle_count = run_to_next(subject);
             expect(cycle_count).toBe(cycles);
             const actual = subject.memory.read(at_address) << 8 | subject.memory.read(at_address + 1)
@@ -268,6 +263,91 @@ describe("6809 cpu", () => {
             expect(cycle_count).toBe(3);
             expect(subject.registers.get("PC").fetch()).toBe(0x0001);
             expect(subject.registers.get("X").fetch()).toBe(0x10ff);
+        });
+
+        each([[0x0,"A",0x20,[0x81,0x20],0x6,2],  // equals = zero + overflow
+            [0x0,"A",0x20,[0x81,0x21],0x8,2], // more than = negative
+            [0x0,"A",0x20,[0x81,0x1f],0x3,2], // less than = overflow + carry (borrow)
+            [0x0,"B",0x55,[0xc1,0x55],0x6,2]]
+        ).
+        it("Compares an 8 bit register against immediate memory",
+            (address, register, value, code, expected, cycles) => {
+            prepare_test(address, code, register, value);
+            const cc_mask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW | cpus.CARRY;
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.CC.save() & cc_mask).toBe(expected);
+        });
+
+        each([[0x0,"A",0x20,0x10,[0x91,0x20],0x6,0x1020,4],
+            [0x0,"B",0x55,0x11,[0xd1,0x55],0x6,0x1155,4]]
+        ).
+        it("Compares an 8 bit register against direct memory",
+            (address, register, value, page, code, expected, at_address, cycles) => {
+            prepare_byte_comparison(address, code, value, at_address, register);
+            subject.registers.get("DP").set(page);
+            const cc_mask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW | cpus.CARRY;
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.CC.save() & cc_mask).toBe(expected);
+        });
+
+        each([[0x0,"A",0x20,[0xb1,0x10,0x20],0x6,0x1020,5],
+            [0x0,"B",0x55,[0xf1,0x11,0xaa],0x6,0x11aa,5]]
+        ).
+        it("Compares an 8 bit register against extended memory",
+            (address, register, value, code, expected, at_address, cycles) => {
+            prepare_byte_comparison(address, code, value, at_address, register);
+            const cc_mask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW | cpus.CARRY;
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.CC.save() & cc_mask).toBe(expected);
+        });
+
+        each([
+            [0x0000,"X",[0x8c, 0x55, 0xaa],0x55aa,0x06,4],
+            [0x0000,"Y",[0x10, 0x8c, 0x55, 0xaa],0x55aa,0x06,5],
+            [0x0000,"S",[0x11, 0x8c, 0x55, 0xaa],0x55aa,0x06,5],
+            [0x0000,"U",[0x11, 0x83, 0x55, 0xaa],0x55aa,0x06,5]
+        ]).
+        it("Compares a 16 bit register against immediate memory",
+            (address, register, code, value, expected, cycles) => {
+            prepare_test(address, code, register, value);
+            const cc_mask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW | cpus.CARRY;
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.CC.save() & cc_mask).toBe(expected);
+        });
+
+        each([
+            [0x0000,"X",0x10,[0x9c,0xaa],0x55aa,0x10aa,0x06,6],
+            [0x0000,"Y",0x11,[0x10,0x9c,0xaa],0x55aa,0x11aa,0x06,7],
+            [0x0000,"S",0x12,[0x11,0x9c,0xaa],0x55aa,0x12aa,0x06,7],
+            [0x0000,"U",0x13,[0x11,0x93,0xaa],0x55aa,0x13aa,0x06,7]
+        ]).
+        it("Compares a 16 bit register against direct memory",
+            (address, register, page, code, value, at_address, expected, cycles) => {
+            prepare_word_comparison(address, code, value, at_address, register);
+            subject.registers.get("DP").set(page);
+            const cc_mask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW | cpus.CARRY;
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.CC.save() & cc_mask).toBe(expected);
+        });
+
+        each([
+            [0x0000,"X",[0xbc,0x10,0xaa],0x55aa,0x10aa,0x06,7],
+            [0x0000,"Y",[0x10,0xbc,0x11,0xaa],0x55aa,0x11aa,0x06,8],
+            [0x0000,"S",[0x11,0xbc,0x12,0xaa],0x55aa,0x12aa,0x06,8],
+            [0x0000,"U",[0x11,0xb3,0x13,0xaa],0x55aa,0x13aa,0x06,8]
+        ]).
+        it("Compares a 16 bit register against direct memory",
+            (address, register, code, value, at_address, expected, cycles) => {
+            prepare_word_comparison(address, code, value, at_address, register);
+            const cc_mask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW | cpus.CARRY;
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.CC.save() & cc_mask).toBe(expected);
         });
     });
 });

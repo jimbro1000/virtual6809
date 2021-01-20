@@ -1,6 +1,6 @@
 # Virtual 6809 #
 
-This project is a simple emulation of the Motorola 6809 8/16 bit processor in
+This project is a simple emulation of the Motorola 6809 8/16-bit processor in
 javascript
 
 In addition to the processor the project emulates the associated memory and 
@@ -27,13 +27,24 @@ CPU interaction.
 
 ## Processor ##
 
-The CPU emulation is based on a strict read/process/write cycle as detailed in the 
-6809 assembly language programming book by Leventhal. The aim is to achieve the same 
+The CPU emulation is based on a strict read/process/write cpu cycle as detailed in the 
+6809 assembly language programming book by Leventhal[1]. The aim is to achieve the same 
 instruction timing.
 
 The emulated processor can operate at any clock speed within the limits of the 
 supporting hardware allowing for fine-tuning that was not possible with real 
 hardware.
+
+So far the instruction set is incomplete and only covers:
+ * 8 and 16 bit LD (immediate, direct, extended)
+ * 8 and 16 bit SV (direct, extended)
+ * JMP
+ * ABX
+ * NOP
+ * 8 bit CMP (immediate, direct, extended)
+
+indexed/indirect addressing is not implemented  
+register D is not implemented
 
 ## Video ##
 
@@ -47,3 +58,7 @@ radically different from the real components. The timing can be locked to the
 cpu clock if desired.
 
 ## References ##
+[1] **6809 Assembly Language Programming**, 1981 by Lance A. Leventhal  
+ISBN 0-931988-35-7
+
+[2] **Motorola Semiconductor Technical Data - MC6809**

@@ -39,15 +39,11 @@ class cpu_register {
 
     load(value) {
         this.value = value & this.valueMask;
-        this.zero(this.value === 0);
-        this.negative(this.value & this.negativeMask);
-        this.overflow(false);
+        this.test_value();
     }
 
     save() {
-        this.zero(this.value === 0);
-        this.negative(this.value & this.negativeMask);
-        this.overflow(false);
+        this.test_value();
         return this.value;
     }
 
@@ -57,6 +53,12 @@ class cpu_register {
 
     set(value) {
         this.value = value & this.valueMask;
+    }
+
+    test_value() {
+        this.zero(this.value === 0);
+        this.negative(this.value & this.negativeMask);
+        this.overflow(false);
     }
 }
 

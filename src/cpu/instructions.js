@@ -11,6 +11,23 @@ instructions = {
         "operation": "extended instruction",
         "mode": "fetch"
     },
+    0x108c: {
+        "operation": "CMPY",
+        "mode": "immediate",
+        "object": "Y",
+        "code": [
+            "READHIGH", "READWLOW", "COMPAREW"
+        ]
+    },
+    0x109c: {
+        "operation": "CMPY",
+        "mode": "direct",
+        "object": "Y",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "READADHIGH", "READADWLOW", "COMPAREW"
+        ]
+    },
     0x109e: {
         "operation": "LDY",
         "mode": "direct",
@@ -27,6 +44,15 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "WRITEHIGH", "WRITELOW"
+        ]
+    },
+    0x10bc: {
+        "operation": "CMPY",
+        "mode": "extended",
+        "object": "Y",
+        "target": "AD",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "READADHIGH", "READADWLOW", "COMPAREW"
         ]
     },
     0x10be: {
@@ -81,6 +107,62 @@ instructions = {
             "READHIGH", "READWLOW", "TFRWTOTG", "WRITEHIGH", "WRITELOW"
         ]
     },
+    0x11: {
+        "operation": "extended instruction",
+        "mode": "fetch"
+    },
+    0x1183: {
+        "operation": "CMPU",
+        "mode": "immediate",
+        "object": "U",
+        "code": [
+            "READHIGH", "READWLOW", "COMPAREW"
+        ]
+    },
+    0x118c: {
+        "operation": "CMPS",
+        "mode": "immediate",
+        "object": "S",
+        "code": [
+            "READHIGH", "READWLOW", "COMPAREW"
+        ]
+    },
+    0x1193: {
+        "operation": "CMPU",
+        "mode": "direct",
+        "object": "U",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "READADHIGH", "READADWLOW", "COMPAREW"
+        ]
+    },
+    0x119c: {
+        "operation": "CMPS",
+        "mode": "direct",
+        "object": "S",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "READADHIGH", "READADWLOW", "COMPAREW"
+        ]
+    },
+    0x11b3: {
+        "operation": "CMPU",
+        "mode": "extended",
+        "object": "U",
+        "target": "AD",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "READADHIGH", "READADWLOW", "COMPAREW"
+        ]
+    },
+    0x11bc: {
+        "operation": "CMPS",
+        "mode": "extended",
+        "object": "S",
+        "target": "AD",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "READADHIGH", "READADWLOW", "COMPAREW"
+        ]
+    },
     0x12: {
         "operation": "NOP",
         "code": [
@@ -103,12 +185,37 @@ instructions = {
             "READHIGH", "READLOW", "TFRWTOOB"
         ]
     },
+    0x81: {
+        "operation": "CMPA",
+        "mode": "immediate",
+        "object": "A",
+        "code": [
+            "READLOWCOMPARE"
+        ]
+    },
     0x86: {
         "operation": "LDA",
         "mode": "immediate",
         "object": "A",
         "code": [
             "READLOW"
+        ]
+    },
+    0x8c: {
+        "operation": "CMPX",
+        "mode": "immediate",
+        "object": "X",
+        "code": [
+            "READHIGH", "READWLOW", "COMPAREW"
+        ]
+    },
+    0x91: {
+        "operation": "CMPA",
+        "mode": "direct",
+        "object": "A",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "READADLOWCOMPARE"
         ]
     },
     0x96: {
@@ -129,6 +236,15 @@ instructions = {
             "DIRECT", "TFRWTOTG", "WRITELOW"
         ]
     },
+    0x9c: {
+        "operation": "CMPX",
+        "mode": "direct",
+        "object": "X",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "READADHIGH", "READADWLOW", "COMPAREW"
+        ]
+    },
     0x9e: {
         "operation": "LDX",
         "mode": "direct",
@@ -145,6 +261,15 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "WRITEHIGH", "WRITELOW"
+        ]
+    },
+    0xb1: {
+        "operation": "CMPA",
+        "mode": "extended",
+        "object": "A",
+        "target": "AD",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "READADLOWCOMPARE"
         ]
     },
     0xb6: {
@@ -165,6 +290,15 @@ instructions = {
             "READHIGH", "READWLOW", "TFRWTOTG", "WRITELOW"
         ]
     },
+    0xbc: {
+        "operation": "CMPX",
+        "mode": "extended",
+        "object": "X",
+        "target": "AD",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "READADHIGH", "READADWLOW", "COMPAREW"
+        ]
+    },
     0xbe: {
         "operation": "LDX",
         "mode": "immediate",
@@ -180,6 +314,14 @@ instructions = {
         "target": "AD",
         "code": [
             "READHIGH", "READWLOW", "TFRWTOTG", "WRITEHIGH", "WRITELOW"
+        ]
+    },
+    0xc1: {
+        "operation": "CMPB",
+        "mode": "immediate",
+        "object": "B",
+        "code": [
+            "READLOWCOMPARE"
         ]
     },
     0xc6: {
@@ -204,6 +346,15 @@ instructions = {
         "object": "U",
         "code": [
             "READHIGH", "READLOW"
+        ]
+    },
+    0xd1: {
+        "operation": "CMPB",
+        "mode": "direct",
+        "object": "B",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "READADLOWCOMPARE"
         ]
     },
     0xd6: {
@@ -249,6 +400,15 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "WRITEHIGH", "WRITELOW"
+        ]
+    },
+    0xf1: {
+        "operation": "CMPB",
+        "mode": "extended",
+        "object": "B",
+        "target": "AD",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "READADLOWCOMPARE"
         ]
     },
     0xf6: {
