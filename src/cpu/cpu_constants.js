@@ -30,3 +30,4 @@ define("READLOWCOMPARE", 14); // read low byte to W and compare with object
 define("READADLOWCOMPARE", 15); // read byte from AD to w and compare with object
 define("COMPAREW", 16); // compare W against object
 define("READADWLOW", 17); // read low byte to W from AD
+define("INCOB", 18); //increment object and place result in w

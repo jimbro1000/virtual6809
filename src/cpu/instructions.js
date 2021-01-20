@@ -177,6 +177,42 @@ instructions = {
             "ADDTGTOOB", "TFRWTOOB"
         ]
     },
+    0x4a: {
+        "operation": "DECA",
+        "object": "A",
+        "code": [
+            "DECOB"
+        ]
+    },
+    0x4c: {
+        "operation": "INCA",
+        "object": "A",
+        "code": [
+            "INCOB"
+        ]
+    },
+    0x5a: {
+        "operation": "DECB",
+        "object": "B",
+        "code": [
+            "DECOB"
+        ]
+    },
+    0x5c: {
+        "operation": "INCB",
+        "object": "B",
+        "code": [
+            "INCOB"
+        ]
+    },
+    0x7c: {
+        "operation": "INC",
+        "mode": "extended",
+        "object": "W",
+        "code": [
+            "READHIGH", "READLOW", "READADLOW", "INCOB", "WRITELOW"
+        ]
+    },
     0x7e: {
         "operation": "JMP",
         "mode": "extended",

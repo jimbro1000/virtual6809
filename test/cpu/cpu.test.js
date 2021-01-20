@@ -349,5 +349,42 @@ describe("6809 cpu", () => {
             expect(cycle_count).toBe(cycles);
             expect(subject.CC.save() & cc_mask).toBe(expected);
         });
+
+        each([
+            [0x0000,"A",[0x4c],0x00,0x01,2,0x00],[0x0000,"A",[0x4c],0xff,0x00,2,cpus.ZERO|cpus.OVERFLOW],
+            [0x0000,"B",[0x5c],0x00,0x01,2,0x00],[0x0000,"B",[0x5c],0x7f,0x80,2,cpus.NEGATIVE]
+        ]).
+        it("increments a register", (address, register, code, value, expected, cycles, cc_flags) => {
+            prepare_test(address, code, register, value);
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(expected);
+            expect(subject.CC.save() & cc_flags).toBe(cc_flags);
+        });
+
+        each([
+            [0x0000,[0x7c,0x20,0x01],0x00,0x2001,0x01,6,0x00]
+        ]).
+        it(
+        "increments a byte in extended memory", (address, code, value, at_address, expected, cycles, cc_flags) => {
+            loadMemory(address, code);
+            subject.memory.write(at_address, value);
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.memory.read(at_address)).toBe(expected);
+            expect(subject.CC.save() & cc_flags).toBe(cc_flags);
+        });
+
+        each([
+            [0x0000,"A",[0x4a],0x02,0x01,2,0x00],[0x0000,"A",[0x4a],0x00,0xff,2,cpus.NEGATIVE],
+            [0x0000,"B",[0x5a],0x02,0x01,2,0x00],[0x0000,"B",[0x5a],0x01,0x00,2,cpus.ZERO]
+        ]).
+        it("decrements a register", (address, register, code, value, expected, cycles, cc_flags) => {
+            prepare_test(address, code, register, value);
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(expected);
+            expect(subject.CC.save() & cc_flags).toBe(cc_flags);
+        })
     });
 });

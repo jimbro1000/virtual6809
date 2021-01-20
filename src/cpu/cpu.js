@@ -39,6 +39,8 @@ class cpu {
         result["READLOWCOMPARE"] = cpus.READLOWCOMPARE;
         result["READADLOWCOMPARE"] = cpus.READADLOWCOMPARE;
         result["COMPAREW"] = cpus.COMPAREW;
+        result["INCOB"] = cpus.INCOB;
+        result["DECOB"] = cpus.DECOB;
         return result;
     }
 
@@ -62,6 +64,8 @@ class cpu {
         result[cpus.READLOWCOMPARE] = this.read_and_compare_low_byte;
         result[cpus.READADLOWCOMPARE] = this.read_ad_and_compare_low_byte;
         result[cpus.COMPAREW] = this.compare_w_with_word;
+        result[cpus.INCOB] = this.inc_ob;
+        result[cpus.DECOB] = this.dec_ob;
         return result;
     }
 
@@ -235,6 +239,25 @@ class cpu {
         this.check_cc(n, w, o, temp, masked);
     }
 
+    inc_ob = () => {
+        const o = this.object.fetch();
+        const temp = o + 1
+        this.object.set(temp);
+        const w = this.object.fetch();
+        this.CC.zero(w === 0);
+        this.CC.negative((w & 0x80) !== 0);
+        this.CC.overflow(w !== temp);
+    }
+
+    dec_ob = () => {
+        const o = this.object.fetch();
+        const temp = o - 1
+        this.object.set(temp);
+        const w = this.object.fetch();
+        this.CC.zero(w === 0);
+        this.CC.negative((w & 0x80) !== 0);
+        this.CC.overflow(w !== temp);
+    }
     check_cc = (initial, complement, object, sum, masked) => {
         this.CC.zero(masked === 0);
         this.CC.negative((masked & 0x80) !== 0);
