@@ -208,9 +208,9 @@ instructions = {
     0x7c: {
         "operation": "INC",
         "mode": "extended",
-        "object": "W",
+        "object": "AD",
         "code": [
-            "READHIGH", "READLOW", "READADLOW", "INCOB", "WRITELOW"
+            "READHIGH", "READLOW", "READADWLOW", "INCOB", "WRITELOW"
         ]
     },
     0x7e: {
