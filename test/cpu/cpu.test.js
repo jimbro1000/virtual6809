@@ -353,5 +353,24 @@ describe("6809 cpu", () => {
             expect(cycle_count).toBe(cycles);
             expect(subject.CC.save() & cc_mask).toBe(expected);
         });
+
+        each([
+            [0x0000,"X",[0xbc,0x10,0xaa],0x55aa,0x10aa,0x06,7],
+            [0x0000,"Y",[0x10,0xbc,0x11,0xaa],0x55aa,0x11aa,0x06,8],
+            [0x0000,"S",[0x11,0xbc,0x12,0xaa],0x55aa,0x12aa,0x06,8],
+            [0x0000,"U",[0x11,0xb3,0x13,0xaa],0x55aa,0x13aa,0x06,8]
+        ]).
+        it("Compares a 16 bit register against direct memory",
+            (address, register, code, value, at_address, expected, cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get(register).set(value);
+            subject.memory.write(at_address, (value & 0xff00) >> 8);
+            subject.memory.write(at_address + 1, value & 0xff);
+            const cc_mask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW | cpus.CARRY;
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.CC.save() & cc_mask).toBe(expected);
+        });
     });
 });
