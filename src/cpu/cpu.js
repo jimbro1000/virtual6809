@@ -236,26 +236,10 @@ class cpu {
     }
 
     check_cc = (initial, complement, object, sum, masked) => {
-        if (masked === 0) {
-            this.CC.set(cpus.ZERO);
-        } else {
-            this.CC.clear(cpus.ZERO);
-        }
-        if ((masked & 0x80) !== 0) {
-            this.CC.set(cpus.NEGATIVE);
-        } else {
-            this.CC.clear(cpus.NEGATIVE);
-        }
-        if (sum !== masked) {
-            this.CC.set(cpus.OVERFLOW);
-        } else {
-            this.CC.clear(cpus.OVERFLOW);
-        }
-        if (initial < object) {
-            this.CC.set(cpus.CARRY);
-        } else {
-            this.CC.clear(cpus.CARRY);
-        }
+        this.CC.zero(masked === 0);
+        this.CC.negative((masked & 0x80) !== 0);
+        this.CC.overflow(sum !== masked);
+        this.CC.carry(initial < object);
     }
 
     complement = (register, scale) => {
