@@ -205,12 +205,20 @@ instructions = {
             "INCOB"
         ]
     },
+    0x7a: {
+        "operation": "DEC",
+        "mode": "extended",
+        "object": "AD",
+        "code": [
+            "READHIGH", "READLOW", "READADWLOW", "DECW", "WRITEWLOW"
+        ]
+    },
     0x7c: {
         "operation": "INC",
         "mode": "extended",
         "object": "AD",
         "code": [
-            "READHIGH", "READLOW", "READADWLOW", "INCOB", "WRITELOW"
+            "READHIGH", "READLOW", "READADWLOW", "INCW", "WRITEWLOW"
         ]
     },
     0x7e: {

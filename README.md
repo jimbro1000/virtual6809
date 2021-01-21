@@ -42,6 +42,7 @@ So far the instruction set is incomplete and only covers:
  * ABX
  * NOP
  * 8 bit CMP (immediate, direct, extended)
+ * INC and DEC
 
 indexed/indirect addressing is not implemented  
 register D is not implemented
@@ -62,3 +63,6 @@ cpu clock if desired.
 ISBN 0-931988-35-7
 
 [2] **Motorola Semiconductor Technical Data - MC6809**
+
+[3] **[Motorola MC6809-MC6809E 8-Bit Microprocessor Programming Manual](
+https://www.maddes.net/m6809pm/sections.htm)**

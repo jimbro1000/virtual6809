@@ -28,6 +28,7 @@ class cpu {
         result["READLOW"] = cpus.READLOW;
         result["WRITEHIGH"] = cpus.WRITEHIGH;
         result["WRITELOW"] = cpus.WRITELOW;
+        result["WRITEWLOW"] = cpus.WRITEWLOW;
         result["READADHIGH"] = cpus.READADHIGH;
         result["READADLOW"] = cpus.READADLOW;
         result["READADWLOW"] = cpus.READADWLOW;
@@ -41,6 +42,8 @@ class cpu {
         result["COMPAREW"] = cpus.COMPAREW;
         result["INCOB"] = cpus.INCOB;
         result["DECOB"] = cpus.DECOB;
+        result["INCW"] = cpus.INCW;
+        result["DECW"] = cpus.DECW;
         return result;
     }
 
@@ -54,6 +57,7 @@ class cpu {
         result[cpus.READWLOW] = this.read_next_low_data_byte_to_W_from_PC;
         result[cpus.WRITEHIGH] = this.write_object_high_byte_to_AD;
         result[cpus.WRITELOW] = this.write_object_low_byte_to_AD;
+        result[cpus.WRITEWLOW] = this.write_w_low_byte_to_AD;
         result[cpus.READADHIGH] = this.read_next_high_data_byte_from_AD;
         result[cpus.READADLOW] = this.read_next_low_data_byte_from_AD;
         result[cpus.READADWLOW] = this.read_next_low_data_byte_to_W_from_AD;
@@ -66,6 +70,8 @@ class cpu {
         result[cpus.COMPAREW] = this.compare_w_with_word;
         result[cpus.INCOB] = this.inc_ob;
         result[cpus.DECOB] = this.dec_ob;
+        result[cpus.INCW] = this.inc_w;
+        result[cpus.DECW] = this.dec_w;
         return result;
     }
 
@@ -207,6 +213,10 @@ class cpu {
         this.memory.write(this.AD.fetch(), this.object.save() & 0xff);
     }
 
+    write_w_low_byte_to_AD = () => {
+        this.memory.write(this.AD.fetch(), this.W.fetch() & 0xff);
+    }
+
     busy_state = () => {
         //do nothing
     }
@@ -240,24 +250,41 @@ class cpu {
     }
 
     inc_ob = () => {
-        const o = this.object.fetch();
+        this.inc(this.object);
+    }
+
+    inc_w = () => {
+        this.inc(this.W);
+    }
+
+    inc = (register) => {
+        const o = register.fetch() & 0xff;
         const temp = o + 1
-        this.object.set(temp);
-        const w = this.object.fetch();
+        register.set(temp & 0xff);
+        const w = register.fetch();
         this.CC.zero(w === 0);
         this.CC.negative((w & 0x80) !== 0);
         this.CC.overflow(w !== temp);
     }
 
     dec_ob = () => {
-        const o = this.object.fetch();
-        const temp = o - 1
-        this.object.set(temp);
-        const w = this.object.fetch();
+        this.dec(this.object);
+    }
+
+    dec_w = () => {
+        this.dec(this.W);
+    }
+
+    dec = (register) => {
+        const o = register.fetch() & 0xff;
+        const temp = o - 1;
+        register.set(temp);
+        const w = register.fetch();
         this.CC.zero(w === 0);
         this.CC.negative((w & 0x80) !== 0);
         this.CC.overflow(w !== temp);
     }
+
     check_cc = (initial, complement, object, sum, masked) => {
         this.CC.zero(masked === 0);
         this.CC.negative((masked & 0x80) !== 0);
