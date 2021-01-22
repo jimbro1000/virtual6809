@@ -19,6 +19,7 @@ class cpu {
         this.target = null;
         this.codes = this.map_code_name_to_code();
         this.lambdas = this.map_code_to_lambda();
+        this.stack_order = this.map_stack_order();
     }
 
     map_code_name_to_code() {
@@ -34,6 +35,8 @@ class cpu {
         result["READADWLOW"] = cpus.READADWLOW;
         result["TFRWTOOB"] = cpus.TFRWTOOB;
         result["TFRWTOTG"] = cpus.TFRWTOTG;
+        result["TFROBTOTG"] = cpus.TFROBTOTG;
+        result["TRTGTOOB"] = cpus.TRTGTOOB;
         result["BUSY"] = cpus.BUSY;
         result["ADDTGTOOB"] = cpus.ADDTGTOOB;
         result["READWLOW"] = cpus.READWLOW;
@@ -44,6 +47,7 @@ class cpu {
         result["DECOB"] = cpus.DECOB;
         result["INCW"] = cpus.INCW;
         result["DECW"] = cpus.DECW;
+        result["PUSH"] = cpus.PUSH;
         return result;
     }
 
@@ -63,6 +67,8 @@ class cpu {
         result[cpus.READADWLOW] = this.read_next_low_data_byte_to_W_from_AD;
         result[cpus.TFRWTOOB] = this.transfer_w_to_object;
         result[cpus.TFRWTOTG] = this.transfer_w_to_target;
+        result[cpus.TFROBTOTG] = this.transfer_object_to_target;
+        result[cpus.TFRTGtOOB] = this.transfer_target_to_object;
         result[cpus.BUSY] = this.busy_state;
         result[cpus.ADDTGTOOB] = this.add_target_to_object;
         result[cpus.READLOWCOMPARE] = this.read_and_compare_low_byte;
@@ -72,6 +78,20 @@ class cpu {
         result[cpus.DECOB] = this.dec_ob;
         result[cpus.INCW] = this.inc_w;
         result[cpus.DECW] = this.dec_w;
+        result[cpus.PUSH] = this.push_reg_to_ad;
+        return result;
+    }
+
+    map_stack_order = () => {
+        let result = [];
+        result[0x80] = "PC";
+        result[0x40] = "US";
+        result[0x20] = "Y";
+        result[0x10] = "X";
+        result[0x8] = "DP";
+        result[0x4] = "B";
+        result[0x2] = "A";
+        result[0x1] = "CC";
         return result;
     }
 
@@ -170,6 +190,14 @@ class cpu {
     transfer_w_to_target = () => {
         this.target.set(this.W.fetch());
         this.W.set(0);
+    }
+
+    transfer_object_to_target = () => {
+        this.target.set(this.object.fetch());
+    }
+
+    transfer_target_to_object = () => {
+        this.object.set(this.target.fetch());
     }
 
     build_direct_page_address_in_W = () => {
@@ -273,6 +301,41 @@ class cpu {
 
     dec_w = () => {
         this.dec(this.W);
+    }
+
+    push_reg_to_ad = () => {
+        let mask = 0x80;
+        let loop = true;
+        let w = this.W.fetch();
+        while (loop) {
+            if ((mask & w) === mask) {
+                this.W.set(w -= mask);
+                if (w !== 0) {
+                    this.code.push(this.codes["PUSH"]);
+                }
+                let register = this.stack_order[mask];
+                if (register === "US") {
+                    if (this.object.name === "U") {
+                        register = "S";
+                    } else {
+                        register = "U";
+                    }
+                }
+                let address = this.target.fetch();
+                const next_entry = this.registers.get(register);
+                if (next_entry.size === cpus.LONG) {
+                    this.code.unshift(this.codes["BUSY"]);
+                    const high_value = (next_entry.fetch() & 0xff00) >> 8;
+                    this.memory.write(address--, high_value);
+                }
+                const low_value = next_entry.fetch() & 0xff;
+                this.memory.write(address--, low_value);
+                this.target.set(address);
+            } else {
+                mask = mask > 1;
+                loop = mask >= 1;
+            }
+        }
     }
 
     dec = (register) => {

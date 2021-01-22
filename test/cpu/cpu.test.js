@@ -97,6 +97,14 @@ describe("6809 cpu", () => {
             subject.memory.write(at_address, value & 0xff);
         }
 
+        function compare_memory(address, code) {
+            let result = true;
+            for (let index = 0; index < code.length; index++) {
+                result = result && (subject.memory.read(address + index) == code[index]);
+            }
+            return result;
+        }
+
         each([
             [0x0,"A",[0x86,0x20],0x20,2],[0x0,"A",[0x86,0xff],0xff,2],
             [0x0,"B",[0xc6,0x22],0x22,2],[0x0,"B",[0xc6,0xf0],0xf0,2]
@@ -394,13 +402,27 @@ describe("6809 cpu", () => {
         ]).
         it(
             "decrements a byte in extended memory", (address, code, value, at_address, expected, cycles, cc_flags) => {
-                loadMemory(address, code);
-                subject.memory.write(at_address, value);
-                let cycle_count = run_to_next(subject);
-                expect(cycle_count).toBe(cycles);
-                expect(subject.memory.read(at_address)).toBe(expected);
-                expect(subject.CC.save() & cc_flags).toBe(cc_flags);
-            });
+            loadMemory(address, code);
+            subject.memory.write(at_address, value);
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.memory.read(at_address)).toBe(expected);
+            expect(subject.CC.save() & cc_flags).toBe(cc_flags);
+        });
 
+        it("pushes registers to the S stack", () => {
+            const code = [0x34,0x87];
+            const result = [0x00, 0x40, 0x80, 0x00, 0x02];
+            const address = 0x0000;
+            let register = "S";
+            const at_address = 0x3ffa;
+            loadMemory(address, code);
+            subject.registers.get(register).set(at_address + 5);
+            const cycles = 10;
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(compare_memory(at_address, result)).toBeTruthy();
+            expect(subject.registers(register).fetch()).toBe(at_address);
+        });
     });
 });
