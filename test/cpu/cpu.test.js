@@ -97,6 +97,14 @@ describe("6809 cpu", () => {
             subject.memory.write(at_address, value & 0xff);
         }
 
+        function compare_memory(address, code) {
+            let result = true;
+            for (let index = 0; index < code.length; index++) {
+                result = result && (subject.memory.read(address + index) === code[index]);
+            }
+            return result;
+        }
+
         each([
             [0x0,"A",[0x86,0x20],0x20,2],[0x0,"A",[0x86,0xff],0xff,2],
             [0x0,"B",[0xc6,0x22],0x22,2],[0x0,"B",[0xc6,0xf0],0xf0,2]
@@ -394,13 +402,84 @@ describe("6809 cpu", () => {
         ]).
         it(
             "decrements a byte in extended memory", (address, code, value, at_address, expected, cycles, cc_flags) => {
-                loadMemory(address, code);
-                subject.memory.write(at_address, value);
-                let cycle_count = run_to_next(subject);
-                expect(cycle_count).toBe(cycles);
-                expect(subject.memory.read(at_address)).toBe(expected);
-                expect(subject.CC.save() & cc_flags).toBe(cc_flags);
-            });
+            loadMemory(address, code);
+            subject.memory.write(at_address, value);
+            let cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.memory.read(at_address)).toBe(expected);
+            expect(subject.CC.save() & cc_flags).toBe(cc_flags);
+        });
+
+        it("pushes registers to the S stack", () => {
+            const code = [0x34,0x87];
+            const result = [0x00, 0x40, 0x80, 0x00, 0x02];
+            const address = 0x0000;
+            let register = "S";
+            const at_address = 0x3fff;
+            const result_address = 0x3ffa;
+            subject.registers.get("A").set("0x40");
+            subject.registers.get("B").set("0x80");
+            loadMemory(address, code);
+            subject.registers.get(register).set(at_address);
+            const cycles = 10;
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(result_address);
+            expect(compare_memory(result_address + 1, result)).toBeTruthy();
+        });
+
+        it("pushes U register to the S stack", () => {
+            const code = [0x34,0x40];
+            const result = [0x2f, 0xff];
+            const address = 0x0000;
+            let register = "S";
+            const at_address = 0x3fff;
+            const result_address = 0x3ffd;
+            subject.registers.get("U").set("0x2fff");
+            loadMemory(address, code);
+            subject.registers.get(register).set(at_address);
+            const cycles = 7;
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(result_address);
+            expect(compare_memory(result_address + 1, result)).toBeTruthy();
+        });
+
+        it("pushes registers to the U stack", () => {
+            const code = [0x36,0x85];
+            const stack_result = [0x00, 0x55, 0x01, 0x02];
+            const pc_address = 0x0100;
+            let register = "U";
+            const at_address = 0x3eff;
+            const result_address = 0x3efb;
+            subject.registers.get("B").set("0x55");
+            loadMemory(pc_address, code);
+            subject.registers.get("PC").set(pc_address);
+            subject.registers.get(register).set(at_address);
+            const cycles = 9;
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(result_address);
+            expect(compare_memory(result_address + 1, stack_result)).toBeTruthy();
+        });
+
+        it("pushes S register to the U stack", () => {
+            const code = [0x36,0x40];
+            const stack_result = [0x2f, 0xff];
+            const pc_address = 0x0000;
+            let register = "U";
+            const at_address = 0x3fff;
+            const result_address = 0x3ffd;
+            subject.registers.get("S").set("0x2fff");
+            loadMemory(pc_address, code);
+            subject.registers.get("PC").set(pc_address);
+            subject.registers.get(register).set(at_address);
+            const cycles = 7;
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(result_address);
+            expect(compare_memory(result_address + 1, stack_result)).toBeTruthy();
+        });
 
     });
 });

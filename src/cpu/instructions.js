@@ -169,6 +169,22 @@ instructions = {
             "BUSY"
         ]
     },
+    0x34: {
+        "operation": "PSHS",
+        "object": "S",
+        "target": "AD",
+        "code": [
+            "READWLOW", "TFROBTOTG", "PUSH", "TFRTGTOOB", "BUSY"
+        ]
+    },
+    0x36: {
+        "operation": "PSHU",
+        "object": "U",
+        "target": "AD",
+        "code": [
+            "READWLOW", "TFROBTOTG", "PUSH", "TFRTGTOOB", "BUSY"
+        ]
+    },
     0x3a: {
         "operation": "ABX",
         "object": "X",

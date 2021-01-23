@@ -35,3 +35,6 @@ define("DECOB", 19);
 define("INCW", 20);
 define("DECW", 21);
 define("WRITEWLOW", 22);
+define("TFROBTOTG", 23);
+define("TFRTGTOOB", 24);
+define("PUSH", 25);
