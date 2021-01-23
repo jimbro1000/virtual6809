@@ -36,7 +36,7 @@ class cpu {
         result["TFRWTOOB"] = cpus.TFRWTOOB;
         result["TFRWTOTG"] = cpus.TFRWTOTG;
         result["TFROBTOTG"] = cpus.TFROBTOTG;
-        result["TRTGTOOB"] = cpus.TRTGTOOB;
+        result["TFRTGTOOB"] = cpus.TFRTGTOOB;
         result["BUSY"] = cpus.BUSY;
         result["ADDTGTOOB"] = cpus.ADDTGTOOB;
         result["READWLOW"] = cpus.READWLOW;
@@ -68,7 +68,7 @@ class cpu {
         result[cpus.TFRWTOOB] = this.transfer_w_to_object;
         result[cpus.TFRWTOTG] = this.transfer_w_to_target;
         result[cpus.TFROBTOTG] = this.transfer_object_to_target;
-        result[cpus.TFRTGtOOB] = this.transfer_target_to_object;
+        result[cpus.TFRTGTOOB] = this.transfer_target_to_object;
         result[cpus.BUSY] = this.busy_state;
         result[cpus.ADDTGTOOB] = this.add_target_to_object;
         result[cpus.READLOWCOMPARE] = this.read_and_compare_low_byte;
@@ -97,8 +97,8 @@ class cpu {
 
     populate_code_stack(instruction_code) {
         this.code = [];
-        for (let index=instruction_code.length-1;index>=0;index--) {
-            this.code.push(this.codes[instruction_code[index]]);
+        for (let index=0;index<instruction_code.length;index++) {
+            this.code.unshift(this.codes[instruction_code[index]]);
         }
     }
 
@@ -166,7 +166,7 @@ class cpu {
         this.operation |= next_byte;
         const action = this.instructions[this.operation];
         if (typeof action === 'undefined') {
-            throw "illegal instruction";
+            throw "illegal instruction " + next_byte;
         }
         if (action.mode === "fetch") {
             this.operation = next_byte << 8;
@@ -331,8 +331,9 @@ class cpu {
                 const low_value = next_entry.fetch() & 0xff;
                 this.memory.write(address--, low_value);
                 this.target.set(address);
+                loop = false;
             } else {
-                mask = mask > 1;
+                mask = mask >> 1;
                 loop = mask >= 1;
             }
         }

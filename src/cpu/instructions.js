@@ -174,7 +174,15 @@ instructions = {
         "object": "S",
         "target": "AD",
         "code": [
-            "READWLOW", "TFROBTOTG", "PUSH", "TRTGTOOB"
+            "READWLOW", "TFROBTOTG", "PUSH", "TFRTGTOOB", "BUSY"
+        ]
+    },
+    0x36: {
+        "operation": "PSHU",
+        "object": "U",
+        "target": "AD",
+        "code": [
+            "READWLOW", "TFROBTOTG", "PUSH", "TFRTGTOOB", "BUSY"
         ]
     },
     0x3a: {

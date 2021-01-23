@@ -43,6 +43,7 @@ So far the instruction set is incomplete and only covers:
  * NOP
  * 8 bit CMP (immediate, direct, extended)
  * INC and DEC
+ * PSH (PUL is todo)
 
 indexed/indirect addressing is not implemented  
 register D is not implemented
