@@ -285,6 +285,14 @@ instructions = {
             "READHIGH", "READWLOW", "COMPAREW"
         ]
     },
+    0x8d: {
+        "operation": "JSR",
+        "mode": "direct",
+        "object": "PC",
+        "code": [
+            "READHIGH", "READWLOW", "PUSHPC", "TFRWTOOB", "BUSY", "BUSY", "BUSY"
+        ]
+    },
     0x91: {
         "operation": "CMPA",
         "mode": "direct",
@@ -319,6 +327,14 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "READADHIGH", "READADWLOW", "COMPAREW"
+        ]
+    },
+    0x9d: {
+        "operation": "JSR",
+        "mode": "direct",
+        "object": "PC",
+        "code": [
+            "DIRECT", "PUSHPC", "TFRWTOOB", "BUSY", "BUSY", "BUSY"
         ]
     },
     0x9e: {

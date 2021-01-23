@@ -44,6 +44,7 @@ So far the instruction set is incomplete and only covers:
  * 8 bit CMP (immediate, direct, extended)
  * INC and DEC
  * PSH and PUL
+ * JSR
 
 indexed/indirect addressing is not implemented  
 register D is not implemented
