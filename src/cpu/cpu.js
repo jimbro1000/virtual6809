@@ -323,13 +323,13 @@ class cpu {
                 }
                 let address = this.target.fetch();
                 const next_entry = this.registers.get(register);
+                const low_value = next_entry.fetch() & 0xff;
+                this.memory.write(address--, low_value);
                 if (next_entry.size === cpus.LONG) {
                     this.code.unshift(this.codes["BUSY"]);
                     const high_value = (next_entry.fetch() & 0xff00) >> 8;
                     this.memory.write(address--, high_value);
                 }
-                const low_value = next_entry.fetch() & 0xff;
-                this.memory.write(address--, low_value);
                 this.target.set(address);
                 loop = false;
             } else {

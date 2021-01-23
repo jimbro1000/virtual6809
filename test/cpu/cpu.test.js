@@ -412,7 +412,7 @@ describe("6809 cpu", () => {
 
         it("pushes registers to the S stack", () => {
             const code = [0x34,0x87];
-            const result = [0x00, 0x40, 0x80, 0x02, 0x00];
+            const result = [0x00, 0x40, 0x80, 0x00, 0x02];
             const address = 0x0000;
             let register = "S";
             const at_address = 0x3fff;
@@ -430,7 +430,7 @@ describe("6809 cpu", () => {
 
         it("pushes U register to the S stack", () => {
             const code = [0x34,0x40];
-            const result = [0xff, 0x2f];
+            const result = [0x2f, 0xff];
             const address = 0x0000;
             let register = "S";
             const at_address = 0x3fff;
@@ -447,7 +447,7 @@ describe("6809 cpu", () => {
 
         it("pushes registers to the U stack", () => {
             const code = [0x36,0x85];
-            const stack_result = [0x00, 0x55, 0x02, 0x01];
+            const stack_result = [0x00, 0x55, 0x01, 0x02];
             const pc_address = 0x0100;
             let register = "U";
             const at_address = 0x3eff;
@@ -465,7 +465,7 @@ describe("6809 cpu", () => {
 
         it("pushes S register to the U stack", () => {
             const code = [0x36,0x40];
-            const stack_result = [0xff, 0x2f];
+            const stack_result = [0x2f, 0xff];
             const pc_address = 0x0000;
             let register = "U";
             const at_address = 0x3fff;
