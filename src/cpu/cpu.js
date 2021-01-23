@@ -49,6 +49,7 @@ class cpu {
         result["DECW"] = cpus.DECW;
         result["PUSH"] = cpus.PUSH;
         result["PULL"] = cpus.PULL;
+        result["PUSHPC"] = cpus.PUSHPC;
         return result;
     }
 
@@ -81,6 +82,7 @@ class cpu {
         result[cpus.DECW] = this.dec_w;
         result[cpus.PUSH] = this.push_reg_to_ad;
         result[cpus.PULL] = this.pull_reg_from_ad;
+        result[cpus.PUSHPC] = this.push_pc_to_ad;
         return result;
     }
 
@@ -373,6 +375,16 @@ class cpu {
                 loop = mask <= 0x100;
             }
         }
+    }
+
+    push_pc_to_ad = () => {
+        let address = this.registers.get("S").fetch();
+        const value = this.PC.fetch();
+        const low_value = (value & 0xff00) >> 8;
+        this.memory.write(address--, low_value);
+        const high_value = value & 0xff;
+        this.memory.write(address--, high_value);
+        this.registers.get("S").set(address);
     }
 
     dec = (register) => {

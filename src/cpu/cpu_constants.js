@@ -39,3 +39,4 @@ define("TFROBTOTG", 23);
 define("TFRTGTOOB", 24);
 define("PUSH", 25);
 define("PULL", 26);
+define("CUEPC", 27);

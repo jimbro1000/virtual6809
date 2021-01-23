@@ -500,5 +500,36 @@ describe("6809 cpu", () => {
             expect(subject.registers.get("PC").fetch()).toBe(0x0102);
             expect(subject.CC.fetch()).toBe(0x09);
         });
+
+        it("jumps to subroutine at direct address", () => {
+            const pc_address = 0x0000;
+            const code = [0x9d,0x20];
+            const stack_address = 0x3fff;
+            const expected_address = 0x0520;
+            loadMemory(pc_address, code);
+            subject.registers.get("PC").set(pc_address);
+            subject.registers.get("DP").set(0x05);
+            subject.registers.get("S").set(stack_address);
+            const cycles = 7;
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected_address);
+            expect(subject.registers.get("S").fetch()).toBe(stack_address - 2);
+        });
+
+        it("jumps to subroutine at extended address", () => {
+            const pc_address = 0x0000;
+            const code = [0x8d,0x06,0x20];
+            const stack_address = 0x3fff;
+            const expected_address = 0x0620;
+            loadMemory(pc_address, code);
+            subject.registers.get("PC").set(pc_address);
+            subject.registers.get("S").set(stack_address);
+            const cycles = 8;
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected_address);
+            expect(subject.registers.get("S").fetch()).toBe(stack_address - 2);
+        });
     });
 });
