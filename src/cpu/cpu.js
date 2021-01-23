@@ -359,13 +359,13 @@ class cpu {
                 const register = this.select_register(mask);
                 let address = this.target.fetch();
                 const next_entry = this.registers.get(register);
-                const low_value = this.memory.read(address++);
-                next_entry.set((next_entry.fetch & 0xff00) + low_value);
+                let pulled_value = 0;
                 if (next_entry.size === cpus.LONG) {
                     this.code.unshift(this.codes["BUSY"]);
-                    const high_value = this.memory.read(address++) << 8;
-                    next_entry.set((next_entry.fetch() & 0xff) + high_value);
+                    pulled_value += this.memory.read(address++) << 8;
                 }
+                pulled_value += this.memory.read(address++);
+                next_entry.set(pulled_value);
                 this.target.set(address);
                 loop = false;
             } else {

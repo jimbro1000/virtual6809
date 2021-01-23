@@ -481,5 +481,24 @@ describe("6809 cpu", () => {
             expect(compare_memory(result_address + 1, stack_result)).toBeTruthy();
         });
 
+        it("pulls registers from the S stack", () => {
+            const code = [0x35,0x87];
+            const stack_content = [0x09, 0x40, 0x80, 0x01, 0x02];
+            const address = 0x0000;
+            const register = "S";
+            const final_address = 0x3fff;
+            const initial_address = 0x3ffa;
+            loadMemory(address, code);
+            loadMemory(initial_address, stack_content);
+            subject.registers.get(register).set(initial_address);
+            const cycles = 10;
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(final_address);
+            expect(subject.registers.get("A").fetch()).toBe(0x40);
+            expect(subject.registers.get("B").fetch()).toBe(0x80);
+            expect(subject.registers.get("PC").fetch()).toBe(0x0102);
+            expect(subject.CC.fetch()).toBe(0x09);
+        });
     });
 });
