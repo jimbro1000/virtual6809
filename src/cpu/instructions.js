@@ -177,12 +177,28 @@ instructions = {
             "READWLOW", "TFROBTOTG", "PUSH", "TFRTGTOOB", "BUSY"
         ]
     },
+    0x35: {
+        "operation": "PULS",
+        "object": "S",
+        "target": "AD",
+        "code": [
+            "READWLOW", "TFROBTOTG", "PULL", "TFRTGTOOB", "BUSY"
+        ]
+    },
     0x36: {
         "operation": "PSHU",
         "object": "U",
         "target": "AD",
         "code": [
             "READWLOW", "TFROBTOTG", "PUSH", "TFRTGTOOB", "BUSY"
+        ]
+    },
+    0x37: {
+        "operation": "PULU",
+        "object": "U",
+        "target": "AD",
+        "code": [
+            "READWLOW", "TFROBTOTG", "PULL", "TFRTGTOOB", "BUSY"
         ]
     },
     0x3a: {

@@ -48,6 +48,7 @@ class cpu {
         result["INCW"] = cpus.INCW;
         result["DECW"] = cpus.DECW;
         result["PUSH"] = cpus.PUSH;
+        result["PULL"] = cpus.PULL;
         return result;
     }
 
@@ -79,6 +80,7 @@ class cpu {
         result[cpus.INCW] = this.inc_w;
         result[cpus.DECW] = this.dec_w;
         result[cpus.PUSH] = this.push_reg_to_ad;
+        result[cpus.PULL] = this.pull_reg_from_ad;
         return result;
     }
 
@@ -303,6 +305,18 @@ class cpu {
         this.dec(this.W);
     }
 
+    select_register = (stack_mask) => {
+        let register = this.stack_order[stack_mask];
+        if (register === "US") {
+            if (this.object.name === "U") {
+                register = "S";
+            } else {
+                register = "U";
+            }
+        }
+        return register;
+    }
+
     push_reg_to_ad = () => {
         let mask = 0x80;
         let loop = true;
@@ -313,14 +327,7 @@ class cpu {
                 if (w !== 0) {
                     this.code.push(this.codes["PUSH"]);
                 }
-                let register = this.stack_order[mask];
-                if (register === "US") {
-                    if (this.object.name === "U") {
-                        register = "S";
-                    } else {
-                        register = "U";
-                    }
-                }
+                const register = this.select_register(mask);
                 let address = this.target.fetch();
                 const next_entry = this.registers.get(register);
                 const low_value = next_entry.fetch() & 0xff;
@@ -335,6 +342,35 @@ class cpu {
             } else {
                 mask = mask >> 1;
                 loop = mask >= 1;
+            }
+        }
+    }
+
+    pull_reg_from_ad = () => {
+        let mask = 0x01;
+        let loop = true;
+        let w = this.W.fetch();
+        while (loop) {
+            if ((mask & w) === mask) {
+                this.W.set(w -= mask);
+                if (w !== 0) {
+                    this.code.push(this.codes["PULL"]);
+                }
+                const register = this.select_register(mask);
+                let address = this.target.fetch();
+                const next_entry = this.registers.get(register);
+                let pulled_value = 0;
+                if (next_entry.size === cpus.LONG) {
+                    this.code.unshift(this.codes["BUSY"]);
+                    pulled_value += this.memory.read(address++) << 8;
+                }
+                pulled_value += this.memory.read(address++);
+                next_entry.set(pulled_value);
+                this.target.set(address);
+                loop = false;
+            } else {
+                mask = mask << 1;
+                loop = mask <= 0x100;
             }
         }
     }
