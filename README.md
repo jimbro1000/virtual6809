@@ -40,6 +40,7 @@ So far the instruction set is incomplete and only covers:
  * 8 and 16 bit SV (direct, extended)
  * JMP
  * ABX
+ * ADD (half carry is todo)  
  * NOP
  * 8 bit CMP (immediate, direct, extended)
  * INC and DEC

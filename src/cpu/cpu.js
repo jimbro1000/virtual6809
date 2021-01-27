@@ -50,6 +50,8 @@ class cpu {
         result["PUSH"] = cpus.PUSH;
         result["PULL"] = cpus.PULL;
         result["PUSHPC"] = cpus.PUSHPC;
+        result["ADDPCTOOB"] = cpus.ADDPCTOOB;
+        result["ADDTGBTOOB"] = cpus.ADDTGBTOOB;
         return result;
     }
 
@@ -73,6 +75,8 @@ class cpu {
         result[cpus.TFRTGTOOB] = this.transfer_target_to_object;
         result[cpus.BUSY] = this.busy_state;
         result[cpus.ADDTGTOOB] = this.add_target_to_object;
+        result[cpus.ADDPCTOOB] = this.add_pc_to_object;
+        result[cpus.ADDTGBTOOB] = this.add_target_byte_to_object;
         result[cpus.READLOWCOMPARE] = this.read_and_compare_low_byte;
         result[cpus.READADLOWCOMPARE] = this.read_ad_and_compare_low_byte;
         result[cpus.COMPAREW] = this.compare_w_with_word;
@@ -163,6 +167,18 @@ class cpu {
 
     add_target_to_object = () => {
         this.W.set(this.object.fetch() + this.target.fetch());
+    }
+
+    add_pc_to_object = () => {
+        const result = this.object.fetch() + this.fetchNextByte();
+        this.object.load(result);
+        this.CC.carry(result > 0xff);
+    }
+
+    add_target_byte_to_object = () => {
+        const result = this.object.fetch() + this.memory.read(this.target.fetch());
+        this.object.load(result);
+        this.CC.carry(result > 0xff);
     }
 
     fetch_next_instruction_from_PC = () => {

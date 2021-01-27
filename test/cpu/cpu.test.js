@@ -531,5 +531,43 @@ describe("6809 cpu", () => {
             expect(subject.registers.get("PC").fetch()).toBe(expected_address);
             expect(subject.registers.get("S").fetch()).toBe(stack_address - 2);
         });
+
+        each(
+            [
+                [0x0000,"A",[0x8b,0x55],0xaa,0xff,2],
+                [0x0000,"A",[0x8b,0x56],0xab,0x01,2],
+                [0x0000,"A",[0xbb,0x00,0x03,0xaa],0x55,0xff,5],
+                [0x0000,"B",[0xcb,0x55],0x23,0x78,2],
+                [0x0000,"B",[0xfb,0x00,0x03,0x80],0x08,0x88,5]
+            ]
+        ).
+        it("adds the referenced byte to the object register", (
+            pc_address, register, code, initial_value, expected_value, cycles
+        ) => {
+            loadMemory(pc_address, code);
+            subject.registers.get("PC").set(pc_address);
+            subject.registers.get(register).set(initial_value);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(expected_value);
+        });
+
+        each(
+            [
+                [0x0000,"A",[0x9b,0x02,0x55],0x00,0xaa,0xff,4],
+                [0x0000,"B",[0xdb,0x02,0x55],0x00,0xaa,0xff,4]
+            ]
+        ).
+        it("adds the referenced direct page byte to the object register", (
+            pc_address, register, code, dp_value, initial_value, expected_value, cycles
+        ) => {
+            loadMemory(pc_address, code);
+            subject.registers.get("PC").set(pc_address);
+            subject.registers.get(register).set(initial_value);
+            subject.registers.get("DP").set(dp_value);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(expected_value);
+        });
     });
 });
