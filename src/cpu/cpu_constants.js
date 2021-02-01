@@ -40,3 +40,5 @@ define("TFRTGTOOB", 24);
 define("PUSH", 25);
 define("PULL", 26);
 define("CUEPC", 27);
+define("ADDPCTOOB", 28); //add byte at pc address to object + increment pc
+define("ADDTGBTOOB", 29); //add byte at target address to object

@@ -277,6 +277,15 @@ instructions = {
             "READLOW"
         ]
     },
+    0x8b: {
+        "operation": "ADDA",
+        "mode": "immediate",
+        "object": "A",
+        "target": "PC",
+        "code": [
+            "ADDPCTOOB"
+        ]
+    },
     0x8c: {
         "operation": "CMPX",
         "mode": "immediate",
@@ -287,7 +296,7 @@ instructions = {
     },
     0x8d: {
         "operation": "JSR",
-        "mode": "direct",
+        "mode": "extended",
         "object": "PC",
         "code": [
             "READHIGH", "READWLOW", "PUSHPC", "TFRWTOOB", "BUSY", "BUSY", "BUSY"
@@ -318,6 +327,15 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "WRITELOW"
+        ]
+    },
+    0x9b: {
+        "operation": "ADDA",
+        "mode": "direct",
+        "object": "A",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "ADDTGBTOOB"
         ]
     },
     0x9c: {
@@ -382,6 +400,15 @@ instructions = {
             "READHIGH", "READWLOW", "TFRWTOTG", "WRITELOW"
         ]
     },
+    0xbb: {
+        "operation": "ADDA",
+        "mode": "extended",
+        "object": "A",
+        "target": "AD",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "ADDTGBTOOB"
+        ]
+    },
     0xbc: {
         "operation": "CMPX",
         "mode": "extended",
@@ -422,6 +449,14 @@ instructions = {
         "object": "B",
         "code": [
             "READLOW"
+        ]
+    },
+    0xcb: {
+        "operation": "ADDB",
+        "mode": "immediate",
+        "object": "B",
+        "code": [
+            "ADDPCTOOB"
         ]
     },
     0xcc: {
@@ -465,6 +500,15 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "WRITELOW"
+        ]
+    },
+    0xdb: {
+        "operation": "ADDB",
+        "mode": "direct",
+        "object": "B",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "ADDTGBTOOB"
         ]
     },
     0xdd: {
@@ -519,6 +563,15 @@ instructions = {
         "target": "AD",
         "code": [
             "READHIGH", "READWLOW", "TFRWTOTG", "WRITELOW"
+        ]
+    },
+    0xfb: {
+        "operation": "ADDB",
+        "mode": "extended",
+        "object": "B",
+        "target": "AD",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "ADDTGBTOOB"
         ]
     },
     0xfd: {
