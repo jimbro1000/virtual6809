@@ -1,11 +1,7 @@
 const cpus = require("../../src/cpu/cpu_constants");
 const Register = require("../../src/cpu/cpu_register");
 const Control_Register = require("../../src/cpu/control_register")
-// size in bits 8/16
-// name
-// set
-// read
-// side-effects
+const Wide_Register = require("../../src/cpu/wide_register");
 
 describe("register prototype", () => {
     it("requires a name and size plus the control register at construction", () => {
@@ -121,6 +117,27 @@ describe("register prototype", () => {
             sample.save();
             expect(cc.value & cpus.NEGATIVE).toBe(cpus.NEGATIVE);
         });
+    });
+});
+
+describe("d register", () => {
+    it("combines the A and B registers", () => {
+        const a = new Register.cpu_register(cpus.SHORT, "A", undefined);
+        const b = new Register.cpu_register(cpus.SHORT, "B", undefined);
+        a.load(0xaa);
+        b.load(0x55);
+        const d = new Wide_Register.wide_register("D", a, b);
+        expect(d.fetch()).toBe(0xaa55);
+    });
+
+    it("loads values actoss both registers", () => {
+        const a = new Register.cpu_register(cpus.SHORT, "A", undefined);
+        const b = new Register.cpu_register(cpus.SHORT, "B", undefined);
+        a.load(0x00);
+        b.load(0x00);
+        const d = new Wide_Register.wide_register("D", a, b);
+        d.load(0x55aa);
+        expect(d.fetch()).toBe(0x55aa);
     });
 });
 
