@@ -40,7 +40,7 @@ So far the instruction set is incomplete and only covers:
  * 8 and 16 bit SV (direct, extended)
  * JMP
  * ABX
- * ADD (half carry is todo)  
+ * ADD (using discrete ALU)
  * NOP
  * 8 bit CMP (immediate, direct, extended)
  * INC and DEC
@@ -48,7 +48,8 @@ So far the instruction set is incomplete and only covers:
  * JSR
 
 indexed/indirect addressing is not implemented  
-register D is not implemented
+register D is present but has few implemented operands
+ALU is partially implemented
 
 ## Video ##
 
