@@ -625,7 +625,7 @@ instructions = {
         "object": "D",
         "target": "AD",
         "code": [
-            "READHIGH", "READLOW", "TFRWTOTG", "WRITEHIGH", "WRITELOW"
+            "READHIGH", "READWLOW", "TFRWTOTG", "WRITEHIGH", "WRITELOW"
         ]
     },
     0xfe: {

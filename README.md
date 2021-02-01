@@ -37,7 +37,7 @@ hardware.
 
 So far the instruction set is incomplete and only covers:
  * 8 and 16 bit LD (immediate, direct, extended)
- * 8 and 16 bit SV (direct, extended)
+ * 8 and 16 bit ST (direct, extended)
  * JMP
  * ABX
  * ADD (using discrete ALU)
@@ -47,8 +47,7 @@ So far the instruction set is incomplete and only covers:
  * PSH and PUL
  * JSR
 
-indexed/indirect addressing is not implemented  
-register D is present but has few implemented operands
+indexed/indirect addressing is not implemented
 ALU is partially implemented
 
 ## Video ##
