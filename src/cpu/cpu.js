@@ -2,6 +2,7 @@ const {cpu_register} = require("../../src/cpu/cpu_register");
 const {register_manager} = require("../../src/cpu/register_manager");
 const cpus = require("../../src/cpu/cpu_constants");
 const {instructions} = require("../../src/cpu/instructions");
+const {alu} = require("../../src/alu/alu");
 
 class cpu {
     constructor(memory_manager) {
@@ -14,6 +15,7 @@ class cpu {
         this.W = this.registers.get("W");
         this.AD = this.registers.get("AD");
         this.CC = this.registers.get("CC");
+        this.alu1 = new alu(this.CC);
         this.operation = null;
         this.object = null;
         this.target = null;
@@ -170,15 +172,11 @@ class cpu {
     }
 
     add_pc_to_object = () => {
-        const result = this.object.fetch() + this.fetchNextByte();
-        this.object.load(result);
-        this.CC.carry(result > 0xff);
+        this.object.load(this.alu1.add8(this.object.fetch(), this.fetchNextByte()));
     }
 
     add_target_byte_to_object = () => {
-        const result = this.object.fetch() + this.memory.read(this.target.fetch());
-        this.object.load(result);
-        this.CC.carry(result > 0xff);
+        this.object.load(this.alu1.add8(this.object.fetch(), this.memory.read(this.target.fetch())));
     }
 
     fetch_next_instruction_from_PC = () => {

@@ -69,7 +69,7 @@ window.onload = () => {
     const memory = Memory.factory("D64");
 
     const message = "hello world".split("");
-    const videoAddress = 0x200;
+    const videoAddress = 0x400;
     let index = videoAddress;
     message.forEach( char => {
         memory.write(index++, char.charCodeAt(0));
