@@ -19,6 +19,14 @@ instructions = {
             "READHIGH", "READWLOW", "COMPAREW"
         ]
     },
+    0x108e: {
+        "operation": "LDY",
+        "mode": "immediate",
+        "object": "Y",
+        "code": [
+            "READHIGH", "READLOW"
+        ]
+    },
     0x109c: {
         "operation": "CMPY",
         "mode": "direct",
@@ -57,10 +65,11 @@ instructions = {
     },
     0x10be: {
         "operation": "LDY",
-        "mode": "immediate",
+        "mode": "extended",
         "object": "Y",
+        "target": "AD",
         "code": [
-            "READHIGH", "READLOW"
+            "READHIGH", "READWLOW", "TFRWTOTG", "READADHIGH", "READADLOW"
         ]
     },
     0x10bf: {
@@ -96,6 +105,15 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "WRITEHIGH", "WRITELOW"
+        ]
+    },
+    0x10fe: {
+        "operation": "LDS",
+        "mode": "extended",
+        "object": "S",
+        "target": "AD",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "READADHIGH", "READADLOW"
         ]
     },
     0x10ff: {
@@ -302,6 +320,14 @@ instructions = {
             "READHIGH", "READWLOW", "PUSHPC", "TFRWTOOB", "BUSY", "BUSY", "BUSY"
         ]
     },
+    0x8e: {
+        "operation": "LDX",
+        "mode": "immediate",
+        "object": "X",
+        "code": [
+            "READHIGH", "READLOW"
+        ]
+    },
     0x91: {
         "operation": "CMPA",
         "mode": "direct",
@@ -420,10 +446,11 @@ instructions = {
     },
     0xbe: {
         "operation": "LDX",
-        "mode": "immediate",
+        "mode": "extended",
         "object": "X",
+        "target": "AD",
         "code": [
-            "READHIGH", "READLOW"
+            "READHIGH", "READWLOW", "TFRWTOTG", "READADHIGH", "READADLOW"
         ]
     },
     0xbf: {
@@ -511,6 +538,15 @@ instructions = {
             "DIRECT", "TFRWTOTG", "ADDTGBTOOB"
         ]
     },
+    0xdc: {
+        "operation": "LDD",
+        "mode": "direct",
+        "object": "D",
+        "target": "AD",
+        "code": [
+            "DIRECT", "TFRWTOTG", "READADHIGH", "READADLOW"
+        ]
+    },
     0xdd: {
         "operation": "STD",
         "mode": "direct",
@@ -574,13 +610,31 @@ instructions = {
             "READHIGH", "READWLOW", "TFRWTOTG", "ADDTGBTOOB"
         ]
     },
+    0xfc: {
+        "operation": "LDD",
+        "mode": "extended",
+        "object": "D",
+        "target": "AD",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "READADHIGH", "READADLOW"
+        ]
+    },
     0xfd: {
         "operation": "STD",
         "mode": "extended",
         "object": "D",
         "target": "AD",
         "code": [
-            "READHIGH", "READLOW", "TFRWTOTG", "WRITEHIGH", "WRITELOW"
+            "READHIGH", "READWLOW", "TFRWTOTG", "WRITEHIGH", "WRITELOW"
+        ]
+    },
+    0xfe: {
+        "operation": "LDU",
+        "mode": "extended",
+        "object": "U",
+        "target": "AD",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "READADHIGH", "READADLOW"
         ]
     },
     0xff: {

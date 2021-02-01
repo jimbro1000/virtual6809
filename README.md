@@ -37,18 +37,18 @@ hardware.
 
 So far the instruction set is incomplete and only covers:
  * 8 and 16 bit LD (immediate, direct, extended)
- * 8 and 16 bit SV (direct, extended)
+ * 8 and 16 bit ST (direct, extended)
  * JMP
  * ABX
- * ADD (half carry is todo)  
+ * ADD (using discrete ALU)
  * NOP
  * 8 bit CMP (immediate, direct, extended)
  * INC and DEC
  * PSH and PUL
  * JSR
 
-indexed/indirect addressing is not implemented  
-register D is not implemented
+indexed/indirect addressing is not implemented
+ALU is partially implemented
 
 ## Video ##
 
