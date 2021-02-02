@@ -381,6 +381,15 @@ instructions = {
             "DIRECT", "TFRWTOTG", "READADLOWCOMPARE"
         ]
     },
+    0x92: {
+        "operation": "SBCA",
+        "mode": "direct",
+        "object": "A",
+        "target": "PC",
+        "code": [
+            "DIRECT", "TFRWTOTG", "SUBCTGFROMOB"
+        ]
+    },
     0x93: {
         "operation": "SUBD",
         "mode": "direct",
@@ -625,6 +634,15 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "READADLOWCOMPARE"
+        ]
+    },
+    0xd2: {
+        "operation": "SBCB",
+        "mode": "direct",
+        "object": "B",
+        "target": "PC",
+        "code": [
+            "DIRECT", "TFRWTOTG", "SUBCTGFROMOB"
         ]
     },
     0xd3: {

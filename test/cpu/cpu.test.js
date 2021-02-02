@@ -692,5 +692,24 @@ describe("6809 cpu", () => {
             expect(cycle_count).toBe(cycles);
             expect(subject.registers.get(register).fetch()).toBe(expected_value);
         });
+
+        each(
+            [
+                [0x0000,"A",[0x92,0x02,0x55],0x00,0xff,0xa9,true,4],
+                [0x0000,"B",[0xd2,0x02,0x56],0x00,0x01,0xaa,true,4]
+            ]
+        ).
+        it("subtracts the referenced direct page value from the object register", (
+            pc_address, register, code, dp_value, initial_value, expected_value, cf, cycles
+        ) => {
+            loadMemory(pc_address, code);
+            subject.registers.get("PC").set(pc_address);
+            subject.registers.get(register).set(initial_value);
+            subject.registers.get("DP").set(dp_value);
+            subject.registers.get("CC").carry(cf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(expected_value);
+        });
     });
 });
