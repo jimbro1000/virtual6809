@@ -41,4 +41,7 @@ define("PUSH", 25);
 define("PULL", 26);
 define("CUEPC", 27);
 define("ADDPCTOOB", 28); //add byte at pc address to object + increment pc
-define("ADDTGBTOOB", 29); //add byte at target address to object
+define("ADDTGBTOOB", 29); //add byte/word at target address to object
+define("SUBPCFROMOB", 30); //sub byte at pc address from object + increment pc
+define("SUBTGFROMOB", 31); //sub byte/word at target address from object
+define("SWAPWAD", 32); //swap internal registers

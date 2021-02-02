@@ -79,5 +79,46 @@ describe("Arithmetic Logic Unit", () => {
             subject.add16(s1,s2);
             expect(cc.save() & cpus.OVERFLOW).toBe(overflow);
         });
+
+        each([[0x01,0x02,0xff], [0xff,0x01,0xfe], [0x02,0x01,0x01]]).
+        it("subtracts two 8 bit registers for an 8 bit result", (s1, s2, expected) => {
+            const result = subject.sub8(s1,s2);
+            expect(result).toBe(expected);
+        });
+    });
+
+    describe("subtracts from two register", () => {
+        each([[0x01,0x02,0xff], [0xff,0x01,0xfe], [0x02,0x01,0x01]]).
+        it("subtracts two 8 bit registers for an 8 bit result", (s1, s2, expected) => {
+            const result = subject.sub8(s1,s2);
+            expect(result).toBe(expected);
+        });
+        each([[0x02,0x7f,cpus.NEGATIVE], [0x01,0xff,0]]).
+        it("sets negative flag if the resulting 8 bit msb is set", (s1,s2,negative) => {
+            subject.sub8(s1,s2);
+            expect(cc.save() & cpus.NEGATIVE).toBe(negative);
+        });
+        each([[0x01,0xff,cpus.CARRY], [0x7f,0x01,0]]).
+        it("sets carry flag if the result if a bit has to be borrowed", (s1,s2,carry) => {
+            subject.sub8(s1,s2);
+            expect(cc.save() & cpus.CARRY).toBe(carry);
+        });
+        each([[0x01,0x01,cpus.ZERO], [0x01,0x00,0]]).
+        it("sets zero flag if the result of the 8 bit subtraction is zero", (s1,s2,zero) => {
+            subject.sub8(s1,s2);
+            expect(cc.save() & cpus.ZERO).toBe(zero);
+        });
+        each([
+            [0x80,0x01,cpus.OVERFLOW],[0x00,0x80,cpus.OVERFLOW],[0xfe,0xff,0]
+        ]).
+        it("sets overflow if the sign of the result is not as expected", (s1,s2,overflow) => {
+            subject.sub8(s1,s2);
+            expect(cc.save() & cpus.OVERFLOW).toBe(overflow);
+        });
+        each([[0x00,0x00,1,0x01]]).
+        it("includes the value of the carry flag (as 1) if set", (s1,s2,c,expected) => {
+            result = subject.add8(s1,s2,c);
+            expect(result).toBe(expected);
+        });
     });
 });
