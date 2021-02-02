@@ -671,5 +671,26 @@ describe("6809 cpu", () => {
             expect(cycle_count).toBe(cycles);
             expect(subject.registers.get(register).fetch()).toBe(expected_value);
         });
+
+        each(
+            [
+                [0x0000,"A",[0x82,0x55],0xff,0xa9,true,2], //immediate
+                [0x0000,"B",[0xc2,0x56],0x01,0xaa,true,2], //immediate
+                [0x0000,"A",[0x82,0x55],0xff,0xaa,false,2], //immediate
+                [0x0000,"A",[0xb2,0x00,0x03,0x80],0x88,0x07,true,5], //extended
+                [0x0000,"B",[0xf2,0x00,0x03,0x80],0x88,0x07,true,5] //extended
+            ]
+        ).
+        it("subtracts the referenced byte and carry from the object register", (
+            pc_address, register, code, initial_value, expected_value, cf, cycles
+        ) => {
+            loadMemory(pc_address, code);
+            subject.registers.get("PC").set(pc_address);
+            subject.registers.get(register).set(initial_value);
+            subject.registers.get("CC").carry(cf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(expected_value);
+        });
     });
 });

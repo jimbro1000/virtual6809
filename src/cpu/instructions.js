@@ -304,6 +304,15 @@ instructions = {
             "READLOWCOMPARE"
         ]
     },
+    0x82: {
+        "operation": "SBCA",
+        "mode": "immediate",
+        "object": "A",
+        "target": "PC",
+        "code": [
+            "SUBCPCFROMOB"
+        ]
+    },
     0x83: {
         "operation": "SUBD",
         "mode": "immediate",
@@ -461,6 +470,15 @@ instructions = {
             "READHIGH", "READWLOW", "TFRWTOTG", "READADLOWCOMPARE"
         ]
     },
+    0xb2: {
+        "operation": "SBCA",
+        "mode": "extended",
+        "object": "A",
+        "target": "PC",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "SUBCTGFROMOB"
+        ]
+    },
     0xb3: {
         "operation": "SUBD",
         "mode": "extended",
@@ -539,6 +557,15 @@ instructions = {
         "object": "B",
         "code": [
             "READLOWCOMPARE"
+        ]
+    },
+    0xc2: {
+        "operation": "SBCB",
+        "mode": "immediate",
+        "object": "B",
+        "target": "PC",
+        "code": [
+            "SUBCPCFROMOB"
         ]
     },
     0xc3: {
@@ -688,6 +715,15 @@ instructions = {
         "target": "AD",
         "code": [
             "READHIGH", "READWLOW", "TFRWTOTG", "READADLOWCOMPARE"
+        ]
+    },
+    0xf2: {
+        "operation": "SBCB",
+        "mode": "extended",
+        "object": "B",
+        "target": "PC",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "SUBCTGFROMOB"
         ]
     },
     0xf3: {
