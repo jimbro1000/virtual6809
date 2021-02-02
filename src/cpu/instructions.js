@@ -187,6 +187,51 @@ instructions = {
             "BUSY"
         ]
     },
+    0x20: {
+        "operation": "BRA",
+        "object": "PC",
+        "target": "W",
+        "condition": "always",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
+    0x24: {
+        "operation": "BCC",
+        "object": "PC",
+        "target": "W",
+        "condition": "carryclear",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
+    0x25: {
+        "operation": "BCS",
+        "object": "PC",
+        "target": "W",
+        "condition": "carryset",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
+    0x27: {
+        "operation": "BEQ",
+        "object": "PC",
+        "target": "W",
+        "condition": "equal",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
+    0x2c: {
+        "operation": "BGE",
+        "object": "PC",
+        "target": "W",
+        "condition": "greaterorequal",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
     0x34: {
         "operation": "PSHS",
         "object": "S",

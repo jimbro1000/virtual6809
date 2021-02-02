@@ -51,3 +51,4 @@ define("SUBCPCFROMOB", 35); //sub byte at pc address from object with carry + in
 define("SUBCTGFROMOB", 36); //sub byte/word at target address from object with carry
 define("ADDCPCTOOB", 37); //add byte at pc address to object with carry + increment pc
 define("ADDCTGTOOB", 38); //add byte/word at target address to object with carry
+define("ADDTGSTOOBIF", 39); //add target signed value to object if condition met
