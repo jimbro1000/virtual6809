@@ -36,17 +36,18 @@ supporting hardware allowing for fine-tuning that was not possible with real
 hardware.
 
 So far the instruction set is incomplete and only covers:
- * 8 and 16 bit LD (immediate, direct, extended)
- * 8 and 16 bit ST (direct, extended)
+ * LD (immediate, direct, extended)
+ * ST (direct, extended)
  * JMP
  * ABX
  * ADD
- * SUB
+ * SUB and SBC
  * NOP
  * 8 bit CMP (immediate, direct, extended)
  * INC and DEC
  * PSH and PUL
  * JSR
+ * RTS
 
 indexed/indirect addressing is not implemented
 ALU is partially implemented (add, subtract, add with carry, subtract with carry)

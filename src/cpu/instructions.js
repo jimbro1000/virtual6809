@@ -304,6 +304,15 @@ instructions = {
             "READLOWCOMPARE"
         ]
     },
+    0x82: {
+        "operation": "SBCA",
+        "mode": "immediate",
+        "object": "A",
+        "target": "PC",
+        "code": [
+            "SUBCPCFROMOB"
+        ]
+    },
     0x83: {
         "operation": "SUBD",
         "mode": "immediate",
@@ -370,6 +379,15 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "READADLOWCOMPARE"
+        ]
+    },
+    0x92: {
+        "operation": "SBCA",
+        "mode": "direct",
+        "object": "A",
+        "target": "PC",
+        "code": [
+            "DIRECT", "TFRWTOTG", "SUBCTGFROMOB"
         ]
     },
     0x93: {
@@ -461,6 +479,15 @@ instructions = {
             "READHIGH", "READWLOW", "TFRWTOTG", "READADLOWCOMPARE"
         ]
     },
+    0xb2: {
+        "operation": "SBCA",
+        "mode": "extended",
+        "object": "A",
+        "target": "PC",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "SUBCTGFROMOB"
+        ]
+    },
     0xb3: {
         "operation": "SUBD",
         "mode": "extended",
@@ -541,6 +568,15 @@ instructions = {
             "READLOWCOMPARE"
         ]
     },
+    0xc2: {
+        "operation": "SBCB",
+        "mode": "immediate",
+        "object": "B",
+        "target": "PC",
+        "code": [
+            "SUBCPCFROMOB"
+        ]
+    },
     0xc3: {
         "operation": "ADDD",
         "mode": "immediate",
@@ -598,6 +634,15 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "READADLOWCOMPARE"
+        ]
+    },
+    0xd2: {
+        "operation": "SBCB",
+        "mode": "direct",
+        "object": "B",
+        "target": "PC",
+        "code": [
+            "DIRECT", "TFRWTOTG", "SUBCTGFROMOB"
         ]
     },
     0xd3: {
@@ -688,6 +733,15 @@ instructions = {
         "target": "AD",
         "code": [
             "READHIGH", "READWLOW", "TFRWTOTG", "READADLOWCOMPARE"
+        ]
+    },
+    0xf2: {
+        "operation": "SBCB",
+        "mode": "extended",
+        "object": "B",
+        "target": "PC",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "SUBCTGFROMOB"
         ]
     },
     0xf3: {

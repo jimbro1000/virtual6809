@@ -47,3 +47,5 @@ define("SUBTGFROMOB", 31); //sub byte/word at target address from object
 define("SWAPWAD", 32); //swap internal registers
 define("PUSHPC", 33);
 define("PULLPC", 34);
+define("SUBCPCFROMOB", 35); //sub byte at pc address from object with carry + increment pc
+define("SUBCTGFROMOB", 36); //sub byte/word at target address from object with carry

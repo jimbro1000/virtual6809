@@ -56,7 +56,9 @@ class cpu {
         result["ADDPCTOOB"] = cpus.ADDPCTOOB;
         result["ADDTGBTOOB"] = cpus.ADDTGBTOOB;
         result["SUBPCFROMOB"] = cpus.SUBPCFROMOB;
+        result["SUBCPCFROMOB"] = cpus.SUBCPCFROMOB;
         result["SUBTGFROMOB"] = cpus.SUBTGFROMOB;
+        result["SUBCTGFROMOB"] = cpus.SUBCTGFROMOB;
         result["SWAPWAD"] = cpus.SWAPWAD;
         return result;
     }
@@ -85,7 +87,9 @@ class cpu {
         result[cpus.ADDPCTOOB] = this.add_pc_to_object;
         result[cpus.ADDTGBTOOB] = this.add_target_byte_to_object;
         result[cpus.SUBPCFROMOB] = this.sub_pc_from_object;
+        result[cpus.SUBCPCFROMOB] = this.sub_pc_with_carry_from_object;
         result[cpus.SUBTGFROMOB] = this.sub_target_value_from_object;
+        result[cpus.SUBCTGFROMOB] = this.sub_target_value_with_carry_from_object;
         result[cpus.READLOWCOMPARE] = this.read_and_compare_low_byte;
         result[cpus.READADLOWCOMPARE] = this.read_ad_and_compare_low_byte;
         result[cpus.COMPAREW] = this.compare_w_with_word;
@@ -201,12 +205,26 @@ class cpu {
         this.object.load(this.alu1.sub8(this.object.fetch(), this.fetchNextByte()));
     }
 
+    sub_pc_with_carry_from_object = () => {
+        this.object.load(this.alu1.sub8(
+            this.object.fetch(), this.fetchNextByte(), (this.CC.save() & cpus.CARRY) === cpus.CARRY?1:0
+        ));
+    }
+
     sub_target_value_from_object = () => {
         if (this.object.size === cpus.SHORT) {
             this.object.load(this.alu1.sub8(this.object.fetch(), this.memory.read(this.target.fetch())));
         } else {
             this.object.load(this.alu1.sub16(this.object.fetch(), this.target.fetch()));
         }
+    }
+
+    sub_target_value_with_carry_from_object = () => {
+        this.object.load(this.alu1.sub8(
+            this.object.fetch(),
+            this.memory.read(this.target.fetch()),
+            (this.CC.save() & cpus.CARRY) === cpus.CARRY?1:0
+        ));
     }
 
     fetch_next_instruction_from_PC = () => {
