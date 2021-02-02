@@ -40,7 +40,7 @@ So far the instruction set is incomplete and only covers:
  * ST (direct, extended)
  * JMP
  * ABX
- * ADD
+ * ADD and ADC
  * SUB and SBC
  * NOP
  * 8 bit CMP (immediate, direct, extended)

@@ -330,6 +330,15 @@ instructions = {
             "READLOW"
         ]
     },
+    0x89: {
+        "operation": "ADCA",
+        "mode": "immediate",
+        "object": "A",
+        "target": "PC",
+        "code": [
+            "ADDCPCTOOB"
+        ]
+    },
     0x8b: {
         "operation": "ADDA",
         "mode": "immediate",
@@ -515,6 +524,15 @@ instructions = {
             "READHIGH", "READWLOW", "TFRWTOTG", "WRITELOW"
         ]
     },
+    0xb9: {
+        "operation": "ADCA",
+        "mode": "extended",
+        "object": "A",
+        "target": "PC",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "ADDCTGTOOB"
+        ]
+    },
     0xbb: {
         "operation": "ADDA",
         "mode": "extended",
@@ -592,6 +610,15 @@ instructions = {
         "object": "B",
         "code": [
             "READLOW"
+        ]
+    },
+    0xc9: {
+        "operation": "ADCB",
+        "mode": "immediate",
+        "object": "B",
+        "target": "PC",
+        "code": [
+            "ADDCPCTOOB"
         ]
     },
     0xcb: {
@@ -769,6 +796,15 @@ instructions = {
         "target": "AD",
         "code": [
             "READHIGH", "READWLOW", "TFRWTOTG", "WRITELOW"
+        ]
+    },
+    0xf9: {
+        "operation": "ADCB",
+        "mode": "extended",
+        "object": "B",
+        "target": "PC",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "ADDCTGTOOB"
         ]
     },
     0xfb: {
