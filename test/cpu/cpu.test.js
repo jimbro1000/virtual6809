@@ -557,6 +557,23 @@ describe("6809 cpu", () => {
             expect(subject.registers.get("S").fetch()).toBe(stack_address - 2);
         });
 
+        it("returns from subroutine", () => {
+            const pc_address = 0x0000;
+            const code = [0x39];
+            const stack = [0x00,0x80];
+            const stack_address = 0x3ffd;
+            const expected_address = 0x8000;
+            loadMemory(pc_address, code);
+            loadMemory(stack_address + 1, stack);
+            subject.registers.get("PC").set(pc_address);
+            subject.registers.get("S").set(stack_address);
+            const cycles = 5;
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected_address);
+            expect(subject.registers.get("S").fetch()).toBe(stack_address + 2);
+        });
+
         each(
             [
                 [0x0000,"A",[0x8b,0x55],0xaa,0xff,2],

@@ -52,6 +52,7 @@ class cpu {
         result["PUSH"] = cpus.PUSH;
         result["PULL"] = cpus.PULL;
         result["PUSHPC"] = cpus.PUSHPC;
+        result["PULLPC"] = cpus.PULLPC;
         result["ADDPCTOOB"] = cpus.ADDPCTOOB;
         result["ADDTGBTOOB"] = cpus.ADDTGBTOOB;
         result["SUBPCFROMOB"] = cpus.SUBPCFROMOB;
@@ -95,6 +96,7 @@ class cpu {
         result[cpus.PUSH] = this.push_reg_to_ad;
         result[cpus.PULL] = this.pull_reg_from_ad;
         result[cpus.PUSHPC] = this.push_pc_to_ad;
+        result[cpus.PULLPC] = this.pull_pc_from_ad;
         return result;
     }
 
@@ -426,6 +428,14 @@ class cpu {
         this.memory.write(address--, low_value);
         const high_value = value & 0xff;
         this.memory.write(address--, high_value);
+        this.registers.get("S").set(address);
+    }
+
+    pull_pc_from_ad = () => {
+        let address = this.registers.get("S").fetch();
+        const low_value = this.memory.read(++address);
+        const high_value = this.memory.read(++address) << 8;
+        this.PC.set(high_value | low_value);
         this.registers.get("S").set(address);
     }
 

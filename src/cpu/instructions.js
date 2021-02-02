@@ -227,6 +227,14 @@ instructions = {
             "ADDTGTOOB", "TFRWTOOB"
         ]
     },
+    0x39: {
+        "operation": "RTS",
+        "mode": "immediate",
+        "object": "S",
+        "code": [
+            "PULLPC", "BUSY", "BUSY", "BUSY"
+        ]
+    },
     0x4a: {
         "operation": "DECA",
         "object": "A",

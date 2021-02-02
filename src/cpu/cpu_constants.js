@@ -45,3 +45,5 @@ define("ADDTGBTOOB", 29); //add byte/word at target address to object
 define("SUBPCFROMOB", 30); //sub byte at pc address from object + increment pc
 define("SUBTGFROMOB", 31); //sub byte/word at target address from object
 define("SWAPWAD", 32); //swap internal registers
+define("PUSHPC", 33);
+define("PULLPC", 34);
