@@ -426,6 +426,15 @@ instructions = {
             "DIRECT", "TFRWTOTG", "WRITELOW"
         ]
     },
+    0x99: {
+        "operation": "ADCA",
+        "mode": "direct",
+        "object": "A",
+        "target": "PC",
+        "code": [
+            "DIRECT", "TFRWTOTG", "ADDCTGTOOB"
+        ]
+    },
     0x9b: {
         "operation": "ADDA",
         "mode": "direct",
@@ -697,6 +706,15 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "WRITELOW"
+        ]
+    },
+    0xd9: {
+        "operation": "ADCB",
+        "mode": "direct",
+        "object": "B",
+        "target": "PC",
+        "code": [
+            "DIRECT", "TFRWTOTG", "ADDCTGTOOB"
         ]
     },
     0xdb: {

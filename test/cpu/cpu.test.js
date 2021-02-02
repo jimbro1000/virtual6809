@@ -638,6 +638,25 @@ describe("6809 cpu", () => {
 
         each(
             [
+                [0x0000,"A",[0x99,0x02,0x55],0x00,0x01,0x57,true,4],
+                [0x0000,"B",[0xd9,0x02,0x56],0x00,0x01,0x58,true,4]
+            ]
+        ).
+        it("adds the referenced direct page value with the object register and carry", (
+            pc_address, register, code, dp_value, initial_value, expected_value, cf, cycles
+        ) => {
+            loadMemory(pc_address, code);
+            subject.registers.get("PC").set(pc_address);
+            subject.registers.get(register).set(initial_value);
+            subject.registers.get("DP").set(dp_value);
+            subject.registers.get("CC").carry(cf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(expected_value);
+        });
+
+        each(
+            [
                 [0x0000,"A",[0x80,0x55],0xff,0xaa,2],
                 [0x0000,"A",[0x80,0x56],0x01,0xab,2],
                 [0x0000,"A",[0xb0,0x00,0x03,0xaa],0xff,0x55,5],
