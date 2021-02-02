@@ -563,10 +563,12 @@ describe("6809 cpu", () => {
                 [0x0000,"A",[0x8b,0x56],0xab,0x01,2],
                 [0x0000,"A",[0xbb,0x00,0x03,0xaa],0x55,0xff,5],
                 [0x0000,"B",[0xcb,0x55],0x23,0x78,2],
-                [0x0000,"B",[0xfb,0x00,0x03,0x80],0x08,0x88,5]
+                [0x0000,"B",[0xfb,0x00,0x03,0x80],0x08,0x88,5],
+                [0x0000,"D",[0xc3,0xaa,0xaa],0x5500,0xffaa,4],
+                [0x0000,"D",[0xf3,0x00,0x03,0x80,0x08],0x0880,0x8888,7]
             ]
         ).
-        it("adds the referenced byte to the object register", (
+        it("adds the referenced value to the object register", (
             pc_address, register, code, initial_value, expected_value, cycles
         ) => {
             loadMemory(pc_address, code);
@@ -580,10 +582,68 @@ describe("6809 cpu", () => {
         each(
             [
                 [0x0000,"A",[0x9b,0x02,0x55],0x00,0xaa,0xff,4],
-                [0x0000,"B",[0xdb,0x02,0x55],0x00,0xaa,0xff,4]
+                [0x0000,"B",[0xdb,0x02,0x55],0x00,0xaa,0xff,4],
+                [0x0000,"D",[0xd3,0x02,0x55,0x55],0x00,0xaaaa,0xffff,6]
             ]
         ).
-        it("adds the referenced direct page byte to the object register", (
+        it("adds the referenced direct page value to the object register", (
+            pc_address, register, code, dp_value, initial_value, expected_value, cycles
+        ) => {
+            loadMemory(pc_address, code);
+            subject.registers.get("PC").set(pc_address);
+            subject.registers.get(register).set(initial_value);
+            subject.registers.get("DP").set(dp_value);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(expected_value);
+        });
+
+        each(
+            [
+                [0x0000,"A",[0x80,0x55],0xff,0xaa,2],
+                [0x0000,"A",[0x80,0x56],0x01,0xab,2],
+                [0x0000,"A",[0xb0,0x00,0x03,0xaa],0xff,0x55,5],
+                [0x0000,"B",[0xc0,0x55],0x78,0x23,2],
+                [0x0000,"B",[0xf0,0x00,0x03,0x80],0x88,0x08,5]
+            ]
+        ).
+        it("subtracts the referenced byte from the object register", (
+            pc_address, register, code, initial_value, expected_value, cycles
+        ) => {
+            loadMemory(pc_address, code);
+            subject.registers.get("PC").set(pc_address);
+            subject.registers.get(register).set(initial_value);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(expected_value);
+        });
+
+        each(
+            [
+                [0x0000,"D",[0x83,0x55,0x55],0xffff,0xaaaa,4], //immediate
+                [0x0000,"D",[0x83,0x56,0x57],0x0100,0xaaa9,4], //immediate
+                [0x0000,"D",[0xb3,0x00,0x03,0x80,0x08],0x8888,0x0880,7] //extended
+            ]
+        ).
+        it("subtracts the immediate word from the object register", (
+            pc_address, register, code, initial_value, expected_value, cycles
+        ) => {
+            loadMemory(pc_address, code);
+            subject.registers.get("PC").set(pc_address);
+            subject.registers.get(register).set(initial_value);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get(register).fetch()).toBe(expected_value);
+        });
+
+        each(
+            [
+                [0x0000,"A",[0x90,0x02,0x55],0x00,0xff,0xaa,4],
+                [0x0000,"B",[0xd0,0x02,0xaa],0x00,0xff,0x55,4],
+                [0x0000,"D",[0x93,0x02,0x55,0xaa],0x00,0xffff,0xaa55,6]
+            ]
+        ).
+        it("subtracts the referenced direct page value from the object register", (
             pc_address, register, code, dp_value, initial_value, expected_value, cycles
         ) => {
             loadMemory(pc_address, code);

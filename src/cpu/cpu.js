@@ -54,6 +54,9 @@ class cpu {
         result["PUSHPC"] = cpus.PUSHPC;
         result["ADDPCTOOB"] = cpus.ADDPCTOOB;
         result["ADDTGBTOOB"] = cpus.ADDTGBTOOB;
+        result["SUBPCFROMOB"] = cpus.SUBPCFROMOB;
+        result["SUBTGFROMOB"] = cpus.SUBTGFROMOB;
+        result["SWAPWAD"] = cpus.SWAPWAD;
         return result;
     }
 
@@ -71,6 +74,7 @@ class cpu {
         result[cpus.READADHIGH] = this.read_next_high_data_byte_from_AD;
         result[cpus.READADLOW] = this.read_next_low_data_byte_from_AD;
         result[cpus.READADWLOW] = this.read_next_low_data_byte_to_W_from_AD;
+        result[cpus.SWAPWAD] = this.swap_internal_registers;
         result[cpus.TFRWTOOB] = this.transfer_w_to_object;
         result[cpus.TFRWTOTG] = this.transfer_w_to_target;
         result[cpus.TFROBTOTG] = this.transfer_object_to_target;
@@ -79,6 +83,8 @@ class cpu {
         result[cpus.ADDTGTOOB] = this.add_target_to_object;
         result[cpus.ADDPCTOOB] = this.add_pc_to_object;
         result[cpus.ADDTGBTOOB] = this.add_target_byte_to_object;
+        result[cpus.SUBPCFROMOB] = this.sub_pc_from_object;
+        result[cpus.SUBTGFROMOB] = this.sub_target_value_from_object;
         result[cpus.READLOWCOMPARE] = this.read_and_compare_low_byte;
         result[cpus.READADLOWCOMPARE] = this.read_ad_and_compare_low_byte;
         result[cpus.COMPAREW] = this.compare_w_with_word;
@@ -167,6 +173,12 @@ class cpu {
         }
     }
 
+    swap_internal_registers = () => {
+        const temp = this.W.fetch();
+        this.W.set(this.AD.fetch());
+        this.AD.set(temp);
+    }
+
     add_target_to_object = () => {
         this.W.set(this.object.fetch() + this.target.fetch());
     }
@@ -176,7 +188,23 @@ class cpu {
     }
 
     add_target_byte_to_object = () => {
-        this.object.load(this.alu1.add8(this.object.fetch(), this.memory.read(this.target.fetch())));
+        if (this.object.size === cpus.SHORT) {
+            this.object.load(this.alu1.add8(this.object.fetch(), this.memory.read(this.target.fetch())));
+        } else {
+            this.object.load(this.alu1.add16(this.object.fetch(), this.target.fetch()));
+        }
+    }
+
+    sub_pc_from_object = () => {
+        this.object.load(this.alu1.sub8(this.object.fetch(), this.fetchNextByte()));
+    }
+
+    sub_target_value_from_object = () => {
+        if (this.object.size === cpus.SHORT) {
+            this.object.load(this.alu1.sub8(this.object.fetch(), this.memory.read(this.target.fetch())));
+        } else {
+            this.object.load(this.alu1.sub16(this.object.fetch(), this.target.fetch()));
+        }
     }
 
     fetch_next_instruction_from_PC = () => {
