@@ -49,3 +49,5 @@ define("PUSHPC", 33);
 define("PULLPC", 34);
 define("SUBCPCFROMOB", 35); //sub byte at pc address from object with carry + increment pc
 define("SUBCTGFROMOB", 36); //sub byte/word at target address from object with carry
+define("ADDCPCTOOB", 37); //add byte at pc address to object with carry + increment pc
+define("ADDCTGTOOB", 38); //add byte/word at target address to object with carry

@@ -330,6 +330,15 @@ instructions = {
             "READLOW"
         ]
     },
+    0x89: {
+        "operation": "ADCA",
+        "mode": "immediate",
+        "object": "A",
+        "target": "PC",
+        "code": [
+            "ADDCPCTOOB"
+        ]
+    },
     0x8b: {
         "operation": "ADDA",
         "mode": "immediate",
@@ -415,6 +424,15 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "WRITELOW"
+        ]
+    },
+    0x99: {
+        "operation": "ADCA",
+        "mode": "direct",
+        "object": "A",
+        "target": "PC",
+        "code": [
+            "DIRECT", "TFRWTOTG", "ADDCTGTOOB"
         ]
     },
     0x9b: {
@@ -515,6 +533,15 @@ instructions = {
             "READHIGH", "READWLOW", "TFRWTOTG", "WRITELOW"
         ]
     },
+    0xb9: {
+        "operation": "ADCA",
+        "mode": "extended",
+        "object": "A",
+        "target": "PC",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "ADDCTGTOOB"
+        ]
+    },
     0xbb: {
         "operation": "ADDA",
         "mode": "extended",
@@ -594,6 +621,15 @@ instructions = {
             "READLOW"
         ]
     },
+    0xc9: {
+        "operation": "ADCB",
+        "mode": "immediate",
+        "object": "B",
+        "target": "PC",
+        "code": [
+            "ADDCPCTOOB"
+        ]
+    },
     0xcb: {
         "operation": "ADDB",
         "mode": "immediate",
@@ -670,6 +706,15 @@ instructions = {
         "target": "AD",
         "code": [
             "DIRECT", "TFRWTOTG", "WRITELOW"
+        ]
+    },
+    0xd9: {
+        "operation": "ADCB",
+        "mode": "direct",
+        "object": "B",
+        "target": "PC",
+        "code": [
+            "DIRECT", "TFRWTOTG", "ADDCTGTOOB"
         ]
     },
     0xdb: {
@@ -769,6 +814,15 @@ instructions = {
         "target": "AD",
         "code": [
             "READHIGH", "READWLOW", "TFRWTOTG", "WRITELOW"
+        ]
+    },
+    0xf9: {
+        "operation": "ADCB",
+        "mode": "extended",
+        "object": "B",
+        "target": "PC",
+        "code": [
+            "READHIGH", "READWLOW", "TFRWTOTG", "ADDCTGTOOB"
         ]
     },
     0xfb: {
