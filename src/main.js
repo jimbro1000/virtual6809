@@ -1,4 +1,5 @@
 const Memory = require("./memory/memory_factory.js");
+const {cpu} = require("./cpu/cpu.js");
 const Font = require("./font.js").halfSet;
 
 const displayWidth = 640;
@@ -9,7 +10,8 @@ const zoom = 2;
 
 window.onload = () => {
     let vdgTranslate = (char, row) => {
-        return Font[char * 8 + row % 8];
+        const fontIndex = char * 8 + row % 8;
+        return Font[fontIndex];
     }
     let div = (a, b) => {
         return Math.floor(a / b);
@@ -37,7 +39,11 @@ window.onload = () => {
                     const memByte = memory.read(screenAddress);
                     const lookup = vdgTranslate(memByte, charRow);
                     const mask = 0x80 >> (screenX % 8);
-                    if (!(lookup & mask)) {
+                    if (!((lookup & mask) === mask)) {
+                        red = 0;
+                        green = 0;
+                        blue = 0;
+                    } else {
                         red = 255;
                         green = 255;
                         blue = 255;
@@ -67,9 +73,10 @@ window.onload = () => {
     let imageData = context.createImageData(width, height);
 
     const memory = Memory.factory("D64");
+    const machine = new cpu(memory);
 
-    const message = "hello world".split("");
-    const videoAddress = 0x200;
+    const message = "HeLlO wOrLd".split("");
+    const videoAddress = 0x400;
     let index = videoAddress;
     message.forEach( char => {
         memory.write(index++, char.charCodeAt(0));
