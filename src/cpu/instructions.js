@@ -1,4 +1,9 @@
 instructions = {
+    0x0: {
+        "operation": "neg",
+        "mode": "immediate",
+        "code": []
+    },
     0x0e: {
         "operation": "JMP",
         "mode": "direct",
@@ -410,7 +415,7 @@ instructions = {
         "mode": "extended",
         "object": "PC",
         "code": [
-            "READHIGH", "READLOW", "TFRWTOOB"
+            "READHIGH", "READWLOW", "TFRWTOOB"
         ]
     },
     0x80: {
