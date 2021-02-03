@@ -973,5 +973,27 @@ describe("6809 cpu", () => {
             expect(subject.registers.get("PC").fetch()).toBe(expected);
             expect(subject.registers.get("S").fetch()).toBe(stack - 2);
         });
+
+        each([
+            [0x0000,[0x16,0x10,0x00],0x1003,5], [0x0200,[0x16,0xfe,0xff],0x0102,5]
+        ]).
+        it("LBRA always branches by the given signed amount", (address,code,expected,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x21,0x10,0x00],0x0004,5], [0x0200,[0x10,0x21,0xfe,0xff],0x0204,5]
+        ]).
+        it("LBRN always branches by the given signed amount", (address,code,expected,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
     });
 });

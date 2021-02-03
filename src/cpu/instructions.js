@@ -16,6 +16,16 @@ instructions = {
         "operation": "extended instruction",
         "mode": "fetch"
     },
+    0x1021: {
+        "operation": "LBRN",
+        "mode": "relative",
+        "object": "PC",
+        "target": "W",
+        "condition": "never",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
     0x108c: {
         "operation": "CMPY",
         "mode": "immediate",
@@ -192,8 +202,19 @@ instructions = {
             "BUSY"
         ]
     },
+    0x16: {
+        "operation": "LBRA",
+        "mode": "relative",
+        "object": "PC",
+        "target": "W",
+        "condition": "always",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF", "BUSY"
+        ]
+    },
     0x20: {
         "operation": "BRA",
+        "mode": "relative",
         "object": "PC",
         "target": "W",
         "condition": "always",
