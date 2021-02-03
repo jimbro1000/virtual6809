@@ -50,9 +50,9 @@ So far the instruction set is incomplete and only covers:
  * RTS
  * short branch (excluding BSR)
 
-indexed/indirect addressing is not implemented
-ALU is partially implemented (add, subtract, add with carry, subtract with carry)
-condition logic contained in control register not ALU
+indexed/indirect addressing is not implemented  
+ALU is partially implemented (add, subtract, add with carry, subtract with carry)  
+condition logic contained in control register not ALU  
 
 ## Video ##
 
