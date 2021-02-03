@@ -56,6 +56,7 @@ class cpu {
         result["ADDPCTOOB"] = cpus.ADDPCTOOB;
         result["ADDCPCTOOB"] = cpus.ADDCPCTOOB;
         result["ADDTGBTOOB"] = cpus.ADDTGBTOOB;
+        result["ADDTGSTOOBIF"] = cpus.ADDTGSTOOBIF;
         result["ADDCTGTOOB"] = cpus.ADDCTGTOOB;
         result["SUBPCFROMOB"] = cpus.SUBPCFROMOB;
         result["SUBCPCFROMOB"] = cpus.SUBCPCFROMOB;
@@ -89,6 +90,7 @@ class cpu {
         result[cpus.ADDPCTOOB] = this.add_pc_to_object;
         result[cpus.ADDCPCTOOB] = this.add_pc_to_object_with_carry;
         result[cpus.ADDTGBTOOB] = this.add_target_byte_to_object;
+        result[cpus.ADDTGSTOOBIF] = this.add_target_signed_byte_value_to_object_if_condition_met;
         result[cpus.ADDCTGTOOB] = this.add_target_to_object_with_carry;
         result[cpus.SUBPCFROMOB] = this.sub_pc_from_object;
         result[cpus.SUBCPCFROMOB] = this.sub_pc_with_carry_from_object;
@@ -173,6 +175,7 @@ class cpu {
         this.AD.set(0);
         this.code = [cpus.NEXT];
         this.operation = 0;
+        this.condition = "";
     }
 
     cycle() {
@@ -209,6 +212,20 @@ class cpu {
         } else {
             this.object.load(this.alu1.add16(this.object.fetch(), this.target.fetch()));
         }
+    }
+
+    add_target_signed_byte_value_to_object_if_condition_met = () => {
+        if (this.CC.test(this.condition)) {
+            this.add_target_signed_byte_to_object();
+        }
+    }
+
+    add_target_signed_byte_to_object = () => {
+        let byte = this.target.fetch();
+        if (byte > 0x7f) {
+            byte = byte - 0x100;
+        }
+        this.object.set(this.object.fetch() + byte);
     }
 
     add_target_to_object_with_carry = () => {
@@ -261,6 +278,9 @@ class cpu {
             }
             if (typeof action.target !== 'undefined') {
                 this.target = this.registers.get(action.target);
+            }
+            if (typeof action.condition !== 'undefined') {
+                this.condition = action.condition;
             }
             this.populate_code_stack(action.code);
         }
@@ -494,15 +514,13 @@ class cpu {
 
     complement = (register, scale) => {
         let value = register.fetch();
+        let mask = 0xffff;
         if (scale === cpus.SHORT) {
-            value = value & 0xff;
-            value = this.xor(value, scale);
-            value += 1;
-        } else {
-            value = value & 0xffff
-            value = this.xor(value, scale);
-            value += 1;
+            mask = 0xff;
         }
+        value = value & mask;
+        value = this.xor(value, scale);
+        value += 1;
         register.set(value);
     }
 
