@@ -30,6 +30,12 @@ class manager {
             this.address_map[address].setMemory(address,byte);
         }
     }
+
+    burn = (address, byte) => {
+        if (this.address_map[address] !== undefined) {
+            this.address_map[address].burnMemory(address,byte);
+        }
+    }
 }
 
 module.exports = { manager }

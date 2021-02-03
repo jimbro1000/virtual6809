@@ -54,6 +54,8 @@ indexed/indirect addressing is not implemented
 ALU is partially implemented (add, subtract, add with carry, subtract with carry)  
 condition logic contained in control register not ALU  
 
+The processor bootstraps correctly using the vector stored at 0xfffe
+
 ## Video ##
 
 The VDG is not an emulation, it is an approximation of the original hardware to
@@ -64,6 +66,15 @@ not present.
 VDG timing is independent of the actual cpu clock so display artifacts will be
 radically different from the real components. The timing can be locked to the 
 cpu clock if desired.
+
+## Interaction ##
+
+The project includes a budo'd client side application that simulates the cpu
+running at approximately 1MHz
+
+The hardware emulation does NOT include input yet so this is purely a passive
+display, if the loaded program does not interact with video memory you will
+not see anything happening
 
 ## References ##
 [1] **6809 Assembly Language Programming**, 1981 by Lance A. Leventhal  

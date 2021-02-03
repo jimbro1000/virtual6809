@@ -68,10 +68,20 @@ describe("6809 cpu", () => {
         });
     });
 
+    describe("cpu bootstrap", () => {
+        it("initiates with loading a vector from $fffe", () => {
+            const subject = new cpu();
+            const code_stack = [cpus.TFRWTOOB,cpus.READWLOW,cpus.READHIGH];
+            expect(subject.PC.fetch()).toBe(0xfffe);
+            expect(subject.code).toEqual(code_stack);
+        });
+    });
+
     describe("cpu operation", () => {
         let subject;
         beforeEach(() => {
             subject = new cpu(factory("D64"));
+            subject.clearInstruction();
         });
 
         let loadMemory = (address, bytes) => {
@@ -274,7 +284,7 @@ describe("6809 cpu", () => {
             let cycle_count = run_to_next(subject);
             expect(cycle_count).toBe(2);
             expect(subject.registers.get("PC").fetch()).toBe(0x0001);
-            expect(subject.mode).toBe(cpus.NEXT);
+            // expect(subject.mode).toBe(cpus.NEXT);
         });
 
         it("process an extended jmp to reload the program counter", () => {
@@ -403,6 +413,7 @@ describe("6809 cpu", () => {
         "increments a byte in extended memory", (address, code, value, at_address, expected, cycles, cc_flags) => {
             loadMemory(address, code);
             subject.memory.write(at_address, value);
+            subject.registers.get("PC").set(address);
             let cycle_count = run_to_next(subject);
             expect(cycle_count).toBe(cycles);
             expect(subject.memory.read(at_address)).toBe(expected);
@@ -429,6 +440,7 @@ describe("6809 cpu", () => {
             "decrements a byte in extended memory", (address, code, value, at_address, expected, cycles, cc_flags) => {
             loadMemory(address, code);
             subject.memory.write(at_address, value);
+            subject.registers.get("PC").set(address);
             let cycle_count = run_to_next(subject);
             expect(cycle_count).toBe(cycles);
             expect(subject.memory.read(at_address)).toBe(expected);
@@ -444,6 +456,7 @@ describe("6809 cpu", () => {
             const result_address = 0x3ffa;
             subject.registers.get("A").set("0x40");
             subject.registers.get("B").set("0x80");
+            subject.registers.get("PC").set(address);
             loadMemory(address, code);
             subject.registers.get(register).set(at_address);
             const cycles = 10;
@@ -461,6 +474,7 @@ describe("6809 cpu", () => {
             const at_address = 0x3fff;
             const result_address = 0x3ffd;
             subject.registers.get("U").set("0x2fff");
+            subject.registers.get("PC").set(address);
             loadMemory(address, code);
             subject.registers.get(register).set(at_address);
             const cycles = 7;
@@ -516,6 +530,7 @@ describe("6809 cpu", () => {
             loadMemory(address, code);
             loadMemory(initial_address, stack_content);
             subject.registers.get(register).set(initial_address);
+            subject.registers.get("PC").set(address);
             const cycles = 10;
             const cycle_count = run_to_next(subject);
             expect(cycle_count).toBe(cycles);
