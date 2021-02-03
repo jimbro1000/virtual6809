@@ -196,6 +196,33 @@ instructions = {
             "READWLOW", "ADDTGSTOOBIF"
         ]
     },
+    0x21: {
+        "operation": "BRN",
+        "object": "PC",
+        "target": "W",
+        "condition": "never",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
+    0x22: {
+        "operation": "BHI",
+        "object": "PC",
+        "target": "W",
+        "condition": "higher",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
+    0x23: {
+        "operation": "BLS",
+        "object": "PC",
+        "target": "W",
+        "condition": "lowerorsame",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
     0x24: {
         "operation": "BCC",
         "object": "PC",
@@ -214,6 +241,15 @@ instructions = {
             "READWLOW", "ADDTGSTOOBIF"
         ]
     },
+    0x26: {
+        "operation": "BNE",
+        "object": "PC",
+        "target": "W",
+        "condition": "notequal",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
     0x27: {
         "operation": "BEQ",
         "object": "PC",
@@ -223,11 +259,56 @@ instructions = {
             "READWLOW", "ADDTGSTOOBIF"
         ]
     },
+    0x2a: {
+        "operation": "BPL",
+        "object": "PC",
+        "target": "W",
+        "condition": "positive",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
+    0x2b: {
+        "operation": "BMI",
+        "object": "PC",
+        "target": "W",
+        "condition": "negative",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
     0x2c: {
         "operation": "BGE",
         "object": "PC",
         "target": "W",
         "condition": "greaterorequal",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
+    0x2d: {
+        "operation": "BLT",
+        "object": "PC",
+        "target": "W",
+        "condition": "lessthan",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
+    0x2e: {
+        "operation": "BGT",
+        "object": "PC",
+        "target": "W",
+        "condition": "greaterthan",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
+    0x2f: {
+        "operation": "BLE",
+        "object": "PC",
+        "target": "W",
+        "condition": "lessorequal",
         "code": [
             "READWLOW", "ADDTGSTOOBIF"
         ]
