@@ -43,4 +43,16 @@ describe("memory chip abstract", () => {
         subject.setMemory(1024, 10);
         expect(subject.memory[1024]).toBe(0);
     });
+
+    it("can burn rom addresses when the memory is not writeable", () => {
+        const subject = new chip(chips.ROM, chips.K4);
+        subject.burnMemory(1024, 10);
+        expect(subject.memory[1024]).toBe(10);
+    });
+
+    it("cannot burn ram addresses when the memory *is* writeable", () => {
+        const subject = new chip(chips.RAM, chips.K4);
+        subject.burnMemory(1024, 10);
+        expect(subject.memory[1024]).toBe(0);
+    });
 });

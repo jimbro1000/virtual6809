@@ -30,5 +30,19 @@ describe("memory manager", () => {
         it("returns a zero byte if the address is unreadable", () => {
             expect(memory.read(0x8000)).toBe(0);
         });
+
+        it("writes to memory in range", () => {
+            const address = 0x1e10;
+            const value = 0x55;
+            memory.write(address, value);
+            expect(memory.read(address)).toBe(value);
+        });
+
+        it("cannot burn to RAM", () => {
+            const address = 0x1e10;
+            const value = 0x55;
+            memory.burn(address, value);
+            expect(memory.read(address)).not.toBe(value);
+        });
     });
 });

@@ -1,22 +1,19 @@
 const {manager} = require("../../src/memory/memory_manager");
 const {factory} = require("../../src/memory/memory_factory");
+const each = require("jest-each").default;
 
 describe("Memory hardware factory", () => {
-    it("accepts a shorthand machine name and returns a memory manager with hardware", () => {
-        const sample = "D64";
+    each([
+        ["D64",4,[32768,16384,8192,4096]],
+        ["D4",1,[4096]]
+    ]).
+    it("accepts a shorthand machine name and returns a memory manager with hardware",
+        (sample,blocks,sizes) => {
         const actual = factory(sample);
         expect(actual).toBeInstanceOf(manager);
-        expect(actual.hardware.length).toBe(4);
-        expect(actual.hardware[0].getSize()).toBe(32768);
-        expect(actual.hardware[0].base).toBe(0);
-        expect(actual.hardware[0].writeable).toBeTruthy();
-        expect(actual.hardware[0].readable).toBeTruthy();
-        expect(actual.hardware[1].getSize()).toBe(16384);
-        expect(actual.hardware[1].base).toBe(32768);
-        expect(actual.hardware[1].writeable).toBeFalsy();
-        expect(actual.hardware[1].readable).toBeTruthy();
-        expect(actual.hardware[2].getSize()).toBe(8192);
-        expect(actual.hardware[2].base).toBe(49152);
-        expect(actual.hardware[2].hardmapped).toBeTruthy();
+        expect(actual.hardware.length).toBe(blocks);
+        for (let index=0;index<blocks;++index) {
+            expect(actual.hardware[index].getSize()).toBe(sizes[index]);
+        }
     });
 });
