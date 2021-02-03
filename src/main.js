@@ -74,6 +74,21 @@ window.onload = () => {
 
     const memory = Memory.factory("D64");
     const machine = new cpu(memory);
+    const cycles_per_tick = 1000;
+    const tick = 1; //milliseconds
+
+    //set entry vector to 0x2000
+    memory.burn(0xfffe, 0x20);
+    //simple program cycle the thirty-second byte of video memory
+    memory.write(0x2000, 0xb6);
+    memory.write(0x2001, 0x04);
+    memory.write(0x2002, 0x20);
+    memory.write(0x2003, 0x4c);
+    memory.write(0x2004, 0xb7);
+    memory.write(0x2005, 0x04);
+    memory.write(0x2006, 0x20);
+    memory.write(0x2007, 0x20);
+    memory.write(0x2008, 0xf7);
 
     const message = "HeLlO wOrLd".split("");
     const videoAddress = 0x400;
@@ -88,5 +103,13 @@ window.onload = () => {
         context.putImageData(imageData, 0, 0);
     }
 
+    function runClock() {
+        let cycles = cycles_per_tick;
+        while(cycles-- > 0) {
+            machine.cycle();
+        }
+    }
+
     main(0);
+    let timer = setInterval(runClock, tick);
 }

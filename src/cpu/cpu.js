@@ -8,8 +8,6 @@ class cpu {
     constructor(memory_manager) {
         this.registers = new register_manager();
         this.memory = memory_manager;
-        this.mode = cpus.NEXT;
-        this.code = [cpus.NEXT];
         this.instructions = instructions;
         this.PC = this.registers.get("PC");
         this.W = this.registers.get("W");
@@ -17,11 +15,13 @@ class cpu {
         this.CC = this.registers.get("CC");
         this.alu1 = new alu(this.CC);
         this.operation = null;
-        this.object = null;
+        this.object = this.PC;
         this.target = null;
         this.codes = this.map_code_name_to_code();
         this.lambdas = this.map_code_to_lambda();
         this.stack_order = this.map_stack_order();
+        this.code = [cpus.TFRWTOOB,cpus.READWLOW,cpus.READHIGH];
+        this.PC.set(0xfffe);
     }
 
     map_code_name_to_code() {

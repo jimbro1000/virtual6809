@@ -8,7 +8,8 @@ let factory = (model) => {
         memory_def = [
             [new chip(chips.RAM, chips.K32), 0x0],
             [new chip(chips.ROM, chips.K16), 0x8000],
-            [new chip(chips.MAPPED, chips.K8), 0xc000]
+            [new chip(chips.MAPPED, chips.K8), 0xc000],
+            [new chip(chips.ROM, chips.K4), 0xf000]
         ];
     }
     else if (model === "D4") {
