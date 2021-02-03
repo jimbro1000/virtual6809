@@ -559,7 +559,7 @@ describe("6809 cpu", () => {
 
         it("jumps to subroutine at extended address", () => {
             const pc_address = 0x0000;
-            const code = [0x8d,0x06,0x20];
+            const code = [0xbd,0x06,0x20];
             const stack_address = 0x3fff;
             const expected_address = 0x0620;
             loadMemory(pc_address, code);
@@ -958,6 +958,20 @@ describe("6809 cpu", () => {
             const cycle_count = run_to_next(subject);
             expect(cycle_count).toBe(cycles);
             expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x8D,0x7f],0x4000,0x0081,7]
+        ]).
+        it("Always branches by the given signed amount AND pushes pc to stack",
+            (address,code,stack,expected,cycles) => {
+            loadMemory(address,code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("S").set(stack);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+            expect(subject.registers.get("S").fetch()).toBe(stack - 2);
         });
     });
 });

@@ -488,11 +488,13 @@ instructions = {
         ]
     },
     0x8d: {
-        "operation": "JSR",
-        "mode": "extended",
+        "operation": "BSR",
+        "mode": "immediate",
         "object": "PC",
+        "target": "W",
+        "condition": "always",
         "code": [
-            "READHIGH", "READWLOW", "PUSHPC", "TFRWTOOB", "BUSY", "BUSY", "BUSY"
+            "READWLOW", "PUSHPC", "ADDTGSTOOBIF", "BUSY", "BUSY", "BUSY"
         ]
     },
     0x8e: {
@@ -689,6 +691,14 @@ instructions = {
         "target": "AD",
         "code": [
             "READHIGH", "READWLOW", "TFRWTOTG", "READADHIGH", "READADWLOW", "COMPAREW"
+        ]
+    },
+    0xbd: {
+        "operation": "JSR",
+        "mode": "extended",
+        "object": "PC",
+        "code": [
+            "READHIGH", "READWLOW", "PUSHPC", "TFRWTOOB", "BUSY", "BUSY", "BUSY"
         ]
     },
     0xbe: {

@@ -6,7 +6,7 @@ describe("Memory hardware factory", () => {
         const sample = "D64";
         const actual = factory(sample);
         expect(actual).toBeInstanceOf(manager);
-        expect(actual.hardware.length).toBe(3);
+        expect(actual.hardware.length).toBe(4);
         expect(actual.hardware[0].getSize()).toBe(32768);
         expect(actual.hardware[0].base).toBe(0);
         expect(actual.hardware[0].writeable).toBeTruthy();
