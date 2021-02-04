@@ -18,6 +18,8 @@ class control_register extends Cpu_Register.cpu_register {
         result["lessthan"] = this.iflessthan;
         result["negative"] = this.ifnegative;
         result["positive"] = this.ifpositive;
+        result["overflow"] = this.ifoverflow;
+        result["notoverflow"] = this.ifnotoverflow;
         return result;
     }
 
@@ -105,6 +107,14 @@ class control_register extends Cpu_Register.cpu_register {
 
     ifpositive = () => {
         return !this.ifnegative();
+    }
+
+    ifoverflow = () => {
+        return (this.value & cpus.OVERFLOW) > 0;
+    }
+
+    ifnotoverflow = () => {
+        return !this.ifoverflow();
     }
 
     ifgreaterorequal = () => {

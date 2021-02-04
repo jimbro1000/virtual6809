@@ -57,6 +57,7 @@ class cpu {
         result["ADDCPCTOOB"] = cpus.ADDCPCTOOB;
         result["ADDTGBTOOB"] = cpus.ADDTGBTOOB;
         result["ADDTGSTOOBIF"] = cpus.ADDTGSTOOBIF;
+        result["ADDTGSWTOOBIF"] = cpus.ADDTGSWTOOBIF;
         result["ADDCTGTOOB"] = cpus.ADDCTGTOOB;
         result["SUBPCFROMOB"] = cpus.SUBPCFROMOB;
         result["SUBCPCFROMOB"] = cpus.SUBCPCFROMOB;
@@ -91,6 +92,7 @@ class cpu {
         result[cpus.ADDCPCTOOB] = this.add_pc_to_object_with_carry;
         result[cpus.ADDTGBTOOB] = this.add_target_byte_to_object;
         result[cpus.ADDTGSTOOBIF] = this.add_target_signed_byte_value_to_object_if_condition_met;
+        result[cpus.ADDTGSWTOOBIF] = this.add_target_signed_word_value_to_object_if_condition_met;
         result[cpus.ADDCTGTOOB] = this.add_target_to_object_with_carry;
         result[cpus.SUBPCFROMOB] = this.sub_pc_from_object;
         result[cpus.SUBCPCFROMOB] = this.sub_pc_with_carry_from_object;
@@ -220,12 +222,27 @@ class cpu {
         }
     }
 
+    add_target_signed_word_value_to_object_if_condition_met = () => {
+        if (this.CC.test(this.condition)) {
+            this.add_target_signed_word_to_object();
+            this.code.push(cpus.BUSY);
+        }
+    }
+
     add_target_signed_byte_to_object = () => {
         let byte = this.target.fetch();
         if (byte > 0x7f) {
             byte = byte - 0x100;
         }
         this.object.set(this.object.fetch() + byte);
+    }
+
+    add_target_signed_word_to_object = () => {
+        let word = this.target.fetch();
+        if (word > 0x7fff) {
+            word = word - 0x10000;
+        }
+        this.object.set(this.object.fetch() + word);
     }
 
     add_target_to_object_with_carry = () => {
@@ -267,7 +284,7 @@ class cpu {
         this.operation |= next_byte;
         const action = this.instructions[this.operation];
         if (typeof action === 'undefined') {
-            throw "illegal instruction " + next_byte;
+            throw "illegal instruction " + (this.operation + next_byte);
         }
         if (action.mode === "fetch") {
             this.operation = next_byte << 8;
