@@ -77,6 +77,43 @@ The hardware emulation does NOT include input yet so this is purely a passive
 display, if the loaded program does not interact with video memory you will
 not see anything happening
 
+## How to Build and Run ##
+
+The project is coded in Javascript using Node.js with budo. The unit tests are
+composed using Jest
+
+To "build" the project just copy the source or clone from github
+Run NPM install from the project folder
+
+The test suite can be started with `npm test`
+
+To "run" the project use `npm start`
+
+### Modifying the Hardware ###
+
+The default memory hardware is an approximation of the coco/dragon design with a
+32k lower RAM and the upper 32k a mix of ROM and mapped addresses (mapping goes
+nowhere yet).
+
+Changing `main.js` to alter the memory is simply a matter of changing these lines:
+```javascript
+    const memory = Memory.factory("D64");
+    const machine = new cpu(memory);
+```
+
+At the moment the memory factory only knows D64 and D4 but it is possible to assemble
+a custom model using the memory manager:
+```javascript
+    const memory = new manager([
+            [new chip(chips.RAM, chips.K32), 0x0000],
+            [new chip(chips.ROM, chips.K4), 0xf000]
+        ]);
+    const machine = new cpu(memory);
+```
+This would provide 4k of RAM at address 0 and a 4k ROM at 61440. Note it is advisable to 
+provide a ROM segment at high-end of memory to provision the interrupt vector table.
+Without some memory at this space the vector table will provide a 0 for all interrupts.
+
 ## References ##
 [1] **6809 Assembly Language Programming**, 1981 by Lance A. Leventhal  
 ISBN 0-931988-35-7
