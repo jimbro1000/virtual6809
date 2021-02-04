@@ -925,7 +925,7 @@ describe("6809 cpu", () => {
         each([
             [0x0000,[0x26,0x10],0x0012,false,3], [0x0020,[0x26,0xfe],0x0022,true,3]
         ]).
-        it("BNE branches by the given signed amount if zero is true",
+        it("BNE branches by the given signed amount if zero is false",
         (address,code,expected,zf,cycles) => {
             loadMemory(address, code);
             subject.registers.get("PC").set(address);
@@ -949,6 +949,32 @@ describe("6809 cpu", () => {
         });
 
         each([
+            [0x0000,[0x28,0x10],0x0012,false,3], [0x0020,[0x28,0xfe],0x0022,true,3]
+        ]).
+        it("BVC branches by the given signed amount if overflow is false",
+        (address,code,expected,vf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").overflow(vf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x29,0x10],0x0012,true,3], [0x0020,[0x29,0xfe],0x0022,false,3]
+        ]).
+        it("BVS branches by the given signed amount if overflow is false",
+        (address,code,expected,vf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").overflow(vf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
             [0x0000,[0x21,0x10],0x0002,3]
         ]).
         it("BRN never branches by the given signed amount",
@@ -963,7 +989,7 @@ describe("6809 cpu", () => {
         each([
             [0x0000,[0x8D,0x7f],0x4000,0x0081,7]
         ]).
-        it("Always branches by the given signed amount AND pushes pc to stack",
+        it("BSR Always branches by the given signed amount AND pushes pc to stack",
             (address,code,stack,expected,cycles) => {
             loadMemory(address,code);
             subject.registers.get("PC").set(address);
@@ -994,6 +1020,229 @@ describe("6809 cpu", () => {
             const cycle_count = run_to_next(subject);
             expect(cycle_count).toBe(cycles);
             expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x24,0x00,0x10],0x0014,false,6], [0x0020,[0x10,0x24,0xff,0xfd],0x0024,true,5]
+        ]).
+        it("LBCC branches by the given signed word if carry flag is clear and takes an extra cycle",
+        (address,code,expected,cf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").carry(cf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x25,0x00,0x10],0x0014,true,6], [0x0020,[0x10,0x25,0xff,0xfd],0x0024,false,5]
+        ]).
+        it("LBCS branches by the given signed word if carry flag is clear and takes an extra cycle",
+        (address,code,expected,cf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").carry(cf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x27,0x00,0x10],0x0014,true,6], [0x0020,[0x10,0x27,0xff,0xfe],0x0024,false,5],
+            [0x0020,[0x10,0x27,0xff,0xfc],0x0020,true,6]
+        ]).
+        it("LBEQ branches by the given signed word if zero flag is set and takes an extra cycle",
+        (address,code,expected,zf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").zero(zf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x2c,0x00,0x12],0x0004,true,false,5], [0x0020,[0x10,0x2c,0xff,0xfc],0x0024,false,true,5],
+            [0x0020,[0x10,0x2c,0xff,0xfc],0x0020,true,true,6], [0x0000,[0x10,0x2c,0x00,0x10],0x0014,false,false,6]
+        ]).
+        it("LBGE branches by the given signed amount if negative eor overflow is false",
+        (address,code,expected,nf,vf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").negative(nf);
+            subject.registers.get("CC").overflow(vf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x2e,0x00,0x10],0x0014,true,false,false,6],
+            [0x0020,[0x10,0x2e,0xff,0xfc],0x0020,false,true,false,6],
+            [0x0020,[0x10,0x2e,0xff,0xfe],0x0024,false,true,true,5]
+        ]).
+        it("LBGT branches by the given signed amount if negative eor overflow is true AND zero is false",
+        (address,code,expected,nf,vf,zf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").negative(nf);
+            subject.registers.get("CC").overflow(vf);
+            subject.registers.get("CC").zero(zf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x22,0x00,0x10],0x0014,false,false,6],
+            [0x0020,[0x10,0x22,0xff,0xfe],0x0024,true,false,5],
+            [0x0020,[0x10,0x22,0xff,0xfe],0x0024,false,true,5]
+        ]).
+        it("LBHI branches by the given signed amount if zero and carry are both false",
+        (address,code,expected,cf,zf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").carry(cf);
+            subject.registers.get("CC").zero(zf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x2f,0x00,0x10],0x0014,true,false,true,6],
+            [0x0020,[0x10,0x2f,0xff,0xfc],0x0020,false,true,true,6],
+            [0x0020,[0x10,0x2f,0xff,0xfe],0x0024,false,true,false,5]
+        ]).
+        it("LBLE branches by the given signed amount if negative eor overflow is true AND zero is true",
+        (address,code,expected,nf,vf,zf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").negative(nf);
+            subject.registers.get("CC").overflow(vf);
+            subject.registers.get("CC").zero(zf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x23,0x00,0x10],0x0014,false,true,6],
+            [0x0020,[0x10,0x23,0xff,0xfc],0x0020,true,false,6],
+            [0x0020,[0x10,0x23,0xff,0xfc],0x0024,false,false,5],
+            [0x0020,[0x10,0x23,0xff,0xfc],0x0020,true,true,6]
+        ]).
+        it("LBLS branches by the given signed amount if zero or carry are true",
+        (address,code,expected,cf,zf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").carry(cf);
+            subject.registers.get("CC").zero(zf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x2d,0x00,0x10],0x0014,true,false,6],
+            [0x0020,[0x10,0x2d,0xff,0xfc],0x0020,false,true,6],
+            [0x0020,[0x10,0x2d,0xff,0xfc],0x0024,true,true,5],
+            [0x0000,[0x10,0x2d,0x00,0x10],0x0004,false,false,5]
+        ]).
+        it("LBLT branches by the given signed amount if negative eor overflow is true",
+        (address,code,expected,nf,vf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").negative(nf);
+            subject.registers.get("CC").overflow(vf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x2b,0x00,0x10],0x0014,true,6],
+            [0x0020,[0x10,0x2b,0xff,0xfe],0x0024,false,5]
+        ]).
+        it("LBMI branches by the given signed amount if negative is true",
+        (address,code,expected,nf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").negative(nf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x26,0x01,0x10],0x0114,false,6],
+            [0x0020,[0x10,0x26,0xff,0xfe],0x0024,true,5]
+        ]).
+        it("LBNE branches by the given signed amount if zero is false",
+        (address,code,expected,zf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").zero(zf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x2a,0x01,0x10],0x0114,false,6],
+            [0x0020,[0x10,0x2a,0xff,0xfe],0x0024,true,5]
+        ]).
+        it("LBPL branches by the given signed amount if negative is false",
+        (address,code,expected,nf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").negative(nf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x28,0x01,0x10],0x0114,false,6],
+            [0x0020,[0x10,0x28,0xff,0xfe],0x0024,true,5]
+        ]).
+        it("LBVC branches by the given signed word if overflow is false",
+        (address,code,expected,vf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").overflow(vf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x10,0x29,0x01,0x10],0x0114,true,6],
+            [0x0020,[0x10,0x29,0xff,0xfe],0x0024,false,5]
+        ]).
+        it("LBVS branches by the given signed word if overflow is false",
+        (address,code,expected,vf,cycles) => {
+            loadMemory(address, code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("CC").overflow(vf);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+        });
+
+        each([
+            [0x0000,[0x17,0x01,0x7f],0x4000,0x0182,9]
+        ]).
+        it("LBSR Always branches by the given signed word AND pushes pc to stack",
+        (address,code,stack,expected,cycles) => {
+            loadMemory(address,code);
+            subject.registers.get("PC").set(address);
+            subject.registers.get("S").set(stack);
+            const cycle_count = run_to_next(subject);
+            expect(cycle_count).toBe(cycles);
+            expect(subject.registers.get("PC").fetch()).toBe(expected);
+            expect(subject.registers.get("S").fetch()).toBe(stack - 2);
         });
     });
 });

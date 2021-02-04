@@ -26,6 +26,132 @@ instructions = {
             "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
         ]
     },
+    0x1022: {
+        "operation": "LBHI",
+        "object": "PC",
+        "target": "W",
+        "condition": "higher",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
+    0x1023: {
+        "operation": "LBLS",
+        "object": "PC",
+        "target": "W",
+        "condition": "lowerorsame",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
+    0x1024: {
+        "operation": "LBCC",
+        "object": "PC",
+        "target": "W",
+        "condition": "carryclear",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
+    0x1025: {
+        "operation": "LBCS",
+        "object": "PC",
+        "target": "W",
+        "condition": "carryset",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
+    0x1026: {
+        "operation": "LBNE",
+        "object": "PC",
+        "target": "W",
+        "condition": "notequal",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
+    0x1027: {
+        "operation": "LBEQ",
+        "object": "PC",
+        "target": "W",
+        "condition": "equal",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
+    0x1028: {
+        "operation": "LBVC",
+        "object": "PC",
+        "target": "W",
+        "condition": "notoverflow",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
+    0x1029: {
+        "operation": "LBVS",
+        "object": "PC",
+        "target": "W",
+        "condition": "overflow",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
+    0x102a: {
+        "operation": "LBPL",
+        "object": "PC",
+        "target": "W",
+        "condition": "positive",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
+    0x102b: {
+        "operation": "LBMI",
+        "object": "PC",
+        "target": "W",
+        "condition": "negative",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
+    0x102c: {
+        "operation": "LBGE",
+        "object": "PC",
+        "target": "W",
+        "condition": "greaterorequal",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
+    0x102d: {
+        "operation": "LBLT",
+        "object": "PC",
+        "target": "W",
+        "condition": "lessthan",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
+    0x102e: {
+        "operation": "LBGT",
+        "object": "PC",
+        "target": "W",
+        "condition": "greaterthan",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
+    0x102f: {
+        "operation": "LBLE",
+        "object": "PC",
+        "target": "W",
+        "condition": "lessorequal",
+        "code": [
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
     0x108c: {
         "operation": "CMPY",
         "mode": "immediate",
@@ -209,7 +335,17 @@ instructions = {
         "target": "W",
         "condition": "always",
         "code": [
-            "READHIGH", "READWLOW", "ADDTGSWTOOBIF", "BUSY"
+            "READHIGH", "READWLOW", "ADDTGSWTOOBIF"
+        ]
+    },
+    0x17: {
+        "operation": "LBSR",
+        "mode": "relative",
+        "object": "PC",
+        "target": "W",
+        "condition": "always",
+        "code": [
+            "READHIGH", "READWLOW", "PUSHPC", "ADDTGSWTOOBIF", "BUSY", "BUSY", "BUSY"
         ]
     },
     0x20: {
@@ -281,6 +417,24 @@ instructions = {
         "object": "PC",
         "target": "W",
         "condition": "equal",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
+    0x28: {
+        "operation": "BVC",
+        "object": "PC",
+        "target": "W",
+        "condition": "notoverflow",
+        "code": [
+            "READWLOW", "ADDTGSTOOBIF"
+        ]
+    },
+    0x29: {
+        "operation": "BVS",
+        "object": "PC",
+        "target": "W",
+        "condition": "overflow",
         "code": [
             "READWLOW", "ADDTGSTOOBIF"
         ]

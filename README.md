@@ -48,7 +48,8 @@ So far the instruction set is incomplete and only covers:
  * PSH and PUL
  * JSR
  * RTS
- * short branch (excluding BSR)
+ * short branch
+ * long branch
 
 indexed/indirect addressing is not implemented  
 ALU is partially implemented (add, subtract, add with carry, subtract with carry)  
@@ -84,3 +85,6 @@ ISBN 0-931988-35-7
 
 [3] **[Motorola MC6809-MC6809E 8-Bit Microprocessor Programming Manual](
 https://www.maddes.net/m6809pm/sections.htm)**
+
+[4] **[Paul Burgin's 6809 Instructions Crib Sheet](
+https://techheap.packetizer.com/processors/6809/6809Instructions.html)**

@@ -225,6 +225,7 @@ class cpu {
     add_target_signed_word_value_to_object_if_condition_met = () => {
         if (this.CC.test(this.condition)) {
             this.add_target_signed_word_to_object();
+            this.code.push(cpus.BUSY);
         }
     }
 
@@ -283,7 +284,7 @@ class cpu {
         this.operation |= next_byte;
         const action = this.instructions[this.operation];
         if (typeof action === 'undefined') {
-            throw "illegal instruction " + next_byte;
+            throw "illegal instruction " + (this.operation + next_byte);
         }
         if (action.mode === "fetch") {
             this.operation = next_byte << 8;
