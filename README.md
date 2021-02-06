@@ -114,6 +114,16 @@ This would provide 4k of RAM at address 0 and a 4k ROM at 61440. Note it is advi
 provide a ROM segment at high-end of memory to provision the interrupt vector table.
 Without some memory at this space the vector table will provide a 0 for all interrupts.
 
+The composition of the memory (thanks to the vector table and mapped hardware) can be 
+messy, but the memory mapping is on a first-come-first-served basis. If you specify an 
+area of 256 bytes of mapped memory at 0xff00 and then 32kb of ram at 0x8000 the mapped
+memory will take precedence at the high addresses. If you do this the other way around
+it will be ram and not mapped.
+
+The maximum expected memory model is 2Mb (the equivalent of using a 6829 MMU to provide
+20 address lines) but paging is not implemented so in effect it will still only be 64k
+of addressable memory.
+
 ## References ##
 [1] **6809 Assembly Language Programming**, 1981 by Lance A. Leventhal  
 ISBN 0-931988-35-7

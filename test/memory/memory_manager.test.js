@@ -37,12 +37,5 @@ describe("memory manager", () => {
             memory.write(address, value);
             expect(memory.read(address)).toBe(value);
         });
-
-        it("cannot burn to RAM", () => {
-            const address = 0x1e10;
-            const value = 0x55;
-            memory.burn(address, value);
-            expect(memory.read(address)).not.toBe(value);
-        });
     });
 });

@@ -50,9 +50,9 @@ describe("memory chip abstract", () => {
         expect(subject.memory[1024]).toBe(10);
     });
 
-    it("cannot burn ram addresses when the memory *is* writeable", () => {
+    it("can burn ram addresses when the memory *is* writeable", () => {
         const subject = new chip(chips.RAM, chips.K4);
         subject.burnMemory(1024, 10);
-        expect(subject.memory[1024]).toBe(0);
+        expect(subject.memory[1024]).toBe(10);
     });
 });

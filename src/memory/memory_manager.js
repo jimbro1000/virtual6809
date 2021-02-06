@@ -10,9 +10,7 @@ class manager {
             const size = chip.getSize();
             for(let index=0;index<size;++index) {
                 const address = base + index;
-                if (this.address_map[address] === undefined) {
                     this.address_map[address] = chip;
-                }
             }
         });
     }

@@ -72,7 +72,7 @@ window.onload = () => {
     const height = canvas.height;
     let imageData = context.createImageData(width, height);
 
-    const memory = Memory.factory("D64");
+    const memory = Memory.factory("A64");
     const machine = new cpu(memory);
     const cycles_per_tick = 1000;
     const tick = 1; //milliseconds

@@ -11,7 +11,7 @@ class chip {
             this.writeable = false;
             this.hardmapped = false;
         } else if (chip_type === chips.MAPPED) {
-            this.readable = false;
+            this.readable = true;
             this.writeable = true;
             this.hardmapped = true;
         }
@@ -53,14 +53,12 @@ class chip {
     }
 
     burnMemory = (address, byte) => {
-        if (!this.writeable) {
-            const value = byte & 0xff;
-            const effective_address = address - this.base;
-            if (effective_address < 0 || effective_address >= this.size) {
-                throw new EvalError("address out of range");
-            }
-            this.memory[effective_address] = value;
+        const value = byte & 0xff;
+        const effective_address = address - this.base;
+        if (effective_address < 0 || effective_address >= this.size) {
+            throw new EvalError("address out of range");
         }
+        this.memory[effective_address] = value;
     }
 
     getReadable = () => {
