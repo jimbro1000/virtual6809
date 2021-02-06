@@ -88,6 +88,14 @@ class Alu {
       }
       return result;
     }
+
+    this.eor = (reg1, value) => {
+      const result = reg1 ^ value;
+      this.cc.negative((result & 0x80) !== 0);
+      this.cc.overflow(false);
+      this.cc.zero(result === 0);
+      return result;
+    }
   }
 }
 

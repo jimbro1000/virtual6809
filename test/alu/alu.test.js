@@ -231,4 +231,19 @@ describe('Arithmetic Logic Unit', () => {
           expect(cc.value).toBe(0);
         });
   });
+
+  describe('Bitwise EOR', () => {
+    each(
+        [
+            [0x55, 0xaa, 0xff, cpus.NEGATIVE],
+            [0x55, 0x55, 0x00, cpus.ZERO]
+        ]
+    ).it(
+        'Exclusive-ORs two values bitwise and sets NZV',
+        (s1, s2, expected, flags) => {
+          const result = subject.eor(s1, s2);
+          expect(result).toBe(expected);
+          expect(cc.value).toBe(flags);
+        });
+  });
 });

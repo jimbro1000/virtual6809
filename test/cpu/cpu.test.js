@@ -1474,5 +1474,51 @@ describe('6809 cpu', () => {
           expect(cycleCount).toBe(cycles);
           expect(subject.CC.value).toBe(expected);
         });
+
+    each([
+      [0x0000, [0x9a, 0x02, 0xaa], 'A', 0x00, 0xa5, 0xaf, 4],
+      [0x0000, [0xda, 0x02, 0x55], 'B', 0x00, 0xaa, 0xff, 4],
+    ]).it(
+        'ORs a register and a direct page referenced value bitwise',
+        (address, code, register, dp, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get(register).set(initial);
+          subject.registers.get('PC').set(address);
+          subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each([
+      [0x0000, [0x88, 0xaa], 'A', 0x0a, 0xa0, 2],
+      [0x0000, [0xb8, 0x00, 0x03, 0x55], 'A', 0xaa, 0xff, 5],
+      [0x0000, [0xc8, 0x55], 'B', 0xaa, 0xff, 2],
+      [0x0000, [0xf8, 0x00, 0x03, 0xaa], 'B', 0xa5, 0x0f, 5],
+    ]).it(
+        'EORs a register and a value bitwise',
+        (address, code, register, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get(register).set(initial);
+          subject.registers.get('PC').set(address);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each([
+      [0x0000, [0x98, 0x02, 0xaa], 'A', 0x00, 0xa5, 0x0f, 4],
+      [0x0000, [0xd8, 0x02, 0x55], 'B', 0x00, 0xa5, 0xf0, 4],
+    ]).it(
+        'EORs a register and a direct page referenced value bitwise',
+        (address, code, register, dp, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get(register).set(initial);
+          subject.registers.get('PC').set(address);
+          subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
   });
 });

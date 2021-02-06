@@ -57,3 +57,4 @@ define('READAND', 41);
 define('ANDCC', 42);
 define('READOR', 43);
 define('ORCC', 44);
+define('READEOR', 45);

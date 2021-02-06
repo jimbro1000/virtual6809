@@ -80,6 +80,7 @@ class Cpu {
     result['ANDCC'] = cpus.ANDCC;
     result['READOR'] = cpus.READOR;
     result['ORCC'] = cpus.ORCC;
+    result['READEOR'] = cpus.READEOR;
     return result;
   }
 
@@ -135,6 +136,7 @@ class Cpu {
     result[cpus.ANDCC] = this.and_control;
     result[cpus.READOR] = this.or_target_read;
     result[cpus.ORCC] = this.or_control;
+    result[cpus.READEOR] = this.eor_target_read;
     return result;
   }
 
@@ -536,6 +538,15 @@ class Cpu {
 
   or_ob = () => {
     this.object.set(this.alu1.or(this.object.fetch(), this.W.fetch()));
+  }
+
+  eor_target_read = () => {
+    if (this.target.name === 'PC') {
+      this.read_next_low_data_byte_to_W_from_PC();
+    } else {
+      this.read_next_low_data_byte_to_W_from_AD();
+    }
+    this.object.set(this.alu1.eor(this.object.fetch(), this.W.fetch()));
   }
 
   select_register = (stackMask) => {
