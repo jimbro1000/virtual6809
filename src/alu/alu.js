@@ -57,4 +57,4 @@ class alu {
     }
 }
 
-module.exports = { alu }
+module.exports = { Alu: alu }
