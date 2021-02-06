@@ -42,6 +42,7 @@ So far the instruction set is incomplete and only covers:
  * ABX
  * ADD and ADC
  * SUB and SBC
+ * AND 
  * NOP
  * 8 bit CMP (immediate, direct, extended)
  * INC and DEC
@@ -52,7 +53,7 @@ So far the instruction set is incomplete and only covers:
  * long branch
 
 indexed/indirect addressing is not implemented  
-ALU is partially implemented (add, subtract, add with carry, subtract with carry)  
+ALU is partially implemented (add, subtract, add with carry, subtract with carry, and)  
 condition logic contained in control register not ALU  
 
 The processor bootstraps correctly using the vector stored at 0xfffe

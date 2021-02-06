@@ -29,7 +29,7 @@ describe('6809 cpu', () => {
         const value = 100;
         const register = subject.registers.get('A');
         subject.subject_register = register;
-        subject.set_register_literal(register, value);
+        subject.setRegisterLiteral(register, value);
         expect(register.fetch()).toBe(value);
       });
 
@@ -41,7 +41,7 @@ describe('6809 cpu', () => {
             const register = subject.registers.get('X');
             register.set(initial);
             subject.subject_register = register;
-            subject.set_register_literal_low(register, value);
+            subject.setRegisterLiteralLow(register, value);
             expect(register.fetch()).toBe(expected);
           });
 
@@ -53,7 +53,7 @@ describe('6809 cpu', () => {
             const register = subject.registers.get('X');
             register.set(initial);
             subject.subject_register = register;
-            subject.set_register_literal_high(register, value);
+            subject.setRegisterLiteralHigh(register, value);
             expect(register.fetch()).toBe(expected);
           });
 
@@ -62,7 +62,7 @@ describe('6809 cpu', () => {
           () => {
             const register = subject.registers.get('A');
             register.set(0);
-            subject.set_register_literal('A', 20);
+            subject.setRegisterLiteral('A', 20);
             expect(subject.registers.get('A').fetch()).toBe(20);
           });
 
@@ -71,7 +71,7 @@ describe('6809 cpu', () => {
           () => {
             const register = subject.registers.get('X');
             register.set(65535);
-            subject.set_register_literal_low('X', 0x55);
+            subject.setRegisterLiteralLow('X', 0x55);
             expect(subject.registers.get('X').fetch()).toBe(0xff55);
           });
 
@@ -80,7 +80,7 @@ describe('6809 cpu', () => {
           () => {
             const register = subject.registers.get('X');
             register.set(65535);
-            subject.set_register_literal_high('X', 0x55);
+            subject.setRegisterLiteralHigh('X', 0x55);
             expect(subject.registers.get('X').fetch()).toBe(0x55ff);
           });
     });
@@ -1400,6 +1400,50 @@ describe('6809 cpu', () => {
           expect(cycleCount).toBe(cycles);
           expect(subject.registers.get('PC').fetch()).toBe(expected);
           expect(subject.registers.get('S').fetch()).toBe(stack - 2);
+        });
+
+    each([
+      [0x0000, [0x84, 0xaa], 'A', 0xff, 0xaa, 2],
+      [0x0000, [0xb4, 0x00, 0x03, 0x55], 'A', 0xaa, 0x00, 5],
+      [0x0000, [0xc4, 0x55], 'B', 0xaa, 0x00, 2],
+      [0x0000, [0xf4, 0x00, 0x03, 0x55], 'B', 0xff, 0x55, 5],
+    ]).it(
+        'ANDs a register and a value bitwise',
+        (address, code, register, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get(register).set(initial);
+          subject.registers.get('PC').set(address);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each([
+      [0x0000, [0x1c, 0x55], 'CC', 0xaa, 0x00, 3],
+    ]).it(
+        'ANDs the CC register and a value bitwise',
+        (address, code, register, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get(register).value = initial;
+          subject.registers.get('PC').set(address);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each([
+      [0x0000, [0x94, 0x02, 0xaa], 'A', 0x00, 0xff, 0xaa, 4],
+      [0x0000, [0xd4, 0x02, 0x55], 'B', 0x00, 0xaa, 0x00, 4],
+    ]).it(
+        'ANDs a register and a direct page referenced value bitwise',
+        (address, code, register, dp, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get(register).set(initial);
+          subject.registers.get('PC').set(address);
+          subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
         });
   });
 });

@@ -4,6 +4,7 @@ const cpus = require('../../src/cpu/cpu_constants');
 const {instructions} = require('../../src/cpu/instructions');
 const {Alu} = require('../../src/alu/alu');
 
+// eslint-disable-next-line valid-jsdoc
 /** @class Cpu representing a 6809 central processor */
 class Cpu {
   /**
@@ -24,15 +25,19 @@ class Cpu {
     this.operation = null;
     this.object = this.PC;
     this.target = null;
-    this.codes = this.map_code_name_to_code();
-    this.lambdas = this.map_code_to_lambda();
-    this.stack_order = this.map_stack_order();
+    this.codes = this.mapCodeNameToCode();
+    this.lambdas = this.mapCodeToLambda();
+    this.stack_order = this.mapStackOrder();
     this.code = [cpus.TFRWTOOB, cpus.READWLOW, cpus.READHIGH];
     this.PC.set(0xfffe);
   }
 
-  map_code_name_to_code() {
-    let result = {};
+  /**
+   * Create map of string microcodes to cpu constants
+   * @return {{}} map
+   */
+  mapCodeNameToCode() {
+    const result = {};
     result['DIRECT'] = cpus.DIRECT;
     result['READHIGH'] = cpus.READHIGH;
     result['READLOW'] = cpus.READLOW;
@@ -71,11 +76,17 @@ class Cpu {
     result['SUBTGFROMOB'] = cpus.SUBTGFROMOB;
     result['SUBCTGFROMOB'] = cpus.SUBCTGFROMOB;
     result['SWAPWAD'] = cpus.SWAPWAD;
+    result['READAND'] = cpus.READAND;
+    result['ANDCC'] = cpus.ANDCC;
     return result;
   }
 
-  map_code_to_lambda() {
-    let result = {};
+  /**
+   * Create map of cpu microcodes to cpu lambdas
+   * @return {{}} map
+   */
+  mapCodeToLambda() {
+    const result = {};
     result[cpus.NEXT] = this.fetch_next_instruction_from_PC;
     result[cpus.FETCH] = this.fetch_next_instruction_from_PC;
     result[cpus.DIRECT] = this.build_direct_page_address_in_W;
@@ -98,8 +109,10 @@ class Cpu {
     result[cpus.ADDPCTOOB] = this.add_pc_to_object;
     result[cpus.ADDCPCTOOB] = this.add_pc_to_object_with_carry;
     result[cpus.ADDTGBTOOB] = this.add_target_byte_to_object;
-    result[cpus.ADDTGSTOOBIF] = this.add_target_signed_byte_value_to_object_if_condition_met;
-    result[cpus.ADDTGSWTOOBIF] = this.add_target_signed_word_value_to_object_if_condition_met;
+    result[cpus.ADDTGSTOOBIF] =
+        this.add_target_signed_byte_value_to_object_if_condition_met;
+    result[cpus.ADDTGSWTOOBIF] =
+        this.add_target_signed_word_value_to_object_if_condition_met;
     result[cpus.ADDCTGTOOB] = this.add_target_to_object_with_carry;
     result[cpus.SUBPCFROMOB] = this.sub_pc_from_object;
     result[cpus.SUBCPCFROMOB] = this.sub_pc_with_carry_from_object;
@@ -116,11 +129,17 @@ class Cpu {
     result[cpus.PULL] = this.pull_reg_from_ad;
     result[cpus.PUSHPC] = this.push_pc_to_ad;
     result[cpus.PULLPC] = this.pull_pc_from_ad;
+    result[cpus.READAND] = this.and_target_read;
+    result[cpus.ANDCC] = this.and_control;
     return result;
   }
 
-  map_stack_order() {
-    let result = [];
+  /**
+   * Create ordered list of cpus in stackable order
+   * @return {[]} stacking list
+   */
+  mapStackOrder() {
+    const result = [];
     result[0x80] = 'PC';
     result[0x40] = 'US';
     result[0x20] = 'Y';
@@ -132,44 +151,68 @@ class Cpu {
     return result;
   };
 
-  populate_code_stack(instruction_code) {
+  /**
+   * Populate the execution stack with micro-codes.
+   * translates string codes to cpu codes
+   * @param {[]} instructionCode list
+   */
+  populateCodeStack(instructionCode) {
     this.code = [];
-    for (let index = 0; index < instruction_code.length; index++) {
-      this.code.unshift(this.codes[instruction_code[index]]);
+    for (let index = 0; index < instructionCode.length; index++) {
+      this.code.unshift(this.codes[instructionCode[index]]);
     }
   }
 
-  set_register_literal(register, literal_value) {
+  /**
+   * populate the named register
+   * @param {string|CpuRegister} register
+   * @param {number} literalValue
+   */
+  setRegisterLiteral(register, literalValue) {
     if (typeof register === 'string') {
       register = this.registers.get(register);
     }
     if (register instanceof CpuRegister) {
-      register.load(literal_value);
+      register.load(literalValue);
     }
   }
 
-  set_register_literal_low(register, literal_value) {
+  /**
+   * populate the low byte of the named register
+   * @param {string|CpuRegister} register
+   * @param {number} literalValue
+   */
+  setRegisterLiteralLow(register, literalValue) {
     if (typeof register === 'string') {
       register = this.registers.get(register);
     }
     if (register instanceof CpuRegister && register.size === cpus.LONG) {
-      let partial = register.fetch() & 0xff00;
-      let result = partial | literal_value;
+      const partial = register.fetch() & 0xff00;
+      const result = partial | literalValue;
       register.load(result);
     }
   }
 
-  set_register_literal_high(register, literal_value) {
+  /**
+   * populate the high byte of the named register
+   * @param {string|CpuRegister} register
+   * @param {number} literalValue
+   */
+  setRegisterLiteralHigh(register, literalValue) {
     if (typeof register === 'string') {
       register = this.registers.get(register);
     }
     if (register instanceof CpuRegister && register.size === cpus.LONG) {
-      let partial = register.fetch() & 0x00ff;
-      let result = partial | (literal_value << 8);
+      const partial = register.fetch() & 0x00ff;
+      const result = partial | (literalValue << 8);
       register.load(result);
     }
   }
 
+  /**
+   * fetch next byte from pc address and advance.
+   * @return {number}
+   */
   fetchNextByte() {
     let address = this.PC.fetch();
     const value = this.memory.read(address++);
@@ -177,6 +220,9 @@ class Cpu {
     return value;
   }
 
+  /**
+   * reset temporary registers for next instruction.
+   */
   clearInstruction() {
     this.object = null;
     this.target = null;
@@ -187,6 +233,9 @@ class Cpu {
     this.condition = '';
   }
 
+  /**
+   * perform a single cpu clock cycle.
+   */
   cycle() {
     const lambda = this.lambdas[this.code.pop()];
     lambda();
@@ -206,7 +255,8 @@ class Cpu {
   };
 
   add_pc_to_object = () => {
-    this.object.load(this.alu1.add8(this.object.fetch(), this.fetchNextByte()));
+    this.object.load(
+        this.alu1.add8(this.object.fetch(), this.fetchNextByte()));
   };
 
   add_pc_to_object_with_carry = () => {
@@ -264,7 +314,8 @@ class Cpu {
   };
 
   sub_pc_from_object = () => {
-    this.object.load(this.alu1.sub8(this.object.fetch(), this.fetchNextByte()));
+    this.object.load(
+        this.alu1.sub8(this.object.fetch(), this.fetchNextByte()));
   };
 
   sub_pc_with_carry_from_object = () => {
@@ -293,14 +344,15 @@ class Cpu {
   };
 
   fetch_next_instruction_from_PC = () => {
-    const next_byte = this.fetchNextByte();
-    this.operation |= next_byte;
+    const nextByte = this.fetchNextByte();
+    this.operation |= nextByte;
     const action = this.instructions[this.operation];
     if (typeof action === 'undefined') {
-      throw 'illegal instruction ' + (this.operation + next_byte);
+      // eslint-disable-next-line no-throw-literal
+      throw 'illegal instruction ' + this.operation;
     }
     if (action.mode === 'fetch') {
-      this.operation = next_byte << 8;
+      this.operation = nextByte << 8;
       this.code = [cpus.FETCH];
     } else {
       if (typeof action.object !== 'undefined') {
@@ -312,7 +364,7 @@ class Cpu {
       if (typeof action.condition !== 'undefined') {
         this.condition = action.condition;
       }
-      this.populate_code_stack(action.code);
+      this.populateCodeStack(action.code);
     }
   };
 
@@ -335,7 +387,8 @@ class Cpu {
   };
 
   build_direct_page_address_in_W = () => {
-    this.W.set((this.registers.get('DP').fetch() << 8) | this.fetchNextByte());
+    this.W.set(
+        (this.registers.get('DP').fetch() << 8) | this.fetchNextByte());
   };
 
   read_next_high_data_byte_from_PC = () => {
@@ -348,8 +401,8 @@ class Cpu {
 
   read_next_high_data_byte_from_AD = () => {
     let AD = this.AD.fetch();
-    const next_byte = this.memory.read(AD++);
-    this.W.set(next_byte << 8);
+    const nextByte = this.memory.read(AD++);
+    this.W.set(nextByte << 8);
     this.AD.set(AD);
   };
 
@@ -380,7 +433,7 @@ class Cpu {
   };
 
   busy_state = () => {
-    //do nothing
+    // do nothing
   };
 
   read_and_compare_low_byte = () => {
@@ -437,8 +490,35 @@ class Cpu {
     this.dec(this.W);
   };
 
-  select_register = (stack_mask) => {
-    let register = this.stack_order[stack_mask];
+  dec = (register) => {
+    const o = register.fetch() & 0xff;
+    const temp = o - 1;
+    register.set(temp);
+    const w = register.fetch();
+    this.CC.zero(w === 0);
+    this.CC.negative((w & 0x80) !== 0);
+    this.CC.overflow(w !== temp);
+  };
+
+  and_target_read = () => {
+    if (this.target.name === 'PC') {
+      this.read_next_low_data_byte_to_W_from_PC();
+    } else {
+      this.read_next_low_data_byte_to_W_from_AD();
+    }
+    this.and_ob();
+  };
+
+  and_control = () => {
+    this.CC.value = this.alu1.and(this.CC.value, this.W.fetch(), false);
+  };
+
+  and_ob = () => {
+    this.object.set(this.alu1.and(this.object.fetch(), this.W.fetch()));
+  };
+
+  select_register = (stackMask) => {
+    let register = this.stack_order[stackMask];
     if (register === 'US') {
       if (this.object.name === 'U') {
         register = 'S';
@@ -461,13 +541,13 @@ class Cpu {
         }
         const register = this.select_register(mask);
         let address = this.target.fetch();
-        const next_entry = this.registers.get(register);
-        const low_value = next_entry.fetch() & 0xff;
-        this.memory.write(address--, low_value);
-        if (next_entry.size === cpus.LONG) {
+        const nextEntry = this.registers.get(register);
+        const lowValue = nextEntry.fetch() & 0xff;
+        this.memory.write(address--, lowValue);
+        if (nextEntry.size === cpus.LONG) {
           this.code.unshift(this.codes['BUSY']);
-          const high_value = (next_entry.fetch() & 0xff00) >> 8;
-          this.memory.write(address--, high_value);
+          const highValue = (nextEntry.fetch() & 0xff00) >> 8;
+          this.memory.write(address--, highValue);
         }
         this.target.set(address);
         loop = false;
@@ -490,14 +570,14 @@ class Cpu {
         }
         const register = this.select_register(mask);
         let address = this.target.fetch();
-        const next_entry = this.registers.get(register);
-        let pulled_value = 0;
-        if (next_entry.size === cpus.LONG) {
+        const nextEntry = this.registers.get(register);
+        let pulledValue = 0;
+        if (nextEntry.size === cpus.LONG) {
           this.code.unshift(this.codes['BUSY']);
-          pulled_value += this.memory.read(address++) << 8;
+          pulledValue += this.memory.read(address++) << 8;
         }
-        pulled_value += this.memory.read(address++);
-        next_entry.set(pulled_value);
+        pulledValue += this.memory.read(address++);
+        nextEntry.set(pulledValue);
         this.target.set(address);
         loop = false;
       } else {
@@ -510,29 +590,19 @@ class Cpu {
   push_pc_to_ad = () => {
     let address = this.registers.get('S').fetch();
     const value = this.PC.fetch();
-    const low_value = (value & 0xff00) >> 8;
-    this.memory.write(address--, low_value);
-    const high_value = value & 0xff;
-    this.memory.write(address--, high_value);
+    const lowValue = (value & 0xff00) >> 8;
+    this.memory.write(address--, lowValue);
+    const highValue = value & 0xff;
+    this.memory.write(address--, highValue);
     this.registers.get('S').set(address);
   };
 
   pull_pc_from_ad = () => {
     let address = this.registers.get('S').fetch();
-    const low_value = this.memory.read(++address);
-    const high_value = this.memory.read(++address) << 8;
-    this.PC.set(high_value | low_value);
+    const lowValue = this.memory.read(++address);
+    const highValue = this.memory.read(++address) << 8;
+    this.PC.set(highValue | lowValue);
     this.registers.get('S').set(address);
-  };
-
-  dec = (register) => {
-    const o = register.fetch() & 0xff;
-    const temp = o - 1;
-    register.set(temp);
-    const w = register.fetch();
-    this.CC.zero(w === 0);
-    this.CC.negative((w & 0x80) !== 0);
-    this.CC.overflow(w !== temp);
   };
 
   check_cc = (initial, complement, object, sum, masked) => {

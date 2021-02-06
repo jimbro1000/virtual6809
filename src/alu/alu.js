@@ -66,6 +66,17 @@ class Alu {
       this.cc.overflow(((signMask & (reg1 ^ masked)) & 0x8000) !== 0);
       return masked;
     };
+
+    this.and = (reg1, value, test) => {
+      if (test === undefined) test = true;
+      const result = reg1 & value;
+      if (test) {
+        this.cc.negative((result & 0x80) !== 0);
+        this.cc.overflow(false);
+        this.cc.zero(result === 0);
+      }
+      return result;
+    };
   }
 }
 
