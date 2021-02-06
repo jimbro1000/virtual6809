@@ -1419,16 +1419,16 @@ describe('6809 cpu', () => {
         });
 
     each([
-      [0x0000, [0x1c, 0x55], 'CC', 0xaa, 0x00, 3],
+      [0x0000, [0x1c, 0x55], 0xaa, 0x00, 3],
     ]).it(
         'ANDs the CC register and a value bitwise',
-        (address, code, register, initial, expected, cycles) => {
+        (address, code, initial, expected, cycles) => {
           loadMemory(address, code);
-          subject.registers.get(register).value = initial;
+          subject.CC.value = initial;
           subject.registers.get('PC').set(address);
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
-          expect(subject.registers.get(register).fetch()).toBe(expected);
+          expect(subject.CC.value).toBe(expected);
         });
 
     each([
@@ -1444,6 +1444,35 @@ describe('6809 cpu', () => {
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
           expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each([
+      [0x0000, [0x8a, 0xaa], 'A', 0x00, 0xaa, 2],
+      [0x0000, [0xba, 0x00, 0x03, 0x55], 'A', 0xaa, 0xff, 5],
+      [0x0000, [0xca, 0x55], 'B', 0xaa, 0xff, 2],
+      [0x0000, [0xfa, 0x00, 0x03, 0x05], 'B', 0xa0, 0xa5, 5],
+    ]).it(
+        'ORs a register and a value bitwise',
+        (address, code, register, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get(register).set(initial);
+          subject.registers.get('PC').set(address);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each([
+      [0x0000, [0x1a, 0x55], 0xaa, 0xff, 3],
+    ]).it(
+        'ORs the CC register and a value bitwise',
+        (address, code, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.CC.value = initial;
+          subject.registers.get('PC').set(address);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.CC.value).toBe(expected);
         });
   });
 });

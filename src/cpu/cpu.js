@@ -78,6 +78,8 @@ class Cpu {
     result['SWAPWAD'] = cpus.SWAPWAD;
     result['READAND'] = cpus.READAND;
     result['ANDCC'] = cpus.ANDCC;
+    result['READOR'] = cpus.READOR;
+    result['ORCC'] = cpus.ORCC;
     return result;
   }
 
@@ -131,6 +133,8 @@ class Cpu {
     result[cpus.PULLPC] = this.pull_pc_from_ad;
     result[cpus.READAND] = this.and_target_read;
     result[cpus.ANDCC] = this.and_control;
+    result[cpus.READOR] = this.or_target_read;
+    result[cpus.ORCC] = this.or_control;
     return result;
   }
 
@@ -516,6 +520,23 @@ class Cpu {
   and_ob = () => {
     this.object.set(this.alu1.and(this.object.fetch(), this.W.fetch()));
   };
+
+  or_target_read = () => {
+    if (this.target.name === 'PC') {
+      this.read_next_low_data_byte_to_W_from_PC();
+    } else {
+      this.read_next_low_data_byte_to_W_from_AD();
+    }
+    this.or_ob();
+  };
+
+  or_control = () => {
+    this.CC.value = this.alu1.or(this.CC.value, this.W.fetch(), false);
+  }
+
+  or_ob = () => {
+    this.object.set(this.alu1.or(this.object.fetch(), this.W.fetch()));
+  }
 
   select_register = (stackMask) => {
     let register = this.stack_order[stackMask];

@@ -351,10 +351,20 @@ instructions = {
       'READHIGH', 'READWLOW', 'PUSHPC', 'ADDTGSWTOOBIF', 'BUSY', 'BUSY', 'BUSY',
     ],
   },
+  0x1a: {
+    'operation': 'ORCC',
+    'mode': 'immediate',
+    'object': 'CC',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'ORCC',
+    ],
+  },
   0x1c: {
     'operation': 'ANDCC',
     'mode': 'immediate',
     'object': 'CC',
+    'target': 'AD',
     'code': [
       'READWLOW', 'ANDCC',
     ],
@@ -665,6 +675,15 @@ instructions = {
       'ADDCPCTOOB',
     ],
   },
+  0x8a: {
+    'operation': 'ORA',
+    'mode': 'immediate',
+    'object': 'A',
+    'target': 'PC',
+    'code': [
+      'READOR',
+    ],
+  },
   0x8b: {
     'operation': 'ADDA',
     'mode': 'immediate',
@@ -893,6 +912,15 @@ instructions = {
       'READHIGH', 'READWLOW', 'TFRWTOTG', 'ADDCTGTOOB',
     ],
   },
+  0xba: {
+    'operation': 'ORA',
+    'mode': 'extended',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'READHIGH', 'READWLOW', 'TFRWTOTG', 'READOR',
+    ],
+  },
   0xbb: {
     'operation': 'ADDA',
     'mode': 'extended',
@@ -997,6 +1025,15 @@ instructions = {
     'target': 'PC',
     'code': [
       'ADDCPCTOOB',
+    ],
+  },
+  0xca: {
+    'operation': 'OR',
+    'mode': 'immediate',
+    'object': 'B',
+    'target': 'PC',
+    'code': [
+      'READOR',
     ],
   },
   0xcb: {
@@ -1215,6 +1252,15 @@ instructions = {
     'target': 'PC',
     'code': [
       'READHIGH', 'READWLOW', 'TFRWTOTG', 'ADDCTGTOOB',
+    ],
+  },
+  0xfa: {
+    'operation': 'ORB',
+    'mode': 'extended',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'READHIGH', 'READWLOW', 'TFRWTOTG', 'READOR',
     ],
   },
   0xfb: {
