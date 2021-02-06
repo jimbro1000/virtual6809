@@ -55,3 +55,6 @@ define('ADDTGSTOOBIF', 39); // add target signed byte value to object if conditi
 define('ADDTGSWTOOBIF', 40); // add target signed byte value to object if condition met
 define('READAND', 41);
 define('ANDCC', 42);
+define('READOR', 43);
+define('ORCC', 44);
+define('READEOR', 45);

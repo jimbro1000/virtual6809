@@ -42,7 +42,7 @@ So far the instruction set is incomplete and only covers:
  * ABX
  * ADD and ADC
  * SUB and SBC
- * AND 
+ * AND, OR, EOR
  * NOP
  * 8 bit CMP (immediate, direct, extended)
  * INC and DEC

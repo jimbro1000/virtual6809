@@ -1,7 +1,7 @@
 # Virtual 6809 CHANGELOG #
 
 ## Unreleased ##
-* Add AND instructions
+* Add AND, OR, EOR instructions
 * Add long branch instructions
 * Add missing short branch instructions (BVS and BVC)
 * A how to use section in the README

@@ -188,7 +188,7 @@ describe('Arithmetic Logic Unit', () => {
     ).it('ANDs two values and sets NZV', (s1, s2, expected, flags) => {
       const result = subject.and(s1, s2);
       expect(result).toBe(expected);
-      expect(cc.fetch()).toBe(flags);
+      expect(cc.value).toBe(flags);
     });
 
     each(
@@ -201,7 +201,49 @@ describe('Arithmetic Logic Unit', () => {
         (s1, s2, expected) => {
           const result = subject.and(s1, s2, false);
           expect(result).toBe(expected);
-          expect(cc.fetch()).toBe(0);
+          expect(cc.value).toBe(0);
+        });
+  });
+
+  describe('Bitwise OR', () => {
+    each(
+        [
+            [0x55, 0xaa, 0xff, cpus.NEGATIVE],
+            [0x00, 0x00, 0x00, cpus.ZERO],
+            [0x55, 0x2a, 0x7f, 0x00]
+        ]
+    ).it('ORs two values and sets NZV', (s1, s2, expected, flags) => {
+      const result = subject.or(s1, s2);
+      expect(result).toBe(expected);
+      expect(cc.value).toBe(flags);
+    });
+
+    each(
+        [
+          [0x55, 0xaa, 0xff],
+          [0x00, 0xaa, 0xaa],
+        ],
+    ).it(
+        'does not modify cc if condition parameter is false',
+        (s1, s2, expected) => {
+          const result = subject.or(s1, s2, false);
+          expect(result).toBe(expected);
+          expect(cc.value).toBe(0);
+        });
+  });
+
+  describe('Bitwise EOR', () => {
+    each(
+        [
+            [0x55, 0xaa, 0xff, cpus.NEGATIVE],
+            [0x55, 0x55, 0x00, cpus.ZERO]
+        ]
+    ).it(
+        'Exclusive-ORs two values bitwise and sets NZV',
+        (s1, s2, expected, flags) => {
+          const result = subject.eor(s1, s2);
+          expect(result).toBe(expected);
+          expect(cc.value).toBe(flags);
         });
   });
 });

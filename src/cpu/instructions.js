@@ -351,10 +351,20 @@ instructions = {
       'READHIGH', 'READWLOW', 'PUSHPC', 'ADDTGSWTOOBIF', 'BUSY', 'BUSY', 'BUSY',
     ],
   },
+  0x1a: {
+    'operation': 'ORCC',
+    'mode': 'immediate',
+    'object': 'CC',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'ORCC',
+    ],
+  },
   0x1c: {
     'operation': 'ANDCC',
     'mode': 'immediate',
     'object': 'CC',
+    'target': 'AD',
     'code': [
       'READWLOW', 'ANDCC',
     ],
@@ -656,6 +666,15 @@ instructions = {
       'READLOW',
     ],
   },
+  0x88: {
+    'operation': 'EORA',
+    'mode': 'immediate',
+    'object': 'A',
+    'target': 'PC',
+    'code': [
+      'READEOR',
+    ],
+  },
   0x89: {
     'operation': 'ADCA',
     'mode': 'immediate',
@@ -663,6 +682,15 @@ instructions = {
     'target': 'PC',
     'code': [
       'ADDCPCTOOB',
+    ],
+  },
+  0x8a: {
+    'operation': 'ORA',
+    'mode': 'immediate',
+    'object': 'A',
+    'target': 'PC',
+    'code': [
+      'READOR',
     ],
   },
   0x8b: {
@@ -763,6 +791,15 @@ instructions = {
       'DIRECT', 'TFRWTOTG', 'WRITELOW',
     ],
   },
+  0x98: {
+    'operation': 'EORA',
+    'mode': 'direct',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'DIRECT', 'TFRWTOTG', 'READEOR',
+    ],
+  },
   0x99: {
     'operation': 'ADCA',
     'mode': 'direct',
@@ -770,6 +807,15 @@ instructions = {
     'target': 'PC',
     'code': [
       'DIRECT', 'TFRWTOTG', 'ADDCTGTOOB',
+    ],
+  },
+  0x9a: {
+    'operation': 'ORA',
+    'mode': 'direct',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'DIRECT', 'TFRWTOTG', 'READOR',
     ],
   },
   0x9b: {
@@ -884,6 +930,15 @@ instructions = {
       'READHIGH', 'READWLOW', 'TFRWTOTG', 'WRITELOW',
     ],
   },
+  0xb8: {
+    'operation': 'EORA',
+    'mode': 'extended',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'READHIGH', 'READWLOW', 'TFRWTOTG', 'READEOR',
+    ],
+  },
   0xb9: {
     'operation': 'ADCA',
     'mode': 'extended',
@@ -891,6 +946,15 @@ instructions = {
     'target': 'PC',
     'code': [
       'READHIGH', 'READWLOW', 'TFRWTOTG', 'ADDCTGTOOB',
+    ],
+  },
+  0xba: {
+    'operation': 'ORA',
+    'mode': 'extended',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'READHIGH', 'READWLOW', 'TFRWTOTG', 'READOR',
     ],
   },
   0xbb: {
@@ -990,6 +1054,15 @@ instructions = {
       'READLOW',
     ],
   },
+  0xc8: {
+    'operation': 'EORB',
+    'mode': 'immediate',
+    'object': 'B',
+    'target': 'PC',
+    'code': [
+      'READEOR',
+    ],
+  },
   0xc9: {
     'operation': 'ADCB',
     'mode': 'immediate',
@@ -997,6 +1070,15 @@ instructions = {
     'target': 'PC',
     'code': [
       'ADDCPCTOOB',
+    ],
+  },
+  0xca: {
+    'operation': 'OR',
+    'mode': 'immediate',
+    'object': 'B',
+    'target': 'PC',
+    'code': [
+      'READOR',
     ],
   },
   0xcb: {
@@ -1086,6 +1168,15 @@ instructions = {
       'DIRECT', 'TFRWTOTG', 'WRITELOW',
     ],
   },
+  0xd8: {
+    'operation': 'EORB',
+    'mode': 'direct',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'DIRECT', 'TFRWTOTG', 'READEOR',
+    ],
+  },
   0xd9: {
     'operation': 'ADCB',
     'mode': 'direct',
@@ -1093,6 +1184,15 @@ instructions = {
     'target': 'PC',
     'code': [
       'DIRECT', 'TFRWTOTG', 'ADDCTGTOOB',
+    ],
+  },
+  0xda: {
+    'operation': 'ORB',
+    'mode': 'direct',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'DIRECT', 'TFRWTOTG', 'READOR',
     ],
   },
   0xdb: {
@@ -1208,6 +1308,15 @@ instructions = {
       'READHIGH', 'READWLOW', 'TFRWTOTG', 'WRITELOW',
     ],
   },
+  0xf8: {
+    'operation': 'EORB',
+    'mode': 'extended',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'READHIGH', 'READWLOW', 'TFRWTOTG', 'READEOR',
+    ],
+  },
   0xf9: {
     'operation': 'ADCB',
     'mode': 'extended',
@@ -1215,6 +1324,15 @@ instructions = {
     'target': 'PC',
     'code': [
       'READHIGH', 'READWLOW', 'TFRWTOTG', 'ADDCTGTOOB',
+    ],
+  },
+  0xfa: {
+    'operation': 'ORB',
+    'mode': 'extended',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'READHIGH', 'READWLOW', 'TFRWTOTG', 'READOR',
     ],
   },
   0xfb: {

@@ -1419,16 +1419,16 @@ describe('6809 cpu', () => {
         });
 
     each([
-      [0x0000, [0x1c, 0x55], 'CC', 0xaa, 0x00, 3],
+      [0x0000, [0x1c, 0x55], 0xaa, 0x00, 3],
     ]).it(
         'ANDs the CC register and a value bitwise',
-        (address, code, register, initial, expected, cycles) => {
+        (address, code, initial, expected, cycles) => {
           loadMemory(address, code);
-          subject.registers.get(register).value = initial;
+          subject.CC.value = initial;
           subject.registers.get('PC').set(address);
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
-          expect(subject.registers.get(register).fetch()).toBe(expected);
+          expect(subject.CC.value).toBe(expected);
         });
 
     each([
@@ -1436,6 +1436,81 @@ describe('6809 cpu', () => {
       [0x0000, [0xd4, 0x02, 0x55], 'B', 0x00, 0xaa, 0x00, 4],
     ]).it(
         'ANDs a register and a direct page referenced value bitwise',
+        (address, code, register, dp, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get(register).set(initial);
+          subject.registers.get('PC').set(address);
+          subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each([
+      [0x0000, [0x8a, 0xaa], 'A', 0x00, 0xaa, 2],
+      [0x0000, [0xba, 0x00, 0x03, 0x55], 'A', 0xaa, 0xff, 5],
+      [0x0000, [0xca, 0x55], 'B', 0xaa, 0xff, 2],
+      [0x0000, [0xfa, 0x00, 0x03, 0x05], 'B', 0xa0, 0xa5, 5],
+    ]).it(
+        'ORs a register and a value bitwise',
+        (address, code, register, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get(register).set(initial);
+          subject.registers.get('PC').set(address);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each([
+      [0x0000, [0x1a, 0x55], 0xaa, 0xff, 3],
+    ]).it(
+        'ORs the CC register and a value bitwise',
+        (address, code, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.CC.value = initial;
+          subject.registers.get('PC').set(address);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.CC.value).toBe(expected);
+        });
+
+    each([
+      [0x0000, [0x9a, 0x02, 0xaa], 'A', 0x00, 0xa5, 0xaf, 4],
+      [0x0000, [0xda, 0x02, 0x55], 'B', 0x00, 0xaa, 0xff, 4],
+    ]).it(
+        'ORs a register and a direct page referenced value bitwise',
+        (address, code, register, dp, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get(register).set(initial);
+          subject.registers.get('PC').set(address);
+          subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each([
+      [0x0000, [0x88, 0xaa], 'A', 0x0a, 0xa0, 2],
+      [0x0000, [0xb8, 0x00, 0x03, 0x55], 'A', 0xaa, 0xff, 5],
+      [0x0000, [0xc8, 0x55], 'B', 0xaa, 0xff, 2],
+      [0x0000, [0xf8, 0x00, 0x03, 0xaa], 'B', 0xa5, 0x0f, 5],
+    ]).it(
+        'EORs a register and a value bitwise',
+        (address, code, register, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get(register).set(initial);
+          subject.registers.get('PC').set(address);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each([
+      [0x0000, [0x98, 0x02, 0xaa], 'A', 0x00, 0xa5, 0x0f, 4],
+      [0x0000, [0xd8, 0x02, 0x55], 'B', 0x00, 0xa5, 0xf0, 4],
+    ]).it(
+        'EORs a register and a direct page referenced value bitwise',
         (address, code, register, dp, initial, expected, cycles) => {
           loadMemory(address, code);
           subject.registers.get(register).set(initial);

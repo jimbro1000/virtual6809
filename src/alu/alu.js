@@ -68,7 +68,7 @@ class Alu {
     };
 
     this.and = (reg1, value, test) => {
-      if (test === undefined) test = true;
+      if (typeof(test) === 'undefined') test = true;
       const result = reg1 & value;
       if (test) {
         this.cc.negative((result & 0x80) !== 0);
@@ -77,6 +77,25 @@ class Alu {
       }
       return result;
     };
+
+    this.or = (reg1, value, test) => {
+      if (typeof(test) === 'undefined') test = true;
+      const result = reg1 | value;
+      if (test) {
+        this.cc.negative((result & 0x80) !== 0);
+        this.cc.overflow(false);
+        this.cc.zero(result === 0);
+      }
+      return result;
+    }
+
+    this.eor = (reg1, value) => {
+      const result = reg1 ^ value;
+      this.cc.negative((result & 0x80) !== 0);
+      this.cc.overflow(false);
+      this.cc.zero(result === 0);
+      return result;
+    }
   }
 }
 
