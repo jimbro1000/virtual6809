@@ -19,6 +19,8 @@
     "node-constants": "0.0.2"
   },
   "devDependencies": {
+    "eslint": "^7.19.0",
+    "eslint-config-google": "^0.14.0",
     "jest-each": "^26.6.2"
   }
 }

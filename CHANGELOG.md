@@ -1,9 +1,11 @@
 # Virtual 6809 CHANGELOG #
 
 ## Unreleased ##
+* Add AND instructions
 * Add long branch instructions
 * Add missing short branch instructions (BVS and BVC)
 * A how to use section in the README
+* Simplify and extend memory options
 
 ## V0.1.1 - Feb 03 2021 ##
 * Fix incorrect operand code for JSR (was using BSR)

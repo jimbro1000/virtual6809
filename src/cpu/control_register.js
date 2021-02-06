@@ -1,7 +1,7 @@
-const Cpu_Register = require("../../src/cpu/cpu_register");
+const {CpuRegister} = require("../../src/cpu/cpu_register");
 const cpus = require("../../src/cpu/cpu_constants");
 
-class control_register extends Cpu_Register.cpu_register {
+class ControlRegister extends CpuRegister {
     mapConditionToFunction() {
         let result = {};
         result["always"] = this.ifalways;
@@ -156,4 +156,4 @@ class control_register extends Cpu_Register.cpu_register {
     }
 }
 
-module.exports = { control_register }
+module.exports = { ControlRegister }

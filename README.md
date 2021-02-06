@@ -42,6 +42,7 @@ So far the instruction set is incomplete and only covers:
  * ABX
  * ADD and ADC
  * SUB and SBC
+ * AND 
  * NOP
  * 8 bit CMP (immediate, direct, extended)
  * INC and DEC
@@ -52,7 +53,7 @@ So far the instruction set is incomplete and only covers:
  * long branch
 
 indexed/indirect addressing is not implemented  
-ALU is partially implemented (add, subtract, add with carry, subtract with carry)  
+ALU is partially implemented (add, subtract, add with carry, subtract with carry, and)  
 condition logic contained in control register not ALU  
 
 The processor bootstraps correctly using the vector stored at 0xfffe
@@ -96,19 +97,21 @@ The default memory hardware is an approximation of the coco/dragon design with a
 nowhere yet).
 
 Changing `main.js` to alter the memory is simply a matter of changing these lines:
+
 ```javascript
     const memory = Memory.factory("D64");
-    const machine = new cpu(memory);
+const machine = new Cpu(memory);
 ```
 
 At the moment the memory factory only knows D64 and D4 but it is possible to assemble
 a custom model using the memory manager:
+
 ```javascript
-    const memory = new manager([
-            [new chip(chips.RAM, chips.K32), 0x0000],
-            [new chip(chips.ROM, chips.K4), 0xf000]
-        ]);
-    const machine = new cpu(memory);
+    const memory = new MemoryManager([
+  [new Chip(chips.RAM, chips.K32), 0x0000],
+  [new Chip(chips.ROM, chips.K4), 0xf000]
+]);
+const machine = new Cpu(memory);
 ```
 This would provide 4k of RAM at address 0 and a 4k ROM at 61440. Note it is advisable to 
 provide a ROM segment at high-end of memory to provision the interrupt vector table.
