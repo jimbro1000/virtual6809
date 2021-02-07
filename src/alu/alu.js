@@ -87,7 +87,7 @@ class Alu {
         this.cc.zero(result === 0);
       }
       return result;
-    }
+    };
 
     this.eor = (reg1, value) => {
       const result = reg1 ^ value;
@@ -95,7 +95,30 @@ class Alu {
       this.cc.overflow(false);
       this.cc.zero(result === 0);
       return result;
-    }
+    };
+
+    this.shiftLeft = (reg1) => {
+      const result = reg1 << 1;
+      const maskedResult = result & 0xff;
+      const carry = result !== maskedResult;
+      const negative = (result & 0x80) !== 0;
+      this.cc.carry(carry);
+      this.cc.negative(negative);
+      this.cc.zero(maskedResult === 0);
+      this.cc.overflow( ( carry && !negative ) || ( !carry && negative ));
+      return maskedResult;
+    };
+
+    this.shiftRight = (reg1) => {
+      const carry = (reg1 & 0x01) !== 0;
+      const msb = (reg1 & 0x80);
+      const result = ((reg1 & 0xfe) >> 1) | msb;
+      const negative = (result & 0x80) !== 0;
+      this.cc.carry(carry);
+      this.cc.negative(negative);
+      this.cc.zero(result === 0);
+      return result;
+    };
   }
 }
 

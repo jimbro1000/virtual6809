@@ -208,10 +208,10 @@ describe('Arithmetic Logic Unit', () => {
   describe('Bitwise OR', () => {
     each(
         [
-            [0x55, 0xaa, 0xff, cpus.NEGATIVE],
-            [0x00, 0x00, 0x00, cpus.ZERO],
-            [0x55, 0x2a, 0x7f, 0x00]
-        ]
+          [0x55, 0xaa, 0xff, cpus.NEGATIVE],
+          [0x00, 0x00, 0x00, cpus.ZERO],
+          [0x55, 0x2a, 0x7f, 0x00],
+        ],
     ).it('ORs two values and sets NZV', (s1, s2, expected, flags) => {
       const result = subject.or(s1, s2);
       expect(result).toBe(expected);
@@ -235,9 +235,9 @@ describe('Arithmetic Logic Unit', () => {
   describe('Bitwise EOR', () => {
     each(
         [
-            [0x55, 0xaa, 0xff, cpus.NEGATIVE],
-            [0x55, 0x55, 0x00, cpus.ZERO]
-        ]
+          [0x55, 0xaa, 0xff, cpus.NEGATIVE],
+          [0x55, 0x55, 0x00, cpus.ZERO],
+        ],
     ).it(
         'Exclusive-ORs two values bitwise and sets NZV',
         (s1, s2, expected, flags) => {
@@ -245,5 +245,32 @@ describe('Arithmetic Logic Unit', () => {
           expect(result).toBe(expected);
           expect(cc.value).toBe(flags);
         });
+  });
+
+  describe('bitwise shift', () => {
+    each(
+        [
+          [0xc0, 0x80, cpus.CARRY | cpus.NEGATIVE],
+          [0x80, 0x00, cpus.CARRY | cpus.ZERO | cpus.OVERFLOW],
+          [0x00, 0x00, cpus.ZERO],
+        ],
+    ).it('performs arithmetic shift left', (s1, expected, flags) => {
+      const result = subject.shiftLeft(s1);
+      expect(result).toBe(expected);
+      expect(cc.value).toBe(flags);
+    });
+
+    each(
+        [
+          [0x80, 0xc0, cpus.NEGATIVE],
+          [0x40, 0x20, 0x00],
+          [0x00, 0x00, cpus.ZERO],
+          [0x01, 0x00, cpus.ZERO | cpus.CARRY],
+        ],
+    ).it('performs arithmetic shift right', (s1, expected, expectedFlags) => {
+      const result = subject.shiftRight(s1);
+      expect(result).toBe(expected);
+      expect(cc.value).toBe(expectedFlags);
+    });
   });
 });
