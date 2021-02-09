@@ -272,5 +272,32 @@ describe('Arithmetic Logic Unit', () => {
       expect(result).toBe(expected);
       expect(cc.value).toBe(expectedFlags);
     });
+
+    each(
+        [
+          [0x80, 0x00, 0x00, cpus.CARRY | cpus.ZERO | cpus.OVERFLOW],
+          [0x80, 0x01, cpus.CARRY, cpus.CARRY | cpus.OVERFLOW],
+        ],
+    ).it('performs rotate left',
+        (s1, expected, initialFlags, expectedFlags) => {
+          cc.value = initialFlags;
+          const result = subject.rotateLeft(s1, true);
+          expect(result).toBe(expected);
+          expect(cc.value).toBe(expectedFlags);
+        });
+
+    each(
+        [
+          [0x80, 0x40, 0x00, 0x00],
+          [0x80, 0xc0, cpus.CARRY, cpus.NEGATIVE],
+          [0x41, 0x20, 0x00, cpus.CARRY],
+        ],
+    ).it('performs rotate right',
+        (s1, expected, initialFlags, expectedFlags) => {
+          cc.value = initialFlags;
+          const result = subject.rotateRight(s1);
+          expect(result).toBe(expected);
+          expect(cc.value).toBe(expectedFlags);
+        });
   });
 });
