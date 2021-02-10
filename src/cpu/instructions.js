@@ -4,6 +4,14 @@ instructions = {
     'mode': 'immediate',
     'code': [],
   },
+  0x06: {
+    'operation': 'ROR',
+    'mode': 'direct',
+    'object': 'W',
+    'code': [
+      'DIRECT', 'SWAPWAD', 'READWLOW', 'ROTATERIGHT', 'WRITEWLOW',
+    ],
+  },
   0x07: {
     'operation': 'ASR',
     'mode': 'direct',
@@ -18,6 +26,14 @@ instructions = {
     'object': 'W',
     'code': [
       'DIRECT', 'SWAPWAD', 'READWLOW', 'SHIFTLEFT', 'WRITEWLOW',
+    ],
+  },
+  0x09: {
+    'operation': 'ROL',
+    'mode': 'direct',
+    'object': 'W',
+    'code': [
+      'DIRECT', 'SWAPWAD', 'READWLOW', 'ROTATELEFT', 'WRITEWLOW',
     ],
   },
   0x0e: {
@@ -578,6 +594,14 @@ instructions = {
       'PULLPC', 'BUSY', 'BUSY', 'BUSY',
     ],
   },
+  0x46: {
+    'operation': 'RORA',
+    'mode': 'inherent',
+    'object': 'A',
+    'code': [
+      'ROTATERIGHT',
+    ],
+  },
   0x47: {
     'operation': 'ASRA',
     'mode': 'inherent',
@@ -594,6 +618,14 @@ instructions = {
       'SHIFTLEFT',
     ],
   },
+  0x49: {
+    'operation': 'ROLA',
+    'mode': 'inherent',
+    'object': 'A',
+    'code': [
+      'ROTATELEFT',
+    ],
+  },
   0x4a: {
     'operation': 'DECA',
     'object': 'A',
@@ -606,6 +638,14 @@ instructions = {
     'object': 'A',
     'code': [
       'INCOB',
+    ],
+  },
+  0x56: {
+    'operation': 'RORB',
+    'mode': 'inherent',
+    'object': 'B',
+    'code': [
+      'ROTATERIGHT',
     ],
   },
   0x57: {
@@ -624,6 +664,14 @@ instructions = {
       'SHIFTLEFT',
     ],
   },
+  0x59: {
+    'operation': 'ROLB',
+    'mode': 'inherent',
+    'object': 'B',
+    'code': [
+      'ROTATELEFT',
+    ],
+  },
   0x5a: {
     'operation': 'DECB',
     'object': 'B',
@@ -636,6 +684,14 @@ instructions = {
     'object': 'B',
     'code': [
       'INCOB',
+    ],
+  },
+  0x76: {
+    'operation': 'ROR',
+    'mode': 'extended',
+    'object': 'W',
+    'code': [
+      'READHIGH', 'READLOW', 'SWAPWAD', 'READWLOW', 'ROTATERIGHT', 'WRITEWLOW',
     ],
   },
   0x77: {
@@ -652,6 +708,14 @@ instructions = {
     'object': 'W',
     'code': [
       'READHIGH', 'READLOW', 'SWAPWAD', 'READWLOW', 'SHIFTLEFT', 'WRITEWLOW',
+    ],
+  },
+  0x79: {
+    'operation': 'ROL',
+    'mode': 'extended',
+    'object': 'W',
+    'code': [
+      'READHIGH', 'READLOW', 'SWAPWAD', 'READWLOW', 'ROTATELEFT', 'WRITEWLOW',
     ],
   },
   0x7a: {

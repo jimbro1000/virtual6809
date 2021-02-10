@@ -1606,5 +1606,91 @@ describe('6809 cpu', () => {
           expect(cycleCount).toBe(cycles);
           expect(subject.registers.get(register).fetch()).toBe(expectedValue);
         });
+
+    it('rotates a direct memory address left 1 bit', () => {
+      const address = 0x0000;
+      const code = [0x09, 0x02, 0x55];
+      const atAddress = 0x0002;
+      const dp = 0;
+      const expected = 0xaa;
+      const cycles = 6;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      subject.registers.get('DP').set(dp);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.memory.read(atAddress)).toBe(expected);
+    });
+
+    it('rotates an extended memory address left 1 bit', () => {
+      const address = 0x0000;
+      const code = [0x79, 0x00, 0x03, 0x55];
+      const atAddress = 0x0003;
+      const expected = 0xaa;
+      const cycles = 7;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.memory.read(atAddress)).toBe(expected);
+    });
+
+    each(
+        [
+          [0x0000, [0x49], 'A', 0x55, 0xaa, 2],
+          [0x0000, [0x59], 'B', 0x55, 0xaa, 2],
+        ],
+    ).it('rotates a register left 1 bit',
+        (address, code, register, initialValue, expectedValue, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(register).set(initialValue);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expectedValue);
+        });
+
+    it('rotates a direct memory address right 1 bit', () => {
+      const address = 0x0000;
+      const code = [0x06, 0x02, 0xaa];
+      const atAddress = 0x0002;
+      const dp = 0;
+      const expected = 0x55;
+      const cycles = 6;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      subject.registers.get('DP').set(dp);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.memory.read(atAddress)).toBe(expected);
+    });
+
+    it('rotates an extended memory address right 1 bit', () => {
+      const address = 0x0000;
+      const code = [0x76, 0x00, 0x03, 0xaa];
+      const atAddress = 0x0003;
+      const expected = 0x55;
+      const cycles = 7;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.memory.read(atAddress)).toBe(expected);
+    });
+
+    each(
+        [
+          [0x0000, [0x46], 'A', 0xaa, 0x55, 2],
+          [0x0000, [0x56], 'B', 0xaa, 0x55, 2],
+        ],
+    ).it('rotates a register right 1 bit',
+        (address, code, register, initialValue, expectedValue, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(register).set(initialValue);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expectedValue);
+        });
   });
 });

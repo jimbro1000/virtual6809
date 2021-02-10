@@ -83,6 +83,8 @@ class Cpu {
     result['READEOR'] = cpus.READEOR;
     result['SHIFTLEFT'] = cpus.SHIFTLEFT;
     result['SHIFTRIGHT'] = cpus.SHIFTRIGHT;
+    result['ROTATELEFT'] = cpus.ROTATELEFT;
+    result['ROTATERIGHT'] = cpus.ROTATERIGHT;
     return result;
   }
 
@@ -141,6 +143,8 @@ class Cpu {
     result[cpus.READEOR] = this.eor_target_read;
     result[cpus.SHIFTLEFT] = this.shift_left;
     result[cpus.SHIFTRIGHT] = this.shift_right;
+    result[cpus.ROTATELEFT] = this.rotate_left;
+    result[cpus.ROTATERIGHT] = this.rotate_right;
     return result;
   }
 
@@ -557,8 +561,16 @@ class Cpu {
     this.object.set(this.alu1.shiftLeft(this.object.fetch()));
   }
 
+  rotate_left = () => {
+    this.object.set(this.alu1.shiftLeft(this.object.fetch(), true));
+  }
+
   shift_right = () => {
     this.object.set(this.alu1.shiftRight(this.object.fetch()));
+  }
+
+  rotate_right = () => {
+    this.object.set(this.alu1.shiftRight(this.object.fetch(), true));
   }
 
   select_register = (stackMask) => {
