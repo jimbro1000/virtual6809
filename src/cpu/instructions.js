@@ -786,6 +786,15 @@ instructions = {
       'READAND',
     ],
   },
+  0x85: {
+    'operation': 'BITA',
+    'mode': 'immediate',
+    'object': 'A',
+    'target': 'PC',
+    'code': [
+      'BITTEST',
+    ],
+  },
   0x86: {
     'operation': 'LDA',
     'mode': 'immediate',
@@ -899,6 +908,15 @@ instructions = {
     'target': 'AD',
     'code': [
       'DIRECT', 'TFRWTOTG', 'READAND',
+    ],
+  },
+  0x95: {
+    'operation': 'BITA',
+    'mode': 'direct',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'DIRECT', 'SWAPWAD', 'BITTEST',
     ],
   },
   0x96: {
@@ -1040,6 +1058,15 @@ instructions = {
       'READHIGH', 'READWLOW', 'TFRWTOTG', 'READAND',
     ],
   },
+  0xb5: {
+    'operation': 'BITA',
+    'mode': 'extended',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'READHIGH', 'READWLOW', 'SWAPWAD', 'BITTEST',
+    ],
+  },
   0xb6: {
     'operation': 'LDA',
     'mode': 'extended',
@@ -1174,6 +1201,15 @@ instructions = {
       'READAND',
     ],
   },
+  0xc5: {
+    'operation': 'BITB',
+    'mode': 'immediate',
+    'object': 'B',
+    'target': 'PC',
+    'code': [
+      'BITTEST',
+    ],
+  },
   0xc6: {
     'operation': 'LDB',
     'mode': 'immediate',
@@ -1276,6 +1312,15 @@ instructions = {
     'target': 'AD',
     'code': [
       'DIRECT', 'TFRWTOTG', 'READAND',
+    ],
+  },
+  0xd5: {
+    'operation': 'BITB',
+    'mode': 'direct',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'DIRECT', 'SWAPWAD', 'BITTEST',
     ],
   },
   0xd6: {
@@ -1416,6 +1461,15 @@ instructions = {
     'target': 'AD',
     'code': [
       'READHIGH', 'READWLOW', 'TFRWTOTG', 'READAND',
+    ],
+  },
+  0xf5: {
+    'operation': 'BITB',
+    'mode': 'extended',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'READHIGH', 'READWLOW', 'SWAPWAD', 'BITTEST',
     ],
   },
   0xf6: {

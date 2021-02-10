@@ -62,3 +62,4 @@ define('SHIFTLEFT', 46);
 define('SHIFTRIGHT', 47);
 define('ROTATELEFT', 48);
 define('ROTATERIGHT', 49);
+define('BITTEST', 50);

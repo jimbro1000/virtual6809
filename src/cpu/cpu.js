@@ -85,6 +85,7 @@ class Cpu {
     result['SHIFTRIGHT'] = cpus.SHIFTRIGHT;
     result['ROTATELEFT'] = cpus.ROTATELEFT;
     result['ROTATERIGHT'] = cpus.ROTATERIGHT;
+    result['BITTEST'] = cpus.BITTEST;
     return result;
   }
 
@@ -145,6 +146,7 @@ class Cpu {
     result[cpus.SHIFTRIGHT] = this.shift_right;
     result[cpus.ROTATELEFT] = this.rotate_left;
     result[cpus.ROTATERIGHT] = this.rotate_right;
+    result[cpus.BITTEST] = this.read_and_bit_test;
     return result;
   }
 
@@ -571,6 +573,14 @@ class Cpu {
 
   rotate_right = () => {
     this.object.set(this.alu1.shiftRight(this.object.fetch(), true));
+  }
+
+  read_and_bit_test = () => {
+    const address = this.target.fetch();
+    if (this.target === this.PC) {
+      this.PC.set(address + 1);
+    }
+    this.alu1.and(this.object.fetch(), this.memory.read(address));
   }
 
   select_register = (stackMask) => {
