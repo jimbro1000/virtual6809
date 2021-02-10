@@ -4,6 +4,38 @@ instructions = {
     'mode': 'immediate',
     'code': [],
   },
+  0x06: {
+    'operation': 'ROR',
+    'mode': 'direct',
+    'object': 'W',
+    'code': [
+      'DIRECT', 'SWAPWAD', 'READWLOW', 'ROTATERIGHT', 'WRITEWLOW',
+    ],
+  },
+  0x07: {
+    'operation': 'ASR',
+    'mode': 'direct',
+    'object': 'W',
+    'code': [
+      'DIRECT', 'SWAPWAD', 'READWLOW', 'SHIFTRIGHT', 'WRITEWLOW',
+    ],
+  },
+  0x08: {
+    'operation': 'ASL',
+    'mode': 'direct',
+    'object': 'W',
+    'code': [
+      'DIRECT', 'SWAPWAD', 'READWLOW', 'SHIFTLEFT', 'WRITEWLOW',
+    ],
+  },
+  0x09: {
+    'operation': 'ROL',
+    'mode': 'direct',
+    'object': 'W',
+    'code': [
+      'DIRECT', 'SWAPWAD', 'READWLOW', 'ROTATELEFT', 'WRITEWLOW',
+    ],
+  },
   0x0e: {
     'operation': 'JMP',
     'mode': 'direct',
@@ -562,6 +594,38 @@ instructions = {
       'PULLPC', 'BUSY', 'BUSY', 'BUSY',
     ],
   },
+  0x46: {
+    'operation': 'RORA',
+    'mode': 'inherent',
+    'object': 'A',
+    'code': [
+      'ROTATERIGHT',
+    ],
+  },
+  0x47: {
+    'operation': 'ASRA',
+    'mode': 'inherent',
+    'object': 'A',
+    'code': [
+      'SHIFTRIGHT',
+    ],
+  },
+  0x48: {
+    'operation': 'ASLA',
+    'mode': 'inherent',
+    'object': 'A',
+    'code': [
+      'SHIFTLEFT',
+    ],
+  },
+  0x49: {
+    'operation': 'ROLA',
+    'mode': 'inherent',
+    'object': 'A',
+    'code': [
+      'ROTATELEFT',
+    ],
+  },
   0x4a: {
     'operation': 'DECA',
     'object': 'A',
@@ -576,6 +640,38 @@ instructions = {
       'INCOB',
     ],
   },
+  0x56: {
+    'operation': 'RORB',
+    'mode': 'inherent',
+    'object': 'B',
+    'code': [
+      'ROTATERIGHT',
+    ],
+  },
+  0x57: {
+    'operation': 'ASRB',
+    'mode': 'inherent',
+    'object': 'B',
+    'code': [
+      'SHIFTRIGHT',
+    ],
+  },
+  0x58: {
+    'operation': 'ASLB',
+    'mode': 'inherent',
+    'object': 'B',
+    'code': [
+      'SHIFTLEFT',
+    ],
+  },
+  0x59: {
+    'operation': 'ROLB',
+    'mode': 'inherent',
+    'object': 'B',
+    'code': [
+      'ROTATELEFT',
+    ],
+  },
   0x5a: {
     'operation': 'DECB',
     'object': 'B',
@@ -588,6 +684,38 @@ instructions = {
     'object': 'B',
     'code': [
       'INCOB',
+    ],
+  },
+  0x76: {
+    'operation': 'ROR',
+    'mode': 'extended',
+    'object': 'W',
+    'code': [
+      'READHIGH', 'READLOW', 'SWAPWAD', 'READWLOW', 'ROTATERIGHT', 'WRITEWLOW',
+    ],
+  },
+  0x77: {
+    'operation': 'ASL',
+    'mode': 'extended',
+    'object': 'W',
+    'code': [
+      'READHIGH', 'READLOW', 'SWAPWAD', 'READWLOW', 'SHIFTRIGHT', 'WRITEWLOW',
+    ],
+  },
+  0x78: {
+    'operation': 'ASL',
+    'mode': 'extended',
+    'object': 'W',
+    'code': [
+      'READHIGH', 'READLOW', 'SWAPWAD', 'READWLOW', 'SHIFTLEFT', 'WRITEWLOW',
+    ],
+  },
+  0x79: {
+    'operation': 'ROL',
+    'mode': 'extended',
+    'object': 'W',
+    'code': [
+      'READHIGH', 'READLOW', 'SWAPWAD', 'READWLOW', 'ROTATELEFT', 'WRITEWLOW',
     ],
   },
   0x7a: {
