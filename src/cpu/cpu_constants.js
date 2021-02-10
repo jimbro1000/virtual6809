@@ -58,3 +58,5 @@ define('ANDCC', 42);
 define('READOR', 43);
 define('ORCC', 44);
 define('READEOR', 45);
+define('SHIFTLEFT', 46);
+define('SHIFTRIGHT', 47);
