@@ -86,6 +86,7 @@ class Cpu {
     result['ROTATELEFT'] = cpus.ROTATELEFT;
     result['ROTATERIGHT'] = cpus.ROTATERIGHT;
     result['BITTEST'] = cpus.BITTEST;
+    result['COMPLEMENT'] = cpus.COMPLEMENT;
     return result;
   }
 
@@ -147,6 +148,7 @@ class Cpu {
     result[cpus.ROTATELEFT] = this.rotate_left;
     result[cpus.ROTATERIGHT] = this.rotate_right;
     result[cpus.BITTEST] = this.read_and_bit_test;
+    result[cpus.COMPLEMENT] = this.complement_byte;
     return result;
   }
 
@@ -462,7 +464,7 @@ class Cpu {
 
   compare_low_byte = (n) => {
     this.W.set(n);
-    this.complement(this.W, cpus.SHORT);
+    this.twos_complement(this.W, cpus.SHORT);
     const w = this.W.fetch();
     const o = this.object.fetch();
     const temp = w + o;
@@ -472,7 +474,7 @@ class Cpu {
 
   compare_w_with_word = () => {
     const n = this.W.fetch();
-    this.complement(this.W, cpus.LONG);
+    this.twos_complement(this.W, cpus.LONG);
     const w = this.W.fetch();
     const o = this.object.fetch();
     const temp = w + o;
@@ -583,6 +585,10 @@ class Cpu {
     this.alu1.and(this.object.fetch(), this.memory.read(address));
   }
 
+  complement_byte = () => {
+    this.object.set(this.alu1.complement(this.object.fetch(), cpus.SHORT));
+  }
+
   select_register = (stackMask) => {
     let register = this.stack_order[stackMask];
     if (register === 'US') {
@@ -678,7 +684,7 @@ class Cpu {
     this.CC.carry(initial < object);
   };
 
-  complement = (register, scale) => {
+  twos_complement = (register, scale) => {
     let value = register.fetch();
     let mask = 0xffff;
     if (scale === cpus.SHORT) {

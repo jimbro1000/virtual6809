@@ -300,4 +300,13 @@ describe('Arithmetic Logic Unit', () => {
           expect(cc.value).toBe(expectedFlags);
         });
   });
+
+  describe('general operations', () => {
+    it('performs a 1s complement', () => {
+      const s1 = 0x55;
+      const result = subject.complement(s1);
+      expect(result).toBe(0xaa);
+      expect(cc.value).toBe(cpus.CARRY | cpus.NEGATIVE);
+    });
+  });
 });

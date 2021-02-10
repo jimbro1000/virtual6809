@@ -594,6 +594,14 @@ instructions = {
       'PULLPC', 'BUSY', 'BUSY', 'BUSY',
     ],
   },
+  0x43: {
+    'operation': 'COMA',
+    'mode': 'inherent',
+    'object': 'A',
+    'code': [
+      'COMPLEMENT',
+    ],
+  },
   0x46: {
     'operation': 'RORA',
     'mode': 'inherent',
@@ -638,6 +646,14 @@ instructions = {
     'object': 'A',
     'code': [
       'INCOB',
+    ],
+  },
+  0x53: {
+    'operation': 'COMB',
+    'mode': 'inherent',
+    'object': 'B',
+    'code': [
+      'COMPLEMENT',
     ],
   },
   0x56: {

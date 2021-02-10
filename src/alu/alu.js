@@ -134,6 +134,16 @@ class Alu {
     this.rotateRight = (reg1) => {
       return this.shiftRight(reg1, true);
     };
+
+    this.complement = (reg1) => {
+      const mask = 0xff;
+      reg1 = this.eor(reg1, mask);
+      this.cc.carry(true);
+      this.cc.zero(reg1 === 0);
+      this.cc.negative( (reg1 & 0x80) !== 0);
+      this.cc.overflow(false);
+      return reg1;
+    };
   }
 }
 
