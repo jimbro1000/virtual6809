@@ -1692,5 +1692,69 @@ describe('6809 cpu', () => {
           expect(cycleCount).toBe(cycles);
           expect(subject.registers.get(register).fetch()).toBe(expectedValue);
         });
+
+    each(
+        [
+          [0x0000, [0x85, 0x55], 'A', 0xaa, cpus.ZERO, 2],
+          [0x0000, [0x85, 0x80], 'A', 0xf0, cpus.NEGATIVE, 2],
+          [0x0000, [0xc5, 0x4e], 'B', 0xaa, 0x00, 2],
+          [0x0000, [0xb5, 0x00, 0x03, 0x55], 'A', 0xaa, cpus.ZERO, 5],
+          [0x0000, [0xf5, 0x00, 0x03, 0x80], 'B', 0xf0, cpus.NEGATIVE, 5],
+        ],
+    ).it('masks a register against a value',
+        (address, code, register, initialValue, expectedFlags, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(register).set(initialValue);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get('CC').value).toBe(expectedFlags);
+        });
+
+    each(
+        [
+          [0x0000, [0x95, 0x02, 0x80], 'A', 0xf0, 0x00, cpus.NEGATIVE, 4],
+          [0x0000, [0xd5, 0x02, 0x80], 'B', 0xf0, 0x00, cpus.NEGATIVE, 4],
+        ],
+    ).it('masks a register against a direct page value',
+        (address, code, register, initialValue, dp, expectedFlags, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get('DP').set(dp);
+          subject.registers.get(register).set(initialValue);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get('CC').value).toBe(expectedFlags);
+        });
+
+    each(
+        [
+          [0x0000, [0x43], 'A', 0xaa, 0x55, 2],
+          [0x0000, [0x53], 'B', 0xff, 0x00, 2],
+        ],
+    ).it('performs ones complement on a given register',
+        (address, code, register, initialValue, expectedValue, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(register).set(initialValue);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expectedValue);
+        });
+
+    each(
+        [
+          [0x0000, [0x03, 0x02, 0xaa], 0x0002, 0, 0x55, 6],
+          [0x0000, [0x73, 0x00, 0x03, 0xaa], 0x0003, 0, 0x55, 7],
+        ],
+    ).it('performs ones complement on a given memory address',
+        (address, code, atAddress, dp, expectedValue, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.memory.read(atAddress)).toBe(expectedValue);
+        });
   });
 });

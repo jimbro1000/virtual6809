@@ -1,6 +1,7 @@
 # Virtual 6809 CHANGELOG #
 
 ## Unreleased ##
+* Add BIT, COM instructions
 * Add shift and rotate instructions
 * Add AND, OR, EOR instructions
 * Add long branch instructions
