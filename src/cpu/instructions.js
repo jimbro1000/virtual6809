@@ -1,8 +1,11 @@
 instructions = {
-  0x0: {
-    'operation': 'neg',
-    'mode': 'immediate',
-    'code': [],
+  0x00: {
+    'operation': 'NEG',
+    'mode': 'direct',
+    'object': 'W',
+    'code': [
+      'DIRECT', 'SWAPWAD', 'READWLOW', 'NEGATE', 'WRITEWLOW',
+    ],
   },
   0x03: {
     'operation': 'COM',
@@ -602,6 +605,14 @@ instructions = {
       'PULLPC', 'BUSY', 'BUSY', 'BUSY',
     ],
   },
+  0x40: {
+    'operation': 'NEGA',
+    'mode': 'inherent',
+    'object': 'A',
+    'code': [
+      'NEGATE',
+    ],
+  },
   0x43: {
     'operation': 'COMA',
     'mode': 'inherent',
@@ -656,6 +667,14 @@ instructions = {
       'INCOB',
     ],
   },
+  0x50: {
+    'operation': 'NEGB',
+    'mode': 'inherent',
+    'object': 'B',
+    'code': [
+      'NEGATE',
+    ],
+  },
   0x53: {
     'operation': 'COMB',
     'mode': 'inherent',
@@ -708,6 +727,14 @@ instructions = {
     'object': 'B',
     'code': [
       'INCOB',
+    ],
+  },
+  0x70: {
+    'operation': 'NEG',
+    'mode': 'extended',
+    'object': 'W',
+    'code': [
+      'READHIGH', 'READLOW', 'SWAPWAD', 'READWLOW', 'NEGATE', 'WRITEWLOW',
     ],
   },
   0x73: {

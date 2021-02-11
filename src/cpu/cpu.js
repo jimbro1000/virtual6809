@@ -87,6 +87,7 @@ class Cpu {
     result['ROTATERIGHT'] = cpus.ROTATERIGHT;
     result['BITTEST'] = cpus.BITTEST;
     result['COMPLEMENT'] = cpus.COMPLEMENT;
+    result['NEGATE'] = cpus.NEGATE;
     return result;
   }
 
@@ -149,6 +150,7 @@ class Cpu {
     result[cpus.ROTATERIGHT] = this.rotate_right;
     result[cpus.BITTEST] = this.read_and_bit_test;
     result[cpus.COMPLEMENT] = this.complement_byte;
+    result[cpus.NEGATE] = this.negate_byte;
     return result;
   }
 
@@ -586,7 +588,11 @@ class Cpu {
   }
 
   complement_byte = () => {
-    this.object.set(this.alu1.complement(this.object.fetch(), cpus.SHORT));
+    this.object.set(this.alu1.complement(this.object.fetch()));
+  }
+
+  negate_byte = () => {
+    this.object.set(this.alu1.negate(this.object.fetch()));
   }
 
   select_register = (stackMask) => {

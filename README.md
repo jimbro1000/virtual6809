@@ -44,7 +44,7 @@ So far the instruction set is incomplete and only covers:
  * SUB and SBC
  * AND, OR, EOR
  * LSL, LSR, ROL and ROR  
- * BIT, COM  
+ * BIT, COM, NEG
  * NOP
  * 8 bit CMP (immediate, direct, extended)
  * INC and DEC
