@@ -1741,5 +1741,20 @@ describe('6809 cpu', () => {
           expect(cycleCount).toBe(cycles);
           expect(subject.registers.get(register).fetch()).toBe(expectedValue);
         });
+
+    each(
+        [
+          [0x0000, [0x03, 0x02, 0xaa], 0x0002, 0, 0x55, 6],
+          [0x0000, [0x73, 0x00, 0x03, 0xaa], 0x0003, 0, 0x55, 7],
+        ],
+    ).it('performs ones complement on a given memory address',
+        (address, code, atAddress, dp, expectedValue, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.memory.read(atAddress)).toBe(expectedValue);
+        });
   });
 });

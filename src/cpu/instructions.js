@@ -4,6 +4,14 @@ instructions = {
     'mode': 'immediate',
     'code': [],
   },
+  0x03: {
+    'operation': 'COM',
+    'mode': 'direct',
+    'object': 'W',
+    'code': [
+      'DIRECT', 'SWAPWAD', 'READWLOW', 'COMPLEMENT', 'WRITEWLOW',
+    ],
+  },
   0x06: {
     'operation': 'ROR',
     'mode': 'direct',
@@ -700,6 +708,14 @@ instructions = {
     'object': 'B',
     'code': [
       'INCOB',
+    ],
+  },
+  0x73: {
+    'operation': 'COM',
+    'mode': 'extended',
+    'object': 'W',
+    'code': [
+      'READHIGH', 'READLOW', 'SWAPWAD', 'READWLOW', 'COMPLEMENT', 'WRITEWLOW',
     ],
   },
   0x76: {
