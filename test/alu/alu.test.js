@@ -308,5 +308,17 @@ describe('Arithmetic Logic Unit', () => {
       expect(result).toBe(0xaa);
       expect(cc.value).toBe(cpus.CARRY | cpus.NEGATIVE);
     });
+
+    each(
+        [
+          [0x55, 0xab, cpus.CARRY | cpus.NEGATIVE],
+          [0x00, 0x00, cpus.ZERO],
+          [0x80, 0x80, cpus.CARRY | cpus.OVERFLOW | cpus.NEGATIVE],
+        ],
+    ).it('performs a 2s complement', (initialValue, expectedValue, ccFlags) => {
+      const result = subject.negate(initialValue);
+      expect(result).toBe(expectedValue);
+      expect(cc.value).toBe(ccFlags);
+    });
   });
 });

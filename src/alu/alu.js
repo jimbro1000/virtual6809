@@ -144,6 +144,15 @@ class Alu {
       this.cc.overflow(false);
       return reg1;
     };
+
+    this.negate = (reg1) => {
+      this.cc.carry(reg1 !== 0);
+      this.cc.overflow(reg1 === 0x80);
+      reg1 = (0x100 - reg1) & 0xff;
+      this.cc.zero(reg1 === 0);
+      this.cc.negative( (reg1 & 0x80) !== 0);
+      return reg1;
+    };
   }
 }
 

@@ -1756,5 +1756,35 @@ describe('6809 cpu', () => {
           expect(cycleCount).toBe(cycles);
           expect(subject.memory.read(atAddress)).toBe(expectedValue);
         });
+
+    each(
+        [
+          [0x0000, [0x40], 'A', 0xaa, 0x56, 2],
+          [0x0000, [0x50], 'B', 0xff, 0x01, 2],
+        ],
+    ).it('performs twos complement on a register',
+        (address, code, register, initialValue, expectedValue, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(register).set(initialValue);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expectedValue);
+        });
+
+    each(
+        [
+          [0x0000, [0x00, 0x02, 0xaa], 0x0002, 0, 0x56, 6],
+          [0x0000, [0x70, 0x00, 0x03, 0xaa], 0x0003, 0, 0x56, 7],
+        ],
+    ).it('performs twos complement on a given memory address',
+        (address, code, atAddress, dp, expectedValue, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.memory.read(atAddress)).toBe(expectedValue);
+        });
   });
 });
