@@ -1,36 +1,60 @@
-const Cpu_Register = require("../../src/cpu/cpu_register");
-const cpus = require("../../src/cpu/cpu_constants");
+const {CpuRegister} = require('../../src/cpu/cpu_register');
+const cpus = require('../../src/cpu/cpu_constants');
 
-class wide_register extends Cpu_Register.cpu_register {
-    constructor(name, register_a, register_b) {
-        super(cpus.LONG, name, register_a.control_register);
-        this.high_register = register_a;
-        this.low_register = register_b;
-    }
+/** @class WideRegister combines two 8bit registers */
+class WideRegister extends CpuRegister {
+  /**
+   * Creates an instance of wide register
+   *
+   * @param {string} name of new combined register
+   * @param {CpuRegister} registerA most significant byte register
+   * @param {CpuRegister} registerB least significant byte register
+   */
+  constructor(name, registerA, registerB) {
+    super(cpus.LONG, name, registerA.control_register);
+    this.high_register = registerA;
+    this.low_register = registerB;
+  }
 
-    load(value) {
-        this.set(value);
-        this.test_value();
-    }
+  /**
+   * Load and test a new value for the register
+   * @param {number} value
+   */
+  load(value) {
+    this.set(value);
+    this.testValue();
+  }
 
-    save() {
-        const result = this.fetch();
-        this.test_value();
-        return result;
-    }
+  /**
+   * Return and test an existing value for the register
+   * @return {number}
+   */
+  save() {
+    const result = this.fetch();
+    this.testValue();
+    return result;
+  }
 
-    fetch() {
-        this.value = (this.high_register.fetch() << 8) + this.low_register.fetch();
-        return this.value;
-    }
+  /**
+   * Return an existing value without testing
+   * @return {number}
+   */
+  fetch() {
+    this.value = (this.high_register.fetch() << 8) + this.low_register.fetch();
+    return this.value;
+  }
 
-    set(value) {
-        this.value = value & this.valueMask;
-        const low_value = value & 0xff;
-        const high_value = (value & 0xff00) >> 8;
-        this.high_register.set(high_value);
-        this.low_register.set(low_value);
-    }
+  /**
+   * Load a new value to the register without testing
+   * @param {number} value
+   */
+  set(value) {
+    this.value = value & this.valueMask;
+    const lowValue = value & 0xff;
+    const highValue = (value & 0xff00) >> 8;
+    this.high_register.set(highValue);
+    this.low_register.set(lowValue);
+  }
 }
 
-module.exports = { wide_register }
+module.exports = {WideRegister};

@@ -1,7 +1,7 @@
-const Cpu_Register = require("../../src/cpu/cpu_register");
+const {CpuRegister} = require("../../src/cpu/cpu_register");
 const cpus = require("../../src/cpu/cpu_constants");
 
-class control_register extends Cpu_Register.cpu_register {
+class ControlRegister extends CpuRegister {
     mapConditionToFunction() {
         let result = {};
         result["always"] = this.ifalways;
@@ -18,6 +18,8 @@ class control_register extends Cpu_Register.cpu_register {
         result["lessthan"] = this.iflessthan;
         result["negative"] = this.ifnegative;
         result["positive"] = this.ifpositive;
+        result["overflow"] = this.ifoverflow;
+        result["notoverflow"] = this.ifnotoverflow;
         return result;
     }
 
@@ -107,6 +109,14 @@ class control_register extends Cpu_Register.cpu_register {
         return !this.ifnegative();
     }
 
+    ifoverflow = () => {
+        return (this.value & cpus.OVERFLOW) > 0;
+    }
+
+    ifnotoverflow = () => {
+        return !this.ifoverflow();
+    }
+
     ifgreaterorequal = () => {
         const negative = (this.value & cpus.NEGATIVE) > 0;
         const overflow = (this.value & cpus.OVERFLOW) > 0;
@@ -146,4 +156,4 @@ class control_register extends Cpu_Register.cpu_register {
     }
 }
 
-module.exports = { control_register }
+module.exports = { ControlRegister }
