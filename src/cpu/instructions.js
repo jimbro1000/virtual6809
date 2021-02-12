@@ -412,6 +412,11 @@ instructions = {
       'READWLOW', 'ANDCC',
     ],
   },
+  0x1d: {
+    'operation': 'SEX',
+    'mode': 'inherent',
+    'code': ['SIGNEXTEND'],
+  },
   0x1e: {
     'operation': 'EXG',
     'mode': 'inherent',
