@@ -626,6 +626,14 @@ instructions = {
       'PULLPC', 'BUSY', 'BUSY', 'BUSY',
     ],
   },
+  0x3d: {
+    'operation': 'MUL',
+    'mode': 'inherent',
+    'code': [
+      'MULTIPLY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
+      'BUSY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
+    ],
+  },
   0x40: {
     'operation': 'NEGA',
     'mode': 'inherent',

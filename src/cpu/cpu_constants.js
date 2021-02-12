@@ -68,3 +68,4 @@ define('NEGATE', 52);
 define('EXCHANGE', 53);
 define('TRANSFER', 54);
 define('SIGNEXTEND', 55);
+define('MULTIPLY', 56);

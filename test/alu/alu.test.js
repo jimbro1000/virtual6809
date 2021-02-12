@@ -179,6 +179,30 @@ describe('Arithmetic Logic Unit', () => {
         });
   });
 
+  describe('Multiplication', () => {
+    it('multiplies two values', () => {
+      const s1 = 0x20;
+      const s2 = 0x08;
+      const expected = 0x0100;
+      const result = subject.mul(s1, s2);
+      expect(result).toBe(expected);
+    });
+
+    it('sets carry if bit 7 of the result is set', () => {
+      const s1 = 0x10;
+      const s2 = 0x08;
+      subject.mul(s1, s2);
+      expect(cc.value & cpus.CARRY).toBe(cpus.CARRY);
+    });
+
+    it('sets zero if the result is zero', () => {
+      const s1 = 0x00;
+      const s2 = 0x00;
+      subject.mul(s1, s2);
+      expect(cc.value & cpus.ZERO).toBe(cpus.ZERO);
+    });
+  });
+
   describe('Bitwise AND', () => {
     each(
         [
