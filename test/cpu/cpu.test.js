@@ -1878,5 +1878,21 @@ describe('6809 cpu', () => {
           expect(subject.registers.get('A').fetch()).toBe(expectedValue);
           expect(subject.CC.value).toBe(ccFlags);
         });
+
+    it('multiplies the A and B register together into D', () => {
+      const address = 0x0000;
+      const code = [0x3d];
+      const valueA = 0x10;
+      const valueB = 0x20;
+      const expectedValue = 0x0200;
+      const cycles = 11;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      subject.registers.get('A').set(valueA);
+      subject.registers.get('B').set(valueB);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('D').fetch()).toBe(expectedValue);
+    });
   });
 });
