@@ -1786,5 +1786,43 @@ describe('6809 cpu', () => {
           expect(cycleCount).toBe(cycles);
           expect(subject.memory.read(atAddress)).toBe(expectedValue);
         });
+
+    each(
+        [
+          [0x0000, [0x1e, 0x12], 'X', 'Y', 0x8000, 0x0001, 8],
+          [0x0000, [0x1e, 0x8b], 'A', 'DP', 0x55, 0xaa, 8],
+        ],
+    ).it('exchanges the value of one register with another',
+        (
+            address, code, register1, register2,
+            initialValue1, initialValue2, cycles,
+        ) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(register1).set(initialValue1);
+          subject.registers.get(register2).set(initialValue2);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register1).fetch()).toBe(initialValue2);
+          expect(subject.registers.get(register2).fetch()).toBe(initialValue1);
+        });
+
+    it('cannot exchange an 8 bit and 16 bit register pair', () => {
+      const address = 0x0000;
+      const code = [0x1e, 0x18];
+      const register1 = 'X';
+      const register2 = 'A';
+      const initialValue1 = 0x5555;
+      const initialValue2 = 0xaa;
+      const cycles = 8;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      subject.registers.get(register1).set(initialValue1);
+      subject.registers.get(register2).set(initialValue2);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get(register1).fetch()).toBe(initialValue1);
+      expect(subject.registers.get(register2).fetch()).toBe(initialValue2);
+    });
   });
 });

@@ -1,5 +1,7 @@
 # Virtual 6809 CHANGELOG #
 
+## Unreleased ##
+
 ## V0.2 - Feb 11 2021 ##
 * Add BIT, COM and NEG instructions
 * Add shift and rotate instructions

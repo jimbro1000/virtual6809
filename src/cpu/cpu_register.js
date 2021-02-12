@@ -68,6 +68,11 @@ class CpuRegister {
     this.cc(value, cpus.NEGATIVE);
   }
 
+  /**
+   * load and test new value for register.
+   *
+   * @param {number} value
+   */
   load(value) {
     this.value = value & this.valueMask;
     this.testValue();

@@ -27,7 +27,8 @@ class Cpu {
     this.target = null;
     this.codes = this.mapCodeNameToCode();
     this.lambdas = this.mapCodeToLambda();
-    this.stack_order = this.mapStackOrder();
+    this.stackOrder = this.mapStackOrder();
+    this.registerIds = this.mapRegisterIdentifier();
     this.code = [cpus.TFRWTOOB, cpus.READWLOW, cpus.READHIGH];
     this.PC.set(0xfffe);
   }
@@ -88,6 +89,7 @@ class Cpu {
     result['BITTEST'] = cpus.BITTEST;
     result['COMPLEMENT'] = cpus.COMPLEMENT;
     result['NEGATE'] = cpus.NEGATE;
+    result['EXCHANGE'] = cpus.EXCHANGE;
     return result;
   }
 
@@ -151,6 +153,7 @@ class Cpu {
     result[cpus.BITTEST] = this.read_and_bit_test;
     result[cpus.COMPLEMENT] = this.complement_byte;
     result[cpus.NEGATE] = this.negate_byte;
+    result[cpus.EXCHANGE] = this.exchange;
     return result;
   }
 
@@ -172,6 +175,25 @@ class Cpu {
   };
 
   /**
+   * Create ordered list of register identifiers
+   * @returns {[]} register list
+   */
+  mapRegisterIdentifier() {
+    const result = [];
+    result[0] = 'D';
+    result[1] = 'X';
+    result[2] = 'Y';
+    result[3] = 'U';
+    result[4] = 'S';
+    result[5] = 'PC';
+    result[8] = 'A';
+    result[9] = 'B';
+    result[10] = 'CC';
+    result[11] = 'DP';
+    return result;
+  }
+
+  /**
    * Populate the execution stack with micro-codes.
    * translates string codes to cpu codes
    * @param {[]} instructionCode list
@@ -179,7 +201,12 @@ class Cpu {
   populateCodeStack(instructionCode) {
     this.code = [];
     for (let index = 0; index < instructionCode.length; index++) {
-      this.code.unshift(this.codes[instructionCode[index]]);
+      const operation = this.codes[instructionCode[index]];
+      if (typeof operation === 'undefined') {
+        throw new Error ("unknown operation " + instructionCode[index]);
+      } else {
+        this.code.unshift(this.codes[instructionCode[index]]);
+      }
     }
   }
 
@@ -262,6 +289,15 @@ class Cpu {
     if (this.code.length === 0) {
       this.clearInstruction();
     }
+  }
+
+  /**
+   * evaluate register id to find register name
+   * @param {number} id 4bit identifier of register
+   * @returns {string} register name
+   */
+  identifyRegister(id) {
+    return this.registerIds[id];
   }
 
   swap_internal_registers = () => {
@@ -595,8 +631,20 @@ class Cpu {
     this.object.set(this.alu1.negate(this.object.fetch()));
   }
 
+  exchange = () => {
+    const id1 = (this.W.fetch() & 0xf0) >> 4;
+    const id2 = this.W.fetch() & 0x0f;
+    if ((id1 & 8) === (id2 & 8)) {
+      const register1 = this.identifyRegister(id1);
+      const register2 = this.identifyRegister(id2);
+      const temporary = this.registers.get(register1).fetch();
+      this.registers.get(register1).set(this.registers.get(register2).fetch());
+      this.registers.get(register2).set(temporary);
+    }
+  }
+
   select_register = (stackMask) => {
-    let register = this.stack_order[stackMask];
+    let register = this.stackOrder[stackMask];
     if (register === 'US') {
       if (this.object.name === 'U') {
         register = 'S';
