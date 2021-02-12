@@ -92,6 +92,7 @@ class Cpu {
     result['EXCHANGE'] = cpus.EXCHANGE;
     result['TRANSFER'] = cpus.TRANSFER;
     result['SIGNEXTEND'] = cpus.SIGNEXTEND;
+    result['MULTIPLY'] = cpus.MULTIPLY;
     return result;
   }
 
@@ -158,6 +159,7 @@ class Cpu {
     result[cpus.EXCHANGE] = this.exchange;
     result[cpus.TRANSFER] = this.transfer;
     result[cpus.SIGNEXTEND] = this.sign_extend;
+    result[cpus.MULTIPLY] = this.multiply;
     return result;
   }
 
@@ -402,6 +404,14 @@ class Cpu {
         (this.CC.save() & cpus.CARRY) === cpus.CARRY ? 1 : 0,
     ));
   };
+
+  multiply = () => {
+    this.registers.get('D').set(
+        this.alu1.mul(
+            this.registers.get('A').fetch(), this.registers.get('B').fetch()
+        )
+    );
+  }
 
   fetch_next_instruction_from_PC = () => {
     const nextByte = this.fetchNextByte();

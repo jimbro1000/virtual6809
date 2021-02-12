@@ -67,6 +67,13 @@ class Alu {
       return masked;
     };
 
+    this.mul = (reg1, reg2) => {
+      const result = reg1 * reg2;
+      this.cc.carry((result & 0x80) === 0x80);
+      this.cc.zero(result === 0);
+      return result;
+    };
+
     this.and = (reg1, value, test) => {
       if (typeof(test) === 'undefined') test = true;
       const result = reg1 & value;
