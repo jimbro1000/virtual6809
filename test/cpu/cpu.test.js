@@ -1824,5 +1824,42 @@ describe('6809 cpu', () => {
       expect(subject.registers.get(register1).fetch()).toBe(initialValue1);
       expect(subject.registers.get(register2).fetch()).toBe(initialValue2);
     });
+
+    each(
+        [
+          [0x0000, [0x1f, 0x12], 'X', 'Y', 0x8000, 0x0001, 7],
+          [0x0000, [0x1f, 0x8b], 'A', 'DP', 0x55, 0xaa, 7],
+        ],
+    ).it('transfers the value of one register to another',
+        (
+            address, code, register1, register2,
+            initialValue1, initialValue2, cycles,
+        ) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(register1).set(initialValue1);
+          subject.registers.get(register2).set(initialValue2);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register1).fetch()).toBe(initialValue1);
+          expect(subject.registers.get(register2).fetch()).toBe(initialValue1);
+        });
+
+    it('cannot transfer an 8 bit to a 16 bit register', () => {
+      const address = 0x0000;
+      const code = [0x1f, 0x81];
+      const register1 = 'A';
+      const register2 = 'X';
+      const initialValue1 = 0xaa;
+      const initialValue2 = 0x5555;
+      const cycles = 7;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      subject.registers.get(register1).set(initialValue1);
+      subject.registers.get(register2).set(initialValue2);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get(register2).fetch()).toBe(initialValue2);
+    });
   });
 });

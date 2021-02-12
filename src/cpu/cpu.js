@@ -90,6 +90,7 @@ class Cpu {
     result['COMPLEMENT'] = cpus.COMPLEMENT;
     result['NEGATE'] = cpus.NEGATE;
     result['EXCHANGE'] = cpus.EXCHANGE;
+    result['TRANSFER'] = cpus.TRANSFER;
     return result;
   }
 
@@ -154,6 +155,7 @@ class Cpu {
     result[cpus.COMPLEMENT] = this.complement_byte;
     result[cpus.NEGATE] = this.negate_byte;
     result[cpus.EXCHANGE] = this.exchange;
+    result[cpus.TRANSFER] = this.transfer;
     return result;
   }
 
@@ -640,6 +642,16 @@ class Cpu {
       const temporary = this.registers.get(register1).fetch();
       this.registers.get(register1).set(this.registers.get(register2).fetch());
       this.registers.get(register2).set(temporary);
+    }
+  }
+
+  transfer = () => {
+    const id1 = (this.W.fetch() & 0xf0) >> 4;
+    const id2 = this.W.fetch() & 0x0f;
+    if ((id1 & 8) === (id2 & 8)) {
+      const register1 = this.identifyRegister(id1);
+      const register2 = this.identifyRegister(id2);
+      this.registers.get(register2).set(this.registers.get(register1).fetch());
     }
   }
 

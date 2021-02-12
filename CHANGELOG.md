@@ -1,6 +1,7 @@
 # Virtual 6809 CHANGELOG #
 
 ## Unreleased ##
+* Add EXG and TFR instructions
 
 ## V0.2 - Feb 11 2021 ##
 * Add BIT, COM and NEG instructions

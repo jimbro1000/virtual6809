@@ -66,3 +66,4 @@ define('BITTEST', 50);
 define('COMPLEMENT', 51);
 define('NEGATE', 52);
 define('EXCHANGE', 53);
+define('TRANSFER', 54);

@@ -414,10 +414,18 @@ instructions = {
   },
   0x1e: {
     'operation': 'EXG',
-    'mode': 'immediate',
+    'mode': 'inherent',
     'object': 'W',
     'code': [
       'READLOW', 'EXCHANGE', 'BUSY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
+    ],
+  },
+  0x1f: {
+    'operation': 'EXG',
+    'mode': 'inherent',
+    'object': 'W',
+    'code': [
+      'READLOW', 'TRANSFER', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
     ],
   },
   0x20: {
