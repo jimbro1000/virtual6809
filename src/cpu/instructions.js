@@ -412,6 +412,14 @@ instructions = {
       'READWLOW', 'ANDCC',
     ],
   },
+  0x1e: {
+    'operation': 'EXG',
+    'mode': 'immediate',
+    'object': 'W',
+    'code': [
+      'READLOW', 'EXCHANGE', 'BUSY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
+    ],
+  },
   0x20: {
     'operation': 'BRA',
     'mode': 'relative',
