@@ -42,6 +42,7 @@ So far the instruction set is incomplete and only covers:
  * ABX
  * ADD and ADC
  * SUB and SBC
+ * SEX
  * AND, OR, EOR
  * LSL, LSR, ROL and ROR  
  * BIT, COM, NEG

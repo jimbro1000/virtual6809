@@ -1861,5 +1861,22 @@ describe('6809 cpu', () => {
       expect(cycleCount).toBe(cycles);
       expect(subject.registers.get(register2).fetch()).toBe(initialValue2);
     });
+
+    each(
+        [
+          [0x0000, [0x1d], 0x80, 0xff, cpus.NEGATIVE, 2],
+          [0x0000, [0x1d], 0x00, 0x00, cpus.ZERO, 2],
+          [0x0000, [0x1d], 0x0f, 0x00, 0x00, 2],
+        ],
+    ).it('extends B into D with respect to sign',
+        (address, code, initialValue, expectedValue, ccFlags, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get('B').set(initialValue);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get('A').fetch()).toBe(expectedValue);
+          expect(subject.CC.value).toBe(ccFlags);
+        });
   });
 });

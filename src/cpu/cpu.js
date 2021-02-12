@@ -91,6 +91,7 @@ class Cpu {
     result['NEGATE'] = cpus.NEGATE;
     result['EXCHANGE'] = cpus.EXCHANGE;
     result['TRANSFER'] = cpus.TRANSFER;
+    result['SIGNEXTEND'] = cpus.SIGNEXTEND;
     return result;
   }
 
@@ -156,6 +157,7 @@ class Cpu {
     result[cpus.NEGATE] = this.negate_byte;
     result[cpus.EXCHANGE] = this.exchange;
     result[cpus.TRANSFER] = this.transfer;
+    result[cpus.SIGNEXTEND] = this.sign_extend;
     return result;
   }
 
@@ -631,6 +633,17 @@ class Cpu {
 
   negate_byte = () => {
     this.object.set(this.alu1.negate(this.object.fetch()));
+  }
+
+  sign_extend = () => {
+    if ((this.registers.get('B').fetch() & 0x80) !== 0) {
+      this.registers.get('A').set(0xff);
+      this.CC.negative(true);
+    } else {
+      this.registers.get('A').set(0x00);
+      this.CC.negative(false);
+    }
+    this.CC.zero(this.registers.get('D').fetch() === 0);
   }
 
   exchange = () => {

@@ -2,6 +2,7 @@
 
 ## Unreleased ##
 * Add EXG and TFR instructions
+* Add Sign Extend (SEX) instruction
 
 ## V0.2 - Feb 11 2021 ##
 * Add BIT, COM and NEG instructions
