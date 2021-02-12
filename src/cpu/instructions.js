@@ -412,6 +412,27 @@ instructions = {
       'READWLOW', 'ANDCC',
     ],
   },
+  0x1d: {
+    'operation': 'SEX',
+    'mode': 'inherent',
+    'code': ['SIGNEXTEND'],
+  },
+  0x1e: {
+    'operation': 'EXG',
+    'mode': 'inherent',
+    'object': 'W',
+    'code': [
+      'READLOW', 'EXCHANGE', 'BUSY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
+    ],
+  },
+  0x1f: {
+    'operation': 'EXG',
+    'mode': 'inherent',
+    'object': 'W',
+    'code': [
+      'READLOW', 'TRANSFER', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
+    ],
+  },
   0x20: {
     'operation': 'BRA',
     'mode': 'relative',

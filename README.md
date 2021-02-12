@@ -42,6 +42,7 @@ So far the instruction set is incomplete and only covers:
  * ABX
  * ADD and ADC
  * SUB and SBC
+ * SEX
  * AND, OR, EOR
  * LSL, LSR, ROL and ROR  
  * BIT, COM, NEG
@@ -53,6 +54,7 @@ So far the instruction set is incomplete and only covers:
  * RTS
  * short branch
  * long branch
+ * EXG and TFR
 
 indexed/indirect addressing is not implemented  
 ALU is partially implemented (add, subtract, add with carry, subtract with carry, and)  
