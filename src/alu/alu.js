@@ -159,6 +159,12 @@ class Alu {
       this.cc.negative( (reg1 & 0x80) !== 0);
       return reg1;
     };
+
+    this.test8 = (reg1) => {
+      this.cc.negative((reg1 & 0x80) !== 0);
+      this.cc.zero(reg1 === 0);
+      this.cc.overflow(false);
+    };
   }
 }
 

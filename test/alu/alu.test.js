@@ -344,5 +344,26 @@ describe('Arithmetic Logic Unit', () => {
       expect(result).toBe(expectedValue);
       expect(cc.value).toBe(ccFlags);
     });
+
+    it('tests an 8 bit value for negative flag', () => {
+      const ccFlags = cpus.NEGATIVE;
+      const testValue = 0x80;
+      subject.test8(testValue);
+      expect(cc.value & ccFlags).toBe(ccFlags);
+    });
+
+    it('tests an 9 bit value for zero flag', () => {
+      const ccFlags = cpus.ZERO;
+      const testValue = 0x00;
+      subject.test8(testValue);
+      expect(cc.value & ccFlags).toBe(ccFlags);
+    });
+
+    it('clears the overflow flag after testing', () => {
+      const ccFlags = cpus.OVERFLOW;
+      cc.value = 0xff;
+      subject.test8(0x01);
+      expect(cc.value & ccFlags).toBe(0x00);
+    });
   });
 });
