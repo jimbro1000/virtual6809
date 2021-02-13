@@ -47,6 +47,14 @@ instructions = {
       'DIRECT', 'SWAPWAD', 'READWLOW', 'ROTATELEFT', 'WRITEWLOW',
     ],
   },
+  0x0d: {
+    'operation': 'TST',
+    'object': 'W',
+    'target': 'AD',
+    'code': [
+      'DIRECT', 'SWAPWAD', 'READWLOW', 'TESTOB', 'BUSY',
+    ],
+  },
   0x0e: {
     'operation': 'JMP',
     'mode': 'direct',
@@ -696,6 +704,13 @@ instructions = {
       'INCOB',
     ],
   },
+  0x4d: {
+    'operation': 'TSTA',
+    'object': 'A',
+    'code': [
+      'TESTOB',
+    ],
+  },
   0x50: {
     'operation': 'NEGB',
     'mode': 'inherent',
@@ -756,6 +771,13 @@ instructions = {
     'object': 'B',
     'code': [
       'INCOB',
+    ],
+  },
+  0x5d: {
+    'operation': 'TSTB',
+    'object': 'B',
+    'code': [
+      'TESTOB',
     ],
   },
   0x70: {
@@ -820,6 +842,15 @@ instructions = {
     'object': 'AD',
     'code': [
       'READHIGH', 'READLOW', 'READADWLOW', 'INCW', 'WRITEWLOW',
+    ],
+  },
+  0x7d: {
+    'operation': 'TST',
+    'mode': 'extended',
+    'object': 'W',
+    'target': 'AD',
+    'code': [
+      'READHIGH', 'READWLOW', 'SWAPWAD', 'READWLOW', 'TESTOB', 'BUSY',
     ],
   },
   0x7e: {

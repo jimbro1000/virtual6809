@@ -10,6 +10,14 @@ class Alu {
   constructor(controlRegister) {
     this.cc = controlRegister;
 
+    /**
+     * add two 8 bit values, optionally with a carry bit.
+     *
+     * @param {number} reg1 register value 1
+     * @param {number} reg2 register value 2
+     * @param {number} c optional carry bit c
+     * @return {number} sum result
+     */
     this.add8 = (reg1, reg2, c) => {
       if (c === undefined) {
         c = 0;
@@ -26,6 +34,13 @@ class Alu {
       return masked;
     };
 
+    /**
+     * add two 16 bit values.
+     *
+     * @param {number} reg1 register value 1
+     * @param {number} reg2 register value 2
+     * @return {number} sum result
+     */
     this.add16 = (reg1, reg2) => {
       const result = (reg1 + reg2);
       const masked = result & 0xffff;
@@ -37,6 +52,14 @@ class Alu {
       return masked;
     };
 
+    /**
+     * subtract two 8 bit values, optionally with a carry bit.
+     *
+     * @param {number} reg1 register value 1
+     * @param {number} reg2 register value 2
+     * @param {number} c optional carry bit c
+     * @return {number} subtraction result
+     */
     this.sub8 = (reg1, reg2, c) => {
       if (c === undefined) {
         c = 0;
@@ -56,6 +79,13 @@ class Alu {
       return masked;
     };
 
+    /**
+     * subtract two 16 bit values.
+     *
+     * @param {number} reg1 register value 1
+     * @param {number} reg2 register value 2
+     * @return {number} subtraction result
+     */
     this.sub16 = (reg1, reg2) => {
       const result = reg1 - reg2;
       const masked = result & 0xffff;
@@ -67,49 +97,80 @@ class Alu {
       return masked;
     };
 
-    this.mul = (reg1, reg2) => {
+    /**
+     * multiply two 8 bit values into 16 bit value.
+     *
+     * @param {number} reg1 register value 1
+     * @param {number} reg2 register value 2
+     * @return {number} multiplication result
+     */
+    this.mul8 = (reg1, reg2) => {
       const result = reg1 * reg2;
       this.cc.carry((result & 0x80) === 0x80);
       this.cc.zero(result === 0);
       return result;
     };
 
-    this.and = (reg1, value, test) => {
+    /**
+     * logically AND two 8 bit values.
+     *
+     * @param {number} reg1 register value 1
+     * @param {number} reg2 register value 2
+     * @param {boolean} test switch to apply condition tests
+     * @return {number} and result
+     */
+    this.and8 = (reg1, reg2, test) => {
       if (typeof(test) === 'undefined') test = true;
-      const result = reg1 & value;
+      const result = reg1 & reg2;
       if (test) {
-        this.cc.negative((result & 0x80) !== 0);
-        this.cc.overflow(false);
-        this.cc.zero(result === 0);
+        this.test8(result);
       }
       return result;
     };
 
-    this.or = (reg1, value, test) => {
+    /**
+     * logically OR two 8 bit values.
+     *
+     * @param {number} reg1 register value 1
+     * @param {number} reg2 register value 2
+     * @param {boolean} test switch to apply condition tests
+     * @return {number} or result
+     */
+    this.or8 = (reg1, reg2, test) => {
       if (typeof(test) === 'undefined') test = true;
-      const result = reg1 | value;
+      const result = reg1 | reg2;
       if (test) {
-        this.cc.negative((result & 0x80) !== 0);
-        this.cc.overflow(false);
-        this.cc.zero(result === 0);
+        this.test8(result);
       }
       return result;
     };
 
-    this.eor = (reg1, value) => {
-      const result = reg1 ^ value;
-      this.cc.negative((result & 0x80) !== 0);
-      this.cc.overflow(false);
-      this.cc.zero(result === 0);
+    /**
+     * logically ExclusiveOR two 8 bit values.
+     *
+     * @param {number} reg1 register value 1
+     * @param {number} reg2 register value 2
+     * @return {number} eor result
+     */
+    this.eor8 = (reg1, reg2) => {
+      const result = reg1 ^ reg2;
+      this.test8(result);
       return result;
     };
 
-    this.shiftLeft = (reg1, rotate) => {
+    /**
+     * logically shift 8 bit value left.
+     * Optionally rotate instead of shift
+     *
+     * @param {number} reg1 register value
+     * @param {boolean} rotate switch
+     * @return {number} shift result
+     */
+    this.shiftLeft8 = (reg1, rotate) => {
       if (typeof(rotate) === 'undefined') {
         rotate = false;
       }
       const result = (reg1 << 1) + (rotate && this.cc.ifcarryset() ? 1 : 0);
-      // const result = reg1 << 1;
       const maskedResult = result & 0xff;
       const carry = result !== maskedResult;
       const negative = (result & 0x80) !== 0;
@@ -120,7 +181,15 @@ class Alu {
       return maskedResult;
     };
 
-    this.shiftRight = (reg1, rotate) => {
+    /**
+     * logically shift 8 bit value right.
+     * Optionally rotate instead of shift
+     *
+     * @param {number} reg1 register value
+     * @param {boolean} rotate switch
+     * @return {number} shift result
+     */
+    this.shiftRight8 = (reg1, rotate) => {
       if (typeof(rotate) === 'undefined') {
         rotate = false;
       }
@@ -134,17 +203,35 @@ class Alu {
       return result;
     };
 
-    this.rotateLeft = (reg1) => {
-      return this.shiftLeft(reg1, true);
+    /**
+     * logically rotate 8 bit value left.
+     *
+     * @param {number} reg1 register value
+     * @return {number} rotate result
+     */
+    this.rotateLeft8 = (reg1) => {
+      return this.shiftLeft8(reg1, true);
     };
 
-    this.rotateRight = (reg1) => {
-      return this.shiftRight(reg1, true);
+    /**
+     * logically rotate 8 bit value right.
+     *
+     * @param {number} reg1 register value
+     * @return {number} rotate result
+     */
+    this.rotateRight8 = (reg1) => {
+      return this.shiftRight8(reg1, true);
     };
 
-    this.complement = (reg1) => {
+    /**
+     * ones complement 8 bit value.
+     *
+     * @param {number} reg1 register value
+     * @return {number} complement result
+     */
+    this.complement8 = (reg1) => {
       const mask = 0xff;
-      reg1 = this.eor(reg1, mask);
+      reg1 = this.eor8(reg1, mask);
       this.cc.carry(true);
       this.cc.zero(reg1 === 0);
       this.cc.negative( (reg1 & 0x80) !== 0);
@@ -152,13 +239,30 @@ class Alu {
       return reg1;
     };
 
-    this.negate = (reg1) => {
+    /**
+     * twos complement 8 bit value.
+     *
+     * @param {number} reg1 register value
+     * @return {number} complement result
+     */
+    this.negate8 = (reg1) => {
       this.cc.carry(reg1 !== 0);
       this.cc.overflow(reg1 === 0x80);
       reg1 = (0x100 - reg1) & 0xff;
       this.cc.zero(reg1 === 0);
       this.cc.negative( (reg1 & 0x80) !== 0);
       return reg1;
+    };
+
+    /**
+     * test 8 bit value.
+     *
+     * @param {number} reg1 register value
+     */
+    this.test8 = (reg1) => {
+      this.cc.negative((reg1 & 0x80) !== 0);
+      this.cc.zero(reg1 === 0);
+      this.cc.overflow(false);
     };
   }
 }
