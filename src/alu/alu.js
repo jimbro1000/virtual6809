@@ -67,14 +67,14 @@ class Alu {
       return masked;
     };
 
-    this.mul = (reg1, reg2) => {
+    this.mul8 = (reg1, reg2) => {
       const result = reg1 * reg2;
       this.cc.carry((result & 0x80) === 0x80);
       this.cc.zero(result === 0);
       return result;
     };
 
-    this.and = (reg1, value, test) => {
+    this.and8 = (reg1, value, test) => {
       if (typeof(test) === 'undefined') test = true;
       const result = reg1 & value;
       if (test) {
@@ -85,7 +85,7 @@ class Alu {
       return result;
     };
 
-    this.or = (reg1, value, test) => {
+    this.or8 = (reg1, value, test) => {
       if (typeof(test) === 'undefined') test = true;
       const result = reg1 | value;
       if (test) {
@@ -96,7 +96,7 @@ class Alu {
       return result;
     };
 
-    this.eor = (reg1, value) => {
+    this.eor8 = (reg1, value) => {
       const result = reg1 ^ value;
       this.cc.negative((result & 0x80) !== 0);
       this.cc.overflow(false);
@@ -104,12 +104,11 @@ class Alu {
       return result;
     };
 
-    this.shiftLeft = (reg1, rotate) => {
+    this.shiftLeft8 = (reg1, rotate) => {
       if (typeof(rotate) === 'undefined') {
         rotate = false;
       }
       const result = (reg1 << 1) + (rotate && this.cc.ifcarryset() ? 1 : 0);
-      // const result = reg1 << 1;
       const maskedResult = result & 0xff;
       const carry = result !== maskedResult;
       const negative = (result & 0x80) !== 0;
@@ -120,7 +119,7 @@ class Alu {
       return maskedResult;
     };
 
-    this.shiftRight = (reg1, rotate) => {
+    this.shiftRight8 = (reg1, rotate) => {
       if (typeof(rotate) === 'undefined') {
         rotate = false;
       }
@@ -134,17 +133,17 @@ class Alu {
       return result;
     };
 
-    this.rotateLeft = (reg1) => {
-      return this.shiftLeft(reg1, true);
+    this.rotateLeft8 = (reg1) => {
+      return this.shiftLeft8(reg1, true);
     };
 
-    this.rotateRight = (reg1) => {
-      return this.shiftRight(reg1, true);
+    this.rotateRight8 = (reg1) => {
+      return this.shiftRight8(reg1, true);
     };
 
-    this.complement = (reg1) => {
+    this.complement8 = (reg1) => {
       const mask = 0xff;
-      reg1 = this.eor(reg1, mask);
+      reg1 = this.eor8(reg1, mask);
       this.cc.carry(true);
       this.cc.zero(reg1 === 0);
       this.cc.negative( (reg1 & 0x80) !== 0);
@@ -152,7 +151,7 @@ class Alu {
       return reg1;
     };
 
-    this.negate = (reg1) => {
+    this.negate8 = (reg1) => {
       this.cc.carry(reg1 !== 0);
       this.cc.overflow(reg1 === 0x80);
       reg1 = (0x100 - reg1) & 0xff;

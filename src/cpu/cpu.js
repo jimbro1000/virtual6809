@@ -407,7 +407,7 @@ class Cpu {
 
   multiply = () => {
     this.registers.get('D').set(
-        this.alu1.mul(
+        this.alu1.mul8(
             this.registers.get('A').fetch(), this.registers.get('B').fetch()
         )
     );
@@ -580,11 +580,11 @@ class Cpu {
   };
 
   and_control = () => {
-    this.CC.value = this.alu1.and(this.CC.value, this.W.fetch(), false);
+    this.CC.value = this.alu1.and8(this.CC.value, this.W.fetch(), false);
   };
 
   and_ob = () => {
-    this.object.set(this.alu1.and(this.object.fetch(), this.W.fetch()));
+    this.object.set(this.alu1.and8(this.object.fetch(), this.W.fetch()));
   };
 
   or_target_read = () => {
@@ -597,11 +597,11 @@ class Cpu {
   };
 
   or_control = () => {
-    this.CC.value = this.alu1.or(this.CC.value, this.W.fetch(), false);
+    this.CC.value = this.alu1.or8(this.CC.value, this.W.fetch(), false);
   }
 
   or_ob = () => {
-    this.object.set(this.alu1.or(this.object.fetch(), this.W.fetch()));
+    this.object.set(this.alu1.or8(this.object.fetch(), this.W.fetch()));
   }
 
   eor_target_read = () => {
@@ -610,23 +610,23 @@ class Cpu {
     } else {
       this.read_next_low_data_byte_to_W_from_AD();
     }
-    this.object.set(this.alu1.eor(this.object.fetch(), this.W.fetch()));
+    this.object.set(this.alu1.eor8(this.object.fetch(), this.W.fetch()));
   }
 
   shift_left = () => {
-    this.object.set(this.alu1.shiftLeft(this.object.fetch()));
+    this.object.set(this.alu1.shiftLeft8(this.object.fetch()));
   }
 
   rotate_left = () => {
-    this.object.set(this.alu1.shiftLeft(this.object.fetch(), true));
+    this.object.set(this.alu1.shiftLeft8(this.object.fetch(), true));
   }
 
   shift_right = () => {
-    this.object.set(this.alu1.shiftRight(this.object.fetch()));
+    this.object.set(this.alu1.shiftRight8(this.object.fetch()));
   }
 
   rotate_right = () => {
-    this.object.set(this.alu1.shiftRight(this.object.fetch(), true));
+    this.object.set(this.alu1.shiftRight8(this.object.fetch(), true));
   }
 
   read_and_bit_test = () => {
@@ -634,15 +634,15 @@ class Cpu {
     if (this.target === this.PC) {
       this.PC.set(address + 1);
     }
-    this.alu1.and(this.object.fetch(), this.memory.read(address));
+    this.alu1.and8(this.object.fetch(), this.memory.read(address));
   }
 
   complement_byte = () => {
-    this.object.set(this.alu1.complement(this.object.fetch()));
+    this.object.set(this.alu1.complement8(this.object.fetch()));
   }
 
   negate_byte = () => {
-    this.object.set(this.alu1.negate(this.object.fetch()));
+    this.object.set(this.alu1.negate8(this.object.fetch()));
   }
 
   sign_extend = () => {

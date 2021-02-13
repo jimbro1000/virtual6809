@@ -184,21 +184,21 @@ describe('Arithmetic Logic Unit', () => {
       const s1 = 0x20;
       const s2 = 0x08;
       const expected = 0x0100;
-      const result = subject.mul(s1, s2);
+      const result = subject.mul8(s1, s2);
       expect(result).toBe(expected);
     });
 
     it('sets carry if bit 7 of the result is set', () => {
       const s1 = 0x10;
       const s2 = 0x08;
-      subject.mul(s1, s2);
+      subject.mul8(s1, s2);
       expect(cc.value & cpus.CARRY).toBe(cpus.CARRY);
     });
 
     it('sets zero if the result is zero', () => {
       const s1 = 0x00;
       const s2 = 0x00;
-      subject.mul(s1, s2);
+      subject.mul8(s1, s2);
       expect(cc.value & cpus.ZERO).toBe(cpus.ZERO);
     });
   });
@@ -210,7 +210,7 @@ describe('Arithmetic Logic Unit', () => {
           [0xff, 0x55, 0x55, 0x00],
         ],
     ).it('ANDs two values and sets NZV', (s1, s2, expected, flags) => {
-      const result = subject.and(s1, s2);
+      const result = subject.and8(s1, s2);
       expect(result).toBe(expected);
       expect(cc.value).toBe(flags);
     });
@@ -223,7 +223,7 @@ describe('Arithmetic Logic Unit', () => {
     ).it(
         'does not modify cc if condition parameter is false',
         (s1, s2, expected) => {
-          const result = subject.and(s1, s2, false);
+          const result = subject.and8(s1, s2, false);
           expect(result).toBe(expected);
           expect(cc.value).toBe(0);
         });
@@ -237,7 +237,7 @@ describe('Arithmetic Logic Unit', () => {
           [0x55, 0x2a, 0x7f, 0x00],
         ],
     ).it('ORs two values and sets NZV', (s1, s2, expected, flags) => {
-      const result = subject.or(s1, s2);
+      const result = subject.or8(s1, s2);
       expect(result).toBe(expected);
       expect(cc.value).toBe(flags);
     });
@@ -250,7 +250,7 @@ describe('Arithmetic Logic Unit', () => {
     ).it(
         'does not modify cc if condition parameter is false',
         (s1, s2, expected) => {
-          const result = subject.or(s1, s2, false);
+          const result = subject.or8(s1, s2, false);
           expect(result).toBe(expected);
           expect(cc.value).toBe(0);
         });
@@ -265,7 +265,7 @@ describe('Arithmetic Logic Unit', () => {
     ).it(
         'Exclusive-ORs two values bitwise and sets NZV',
         (s1, s2, expected, flags) => {
-          const result = subject.eor(s1, s2);
+          const result = subject.eor8(s1, s2);
           expect(result).toBe(expected);
           expect(cc.value).toBe(flags);
         });
@@ -279,7 +279,7 @@ describe('Arithmetic Logic Unit', () => {
           [0x00, 0x00, cpus.ZERO],
         ],
     ).it('performs arithmetic shift left', (s1, expected, flags) => {
-      const result = subject.shiftLeft(s1);
+      const result = subject.shiftLeft8(s1);
       expect(result).toBe(expected);
       expect(cc.value).toBe(flags);
     });
@@ -292,7 +292,7 @@ describe('Arithmetic Logic Unit', () => {
           [0x01, 0x00, cpus.ZERO | cpus.CARRY],
         ],
     ).it('performs arithmetic shift right', (s1, expected, expectedFlags) => {
-      const result = subject.shiftRight(s1);
+      const result = subject.shiftRight8(s1);
       expect(result).toBe(expected);
       expect(cc.value).toBe(expectedFlags);
     });
@@ -305,7 +305,7 @@ describe('Arithmetic Logic Unit', () => {
     ).it('performs rotate left',
         (s1, expected, initialFlags, expectedFlags) => {
           cc.value = initialFlags;
-          const result = subject.rotateLeft(s1, true);
+          const result = subject.rotateLeft8(s1, true);
           expect(result).toBe(expected);
           expect(cc.value).toBe(expectedFlags);
         });
@@ -319,7 +319,7 @@ describe('Arithmetic Logic Unit', () => {
     ).it('performs rotate right',
         (s1, expected, initialFlags, expectedFlags) => {
           cc.value = initialFlags;
-          const result = subject.rotateRight(s1);
+          const result = subject.rotateRight8(s1);
           expect(result).toBe(expected);
           expect(cc.value).toBe(expectedFlags);
         });
@@ -328,7 +328,7 @@ describe('Arithmetic Logic Unit', () => {
   describe('general operations', () => {
     it('performs a 1s complement', () => {
       const s1 = 0x55;
-      const result = subject.complement(s1);
+      const result = subject.complement8(s1);
       expect(result).toBe(0xaa);
       expect(cc.value).toBe(cpus.CARRY | cpus.NEGATIVE);
     });
@@ -340,7 +340,7 @@ describe('Arithmetic Logic Unit', () => {
           [0x80, 0x80, cpus.CARRY | cpus.OVERFLOW | cpus.NEGATIVE],
         ],
     ).it('performs a 2s complement', (initialValue, expectedValue, ccFlags) => {
-      const result = subject.negate(initialValue);
+      const result = subject.negate8(initialValue);
       expect(result).toBe(expectedValue);
       expect(cc.value).toBe(ccFlags);
     });
