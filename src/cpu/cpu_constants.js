@@ -69,3 +69,4 @@ define('EXCHANGE', 53);
 define('TRANSFER', 54);
 define('SIGNEXTEND', 55);
 define('MULTIPLY', 56);
+define('TESTOB', 57);

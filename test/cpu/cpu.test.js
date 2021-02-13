@@ -1894,5 +1894,35 @@ describe('6809 cpu', () => {
       expect(cycleCount).toBe(cycles);
       expect(subject.registers.get('D').fetch()).toBe(expectedValue);
     });
+
+    each(
+        [
+          [0x0000, [0x4d], 'A', 0x00, cpus.ZERO, 2],
+          [0x0000, [0x5d], 'B', 0x80, cpus.NEGATIVE, 2],
+        ],
+    ).it('tests an 8 bit register',
+        (address, code, register, value, ccFlags, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(register).set(value);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.CC.value).toBe(ccFlags);
+        });
+
+    each(
+        [
+          [0x0000, [0x0d, 0x02, 0x00], 0x00, cpus.ZERO, 6],
+          [0x0000, [0x7d, 0x00, 0x03, 0x80], 0x00, cpus.NEGATIVE, 7],
+        ],
+    ).it('tests a memory address',
+        (address, code, dp, ccFlags, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.CC.value).toBe(ccFlags);
+        });
   });
 });

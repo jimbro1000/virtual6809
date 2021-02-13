@@ -93,6 +93,7 @@ class Cpu {
     result['TRANSFER'] = cpus.TRANSFER;
     result['SIGNEXTEND'] = cpus.SIGNEXTEND;
     result['MULTIPLY'] = cpus.MULTIPLY;
+    result['TESTOB'] = cpus.TESTOB;
     return result;
   }
 
@@ -160,6 +161,7 @@ class Cpu {
     result[cpus.TRANSFER] = this.transfer;
     result[cpus.SIGNEXTEND] = this.sign_extend;
     result[cpus.MULTIPLY] = this.multiply;
+    result[cpus.TESTOB] = this.test_byte;
     return result;
   }
 
@@ -411,7 +413,11 @@ class Cpu {
             this.registers.get('A').fetch(), this.registers.get('B').fetch()
         )
     );
-  }
+  };
+
+  test_byte = () => {
+    this.alu1.test8(this.object.fetch());
+  };
 
   fetch_next_instruction_from_PC = () => {
     const nextByte = this.fetchNextByte();

@@ -49,6 +49,7 @@ So far the instruction set is incomplete and only covers:
  * BIT, COM, NEG
  * NOP
  * 8 bit CMP (immediate, direct, extended)
+ * TST
  * INC and DEC
  * PSH and PUL
  * JSR
