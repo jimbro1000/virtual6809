@@ -70,3 +70,4 @@ define('TRANSFER', 54);
 define('SIGNEXTEND', 55);
 define('MULTIPLY', 56);
 define('TESTOB', 57);
+define('DECIMALADJUST', 58);

@@ -5,6 +5,10 @@
 * Add Sign Extend (SEX) instruction
 * Add MUL instruction
 * Add TST instructions
+* Add DAA instruction
+
+## V0.2.1 (fix) - Feb 13 2021 ##
+* Use real semver to fix npm install
 
 ## V0.2 - Feb 11 2021 ##
 * Add BIT, COM and NEG instructions

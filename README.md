@@ -41,6 +41,7 @@ So far the instruction set is incomplete and only covers:
  * JMP
  * ABX
  * ADD and ADC
+ * DAA
  * SUB and SBC
  * SEX
  * MUL

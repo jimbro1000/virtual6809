@@ -1924,5 +1924,22 @@ describe('6809 cpu', () => {
           expect(cycleCount).toBe(cycles);
           expect(subject.CC.value).toBe(ccFlags);
         });
+
+    it('performs decimal adjust on A register', () => {
+      const address = 0x0000;
+      const code = [0x19];
+      const register = 'A';
+      const initialValueA = 0x1b;
+      const initialCC = cpus.HALFCARRY;
+      const expectedValueA = 0x21;
+      const cycles = 2;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      subject.registers.get(register).set(initialValueA);
+      subject.CC.value = initialCC;
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get(register).fetch()).toBe(expectedValueA);
+    });
   });
 });
