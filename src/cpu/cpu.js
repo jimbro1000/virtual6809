@@ -94,6 +94,7 @@ class Cpu {
     result['SIGNEXTEND'] = cpus.SIGNEXTEND;
     result['MULTIPLY'] = cpus.MULTIPLY;
     result['TESTOB'] = cpus.TESTOB;
+    result['DECIMALADJUST'] = cpus.DECIMALADJUST;
     return result;
   }
 
@@ -162,6 +163,7 @@ class Cpu {
     result[cpus.SIGNEXTEND] = this.sign_extend;
     result[cpus.MULTIPLY] = this.multiply;
     result[cpus.TESTOB] = this.test_byte;
+    result[cpus.DECIMALADJUST] = this.decimal_adjust;
     return result;
   }
 
@@ -660,6 +662,10 @@ class Cpu {
       this.CC.negative(false);
     }
     this.CC.zero(this.registers.get('D').fetch() === 0);
+  }
+
+  decimal_adjust = () => {
+    this.object.set(this.alu1.daa(this.object.fetch()));
   }
 
   exchange = () => {

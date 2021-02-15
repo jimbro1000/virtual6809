@@ -154,6 +154,10 @@ class ControlRegister extends CpuRegister {
         const overflow = (this.value & cpus.OVERFLOW) > 0;
         return (negative && !overflow) || (overflow && !negative);
     }
+
+    ifhalfcarry = () => {
+        return (this.value & cpus.HALFCARRY) > 0;
+    }
 }
 
 module.exports = { ControlRegister }

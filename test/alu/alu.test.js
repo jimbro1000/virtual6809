@@ -352,7 +352,7 @@ describe('Arithmetic Logic Unit', () => {
       expect(cc.value & ccFlags).toBe(ccFlags);
     });
 
-    it('tests an 9 bit value for zero flag', () => {
+    it('tests an 8 bit value for zero flag', () => {
       const ccFlags = cpus.ZERO;
       const testValue = 0x00;
       subject.test8(testValue);
@@ -364,6 +364,54 @@ describe('Arithmetic Logic Unit', () => {
       cc.value = 0xff;
       subject.test8(0x01);
       expect(cc.value & ccFlags).toBe(0x00);
+    });
+
+    describe('decimal adjust accumulator', () => {
+      it('corrects the value if a half carry is present', () => {
+        cc.value = cpus.HALFCARRY;
+        const result = subject.daa(0x03);
+        expect(result).toBe(0x19);
+      });
+
+      it('corrects the value if low nibble is over 9', () => {
+        const result = subject.daa(0x0b);
+        expect(result).toBe(0x11);
+      });
+
+      it('corrects the upper nibble if a carry is present', () => {
+        cc.value = cpus.CARRY;
+        const result = subject.daa(0x18);
+        expect(result).toBe(0x78);
+      });
+
+      it('corrects the upper nibble if it is over 9', () => {
+        const result = subject.daa(0xa6);
+        expect(result).toBe(0x06);
+      });
+
+      it(
+          'corrects the upper nibble if higher is over 8 and lower is over 9',
+          () => {
+            const result = subject.daa(0x9a);
+            expect(result).toBe(0x00);
+          });
+
+      it('sets the carry flag if the adjustment overflows the upper nibble',
+          () => {
+            cc.value = cpus.HALFCARRY | cpus.CARRY;
+            subject.daa(0x91);
+            expect(cc.value & cpus.CARRY).toBe(cpus.CARRY);
+          });
+
+      it('sets the negative flag when the result is negative', () => {
+        subject.daa(0x80);
+        expect(cc.value & cpus.NEGATIVE).toBe(cpus.NEGATIVE);
+      });
+
+      it('sets the zero flag when the result is zero', () => {
+        subject.daa(0x00);
+        expect(cc.value & cpus.ZERO).toBe(cpus.ZERO);
+      });
     });
   });
 });

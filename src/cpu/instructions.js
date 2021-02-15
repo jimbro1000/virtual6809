@@ -402,6 +402,12 @@ instructions = {
       'READHIGH', 'READWLOW', 'PUSHPC', 'ADDTGSWTOOBIF', 'BUSY', 'BUSY', 'BUSY',
     ],
   },
+  0x19: {
+    'operation': 'DAA',
+    'mode': 'inherent',
+    'object': 'A',
+    'code': ['DECIMALADJUST'],
+  },
   0x1a: {
     'operation': 'ORCC',
     'mode': 'immediate',

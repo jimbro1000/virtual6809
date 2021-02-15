@@ -264,6 +264,30 @@ class Alu {
       this.cc.zero(reg1 === 0);
       this.cc.overflow(false);
     };
+
+    /**
+     * digital adjust 8 bit value.
+     *
+     * @param {number} reg1 register value
+     * @return {number} adjusted value
+     */
+    this.daa = (reg1) => {
+      let highNibble = reg1 >> 4;
+      let lowNibble = reg1 & 0xf;
+      if (this.cc.ifcarryset() || (highNibble > 9) ||
+          (highNibble > 8 && lowNibble > 9)) {
+        highNibble += 6;
+      }
+      if (this.cc.ifhalfcarry() || (lowNibble > 9)) {
+        lowNibble += 6;
+        highNibble += 1;
+      }
+      this.cc.carry((highNibble & 0x0f) !== highNibble);
+      const result = ((highNibble & 0x0f) << 4) | (lowNibble & 0xf);
+      this.cc.negative((result & 0x80) !== 0);
+      this.cc.zero(result === 0);
+      return result;
+    };
   }
 }
 
