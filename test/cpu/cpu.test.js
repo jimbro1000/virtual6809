@@ -703,7 +703,7 @@ describe('6809 cpu', () => {
     it('returns from subroutine', () => {
       const pcAddress = 0x0000;
       const code = [0x39];
-      const stack = [0x00, 0x80];
+      const stack = [0x80, 0x00];
       const stackAddress = 0x3ffd;
       const expectedAddress = 0x8000;
       loadMemory(pcAddress, code);
@@ -1940,6 +1940,61 @@ describe('6809 cpu', () => {
       const cycleCount = runToNext(subject);
       expect(cycleCount).toBe(cycles);
       expect(subject.registers.get(register).fetch()).toBe(expectedValueA);
+    });
+
+    it('returns to prior execution on return from fast interrupt', () => {
+      const address = 0x0000;
+      const code = [0x3b];
+      const initialSValue = 0x2000;
+      const initialStack = [cpus.NEGATIVE, 0x10, 0x00];
+      const expectedPCValue = 0x1000;
+      const expectedSValue = 0x2003;
+      const cycles = 6;
+      loadMemory(address, code);
+      loadMemory(initialSValue + 1, initialStack);
+      subject.registers.get('PC').set(address);
+      subject.registers.get('S').set(initialSValue);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('PC').fetch()).toBe(expectedPCValue);
+      expect(subject.registers.get('S').fetch()).toBe(expectedSValue);
+    });
+
+    it('returns from slow interrupt and restores all registers', () => {
+      const address = 0x0000;
+      const code = [0x3b];
+      const initialSValue = 0x2000;
+      const expectedPCValue = 0x1000;
+      const expectedSValue = 0x200c;
+      const expectedAValue = 0x01;
+      const expectedBValue = 0x02;
+      const expectedDPValue = 0x03;
+      const expectedXValue = 0x0405;
+      const expectedYValue = 0x0607;
+      const expectedUValue = 0x0809;
+      const initialStack = [
+        cpus.ENTIRE, expectedAValue,
+        expectedBValue, expectedDPValue,
+        (expectedXValue & 0xff00) >> 8, expectedXValue & 0xff,
+        (expectedYValue & 0xff00) >> 8, expectedYValue & 0xff,
+        (expectedUValue & 0xff00) >> 8, expectedUValue & 0xff,
+        0x10, 0x00,
+      ];
+      const cycles = 15;
+      loadMemory(address, code);
+      loadMemory(initialSValue + 1, initialStack);
+      subject.registers.get('PC').set(address);
+      subject.registers.get('S').set(initialSValue);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('A').fetch()).toBe(expectedAValue);
+      expect(subject.registers.get('B').fetch()).toBe(expectedBValue);
+      expect(subject.registers.get('X').fetch()).toBe(expectedXValue);
+      expect(subject.registers.get('Y').fetch()).toBe(expectedYValue);
+      expect(subject.registers.get('U').fetch()).toBe(expectedUValue);
+      expect(subject.registers.get('S').fetch()).toBe(expectedSValue);
+      expect(subject.registers.get('DP').fetch()).toBe(expectedDPValue);
+      expect(subject.registers.get('PC').fetch()).toBe(expectedPCValue);
     });
   });
 });

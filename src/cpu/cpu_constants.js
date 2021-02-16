@@ -71,3 +71,4 @@ define('SIGNEXTEND', 55);
 define('MULTIPLY', 56);
 define('TESTOB', 57);
 define('DECIMALADJUST', 58);
+define('PULLCC', 59);

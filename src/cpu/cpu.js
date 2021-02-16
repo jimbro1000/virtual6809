@@ -95,6 +95,7 @@ class Cpu {
     result['MULTIPLY'] = cpus.MULTIPLY;
     result['TESTOB'] = cpus.TESTOB;
     result['DECIMALADJUST'] = cpus.DECIMALADJUST;
+    result['PULLCC'] = cpus.PULLCC;
     return result;
   }
 
@@ -164,6 +165,7 @@ class Cpu {
     result[cpus.MULTIPLY] = this.multiply;
     result[cpus.TESTOB] = this.test_byte;
     result[cpus.DECIMALADJUST] = this.decimal_adjust;
+    result[cpus.PULLCC] = this.pull_and_test_cc;
     return result;
   }
 
@@ -772,11 +774,21 @@ class Cpu {
 
   pull_pc_from_ad = () => {
     let address = this.registers.get('S').fetch();
-    const lowValue = this.memory.read(++address);
     const highValue = this.memory.read(++address) << 8;
+    const lowValue = this.memory.read(++address);
     this.PC.set(highValue | lowValue);
     this.registers.get('S').set(address);
   };
+
+  pull_and_test_cc = () => {
+    let address = this.target.fetch();
+    this.CC.value = this.memory.read(++address);
+    this.target.set(address);
+    if(this.CC.ifentireset()) {
+      this.code.push(this.codes['PULL']);
+      this.W.set(0x7e);
+    }
+  }
 
   check_cc = (initial, complement, object, sum, masked) => {
     this.CC.zero(masked === 0);

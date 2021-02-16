@@ -158,6 +158,10 @@ class ControlRegister extends CpuRegister {
     ifhalfcarry = () => {
         return (this.value & cpus.HALFCARRY) > 0;
     }
+
+    ifentireset = () => {
+        return (this.value & cpus.ENTIRE) > 0;
+    }
 }
 
 module.exports = { ControlRegister }

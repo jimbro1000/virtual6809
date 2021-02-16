@@ -640,6 +640,15 @@ instructions = {
       'PULLPC', 'BUSY', 'BUSY', 'BUSY',
     ],
   },
+  0x3b: {
+    'operation': 'RTI',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'S',
+    'code': [
+      'PULLCC', 'PULLPC', 'BUSY', 'BUSY', 'BUSY',
+    ],
+  },
   0x3d: {
     'operation': 'MUL',
     'mode': 'inherent',
