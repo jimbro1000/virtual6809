@@ -1745,14 +1745,15 @@ instructions = {
       'READHIGH', 'READWLOW', 'TFRWTOTG', 'WRITEHIGH', 'WRITELOW',
     ],
   },
-  'vectorFromRunIF': {
+  'fastVectorFromRun': {
     'operation': 'HWI',
     'mode': 'inherent',
     'object': 'S',
     'target': 'AD',
     'code': [
-      'SETENTIRE', 'TFROBTOTG', 'PUSH', 'TFRTGTOOB',
+      'TFROBTOTG', 'PUSHIR', 'TFRTGTOOB',
       'VECTORHIGH', 'VECTORLOW', 'MASKIF',
+      'BUSY', 'BUSY', 'BUSY',
     ],
   },
   'vectorFromRun': {
@@ -1762,17 +1763,7 @@ instructions = {
     'target': 'AD',
     'code': [
       'SETENTIRE', 'TFROBTOTG', 'PUSH', 'TFRTGTOOB',
-      'VECTORHIGH', 'VECTORLOW', 'BUSY',
-    ],
-  },
-  'vectorFromWaitIF': {
-    'operation': 'HWI',
-    'mode': 'inherent',
-    'object': 'S',
-    'target': 'AD',
-    'code': [
-      'VECTORHIGH', 'VECTORLOW', 'MASKIF',
-      'BUSY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
+      'VECTORHIGH', 'VECTORLOW', 'MASKIF', 'BUSY', 'BUSY',
     ],
   },
   'vectorFromWait': {
@@ -1781,7 +1772,7 @@ instructions = {
     'object': 'S',
     'target': 'AD',
     'code': [
-      'VECTORHIGH', 'VECTORLOW', 'BUSY',
+      'VECTORHIGH', 'VECTORLOW', 'MASKIF',
       'BUSY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
     ],
   },

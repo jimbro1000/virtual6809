@@ -48,7 +48,7 @@ define('vSWI', {
 define('vNMI', {
   'name': 'nmi',
   'vector': 0xfffc,
-  'entire': false,
+  'entire': true,
   'flags': this.IRQ | this.FIRQ,
 });
 define('vRESET', {
@@ -123,3 +123,4 @@ define('VECTORHIGH', 61);
 define('VECTORLOW', 62);
 define('MASKIF', 63);
 define('WAIT', 64);
+define('PUSHIR', 65);

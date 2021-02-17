@@ -98,6 +98,7 @@ class Cpu {
     result['MULTIPLY'] = cpus.MULTIPLY;
     result['TESTOB'] = cpus.TESTOB;
     result['DECIMALADJUST'] = cpus.DECIMALADJUST;
+    result['PUSHIR'] = cpus.PUSHIR;
     result['PULLCC'] = cpus.PULLCC;
     result['SETENTIRE'] = cpus.SETENTIRE;
     result['VECTORHIGH'] = cpus.VECTORHIGH;
@@ -173,6 +174,7 @@ class Cpu {
     result[cpus.MULTIPLY] = this.multiply;
     result[cpus.TESTOB] = this.test_byte;
     result[cpus.DECIMALADJUST] = this.decimal_adjust;
+    result[cpus.PUSHIR] = this.push_pc_and_cc;
     result[cpus.PULLCC] = this.pull_and_test_cc;
     result[cpus.SETENTIRE] = this.set_entire_flag;
     result[cpus.VECTORHIGH] = this.vector_msb;
@@ -322,9 +324,24 @@ class Cpu {
    * perform a single cpu clock cycle.
    */
   cycle() {
-    if (this.interruptQueue.length > 0) {
-      this.serviceInterrupt(this.interruptQueue.pop());
-      this.runState = cpus.RUNNING;
+    if (this.interruptQueue.length > 0 && this.code[0] === cpus.NEXT) {
+      let unmasked;
+      const interrupt = this.interruptQueue.shift();
+      switch (interrupt.name) {
+        case 'irq':
+          unmasked = this.CC.ifirqclear();
+          break;
+        case 'firq':
+          unmasked = this.CC.iffirqclear();
+          break;
+        default:
+          unmasked = true;
+          break;
+      }
+      if (unmasked) {
+        this.serviceInterrupt(interrupt);
+        this.runState = cpus.RUNNING;
+      }
     } else if (this.runState === cpus.RUNNING) {
       const lambda = this.lambdas[this.code.pop()];
       lambda();
@@ -359,19 +376,20 @@ class Cpu {
    * @param {object} interrupt
    */
   serviceInterrupt(interrupt) {
+    let operation = 'fastVectorFromRun';
     if (this.runState === cpus.WAITING) {
-      // stack
-      const operation = 'vectorFromWaitIF';
-      const action = this.instructions[operation];
-      action.vector = interrupt.vector;
-      action.mask = interrupt.flags;
-      this.interpretInstruction(action);
+      operation = 'vectorFromWait';
+    } else if (interrupt.entire) {
+      operation = 'vectorFromRun';
     }
+    const action = this.instructions[operation];
+    action.vector = interrupt.vector;
+    action.mask = interrupt.flags;
+    this.interpretInstruction(action);
   }
 
   /**
-   * transform operation object into cpu state and code stack
-   *
+   * transform operation object into cpu state and code stack.
    * @param {object} action
    */
   interpretInstruction(action) {
@@ -860,6 +878,11 @@ class Cpu {
       this.code.push(this.codes['PULL']);
       this.W.set(0x7e);
     }
+  }
+
+  push_pc_and_cc = () => {
+    this.W.set(0x81);
+    this.push_reg_to_ad();
   }
 
   set_entire_flag = () => {

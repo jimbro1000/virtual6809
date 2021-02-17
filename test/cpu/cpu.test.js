@@ -2125,8 +2125,48 @@ describe('6809 cpu', () => {
           expect(cycleCount).toBe(cycles);
           expect(subject.PC.fetch()).toBe(expectedPC);
           expect(subject.registers.get('S').fetch()).toBe(expectedS);
-          expect(subject.CC.value & (cpus.FIRQ | cpus.IRQ)).
-              toBe(expectedCC);
+          expect(subject.CC.value & (cpus.FIRQ | cpus.IRQ))
+              .toBe(expectedCC);
+        });
+
+    each(
+        [
+          ['nmi', 21, 0x7000, 0x0ff4, cpus.FIRQ | cpus.IRQ],
+          ['reset', 21, 0x0000, 0x0ff4, cpus.FIRQ | cpus.IRQ],
+          ['firq', 12, 0x4000, 0x0ffd, cpus.FIRQ | cpus.IRQ],
+          ['irq', 21, 0x5000, 0x0ff4, cpus.IRQ],
+        ],
+    ).it('processes an interrupt request from running',
+        (interruptLine, cycles, expectedPC, expectedS, expectedCC) => {
+          subject.runState = cpus.RUNNING;
+          subject.callInterrupt(interruptLine);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.PC.fetch()).toBe(expectedPC);
+          expect(subject.registers.get('S').fetch()).toBe(expectedS);
+          expect(subject.CC.value & (cpus.FIRQ | cpus.IRQ))
+              .toBe(expectedCC);
+        });
+
+    each(
+        [
+          ['nmi', cpus.IRQ, 0x7000],
+          ['nmi', cpus.FIRQ, 0x7000],
+          ['reset', cpus.IRQ, 0x0000],
+          ['reset', cpus.FIRQ, 0x0000],
+          ['irq', cpus.IRQ, 0x0100],
+          ['irq', cpus.FIRQ, 0x5000],
+          ['firq', cpus.IRQ, 0x4000],
+          ['firq', cpus.FIRQ, 0x0100],
+        ],
+    ).it('can ignore an interrupt if it is masked',
+        (interruptLine, initialCC, expectedPC) => {
+          subject.PC.set(0x100);
+          subject.runState = cpus.RUNNING;
+          subject.CC.value = subject.CC.value | initialCC;
+          subject.callInterrupt(interruptLine);
+          runToNext(subject);
+          expect(subject.PC.fetch()).toBe(expectedPC);
         });
   });
 });
