@@ -749,9 +749,9 @@ class Cpu {
         let pulledValue = 0;
         if (nextEntry.size === cpus.LONG) {
           this.code.unshift(this.codes['BUSY']);
-          pulledValue += this.memory.read(address++) << 8;
+          pulledValue += this.memory.read(++address) << 8;
         }
-        pulledValue += this.memory.read(address++);
+        pulledValue += this.memory.read(++address);
         nextEntry.set(pulledValue);
         this.target.set(address);
         loop = false;
@@ -773,11 +773,11 @@ class Cpu {
   };
 
   pull_pc_from_ad = () => {
-    let address = this.registers.get('S').fetch();
+    let address = this.target.fetch();
     const highValue = this.memory.read(++address) << 8;
     const lowValue = this.memory.read(++address);
     this.PC.set(highValue | lowValue);
-    this.registers.get('S').set(address);
+    this.target.set(address);
   };
 
   pull_and_test_cc = () => {

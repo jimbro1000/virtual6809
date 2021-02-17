@@ -656,7 +656,7 @@ describe('6809 cpu', () => {
       const finalAddress = 0x3fff;
       const initialAddress = 0x3ffa;
       loadMemory(address, code);
-      loadMemory(initialAddress, stackContent);
+      loadMemory(initialAddress + 1, stackContent);
       subject.registers.get(register).set(initialAddress);
       subject.registers.get('PC').set(address);
       const cycles = 10;

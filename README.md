@@ -55,15 +55,18 @@ So far the instruction set is incomplete and only covers:
  * PSH and PUL
  * JSR
  * RTS
+ * RTI  
  * short branch
  * long branch
  * EXG and TFR
 
 indexed/indirect addressing is not implemented  
-ALU is partially implemented (add, subtract, add with carry, subtract with carry, and)  
-condition logic contained in control register not ALU  
+ALU is fully implemented but condition logic contained in control 
+register not ALU  
 
-The processor bootstraps correctly using the vector stored at 0xfffe
+The processor bootstraps correctly using the hard reset vector stored at 0xfffe.
+If no memory exists at that address it will be interpreted as starting from 
+0x0000.
 
 ## Video ##
 

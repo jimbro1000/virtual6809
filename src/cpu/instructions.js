@@ -636,17 +636,18 @@ instructions = {
     'operation': 'RTS',
     'mode': 'immediate',
     'object': 'S',
+    'target': 'AD',
     'code': [
-      'PULLPC', 'BUSY', 'BUSY', 'BUSY',
+      'TFROBTOTG', 'PULLPC', 'TFRTGTOOB', 'BUSY',
     ],
   },
   0x3b: {
     'operation': 'RTI',
     'mode': 'inherent',
     'object': 'S',
-    'target': 'S',
+    'target': 'AD',
     'code': [
-      'PULLCC', 'PULLPC', 'BUSY', 'BUSY', 'BUSY',
+      'TFROBTOTG', 'PULLCC', 'PULLPC', 'TFRTGTOOB', 'BUSY',
     ],
   },
   0x3d: {
