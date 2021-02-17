@@ -3,6 +3,8 @@ const each = require('jest-each').default;
 const {Cpu} = require('../../src/cpu/cpu');
 const cpus = require('../../src/cpu/cpu_constants');
 
+const RUN_LIMIT = 50;
+
 /**
  * Cycle processor to complete a single instruction.
  *
@@ -14,7 +16,7 @@ function runToNext(subject) {
   do {
     subject.cycle();
     cycles++;
-  } while (subject.code[0] !== cpus.NEXT);
+  } while (subject.code[0] !== cpus.NEXT && cycles < RUN_LIMIT);
   return cycles;
 }
 
@@ -2087,5 +2089,44 @@ describe('6809 cpu', () => {
       expect(subject.runState).toBe(cpus.WAITING);
       expect(subject.PC.fetch()).toBe(address);
     });
+  });
+
+  describe('interrupt request handling', () => {
+    loadMemory = (address, bytes) => {
+      for (let index = 0; index < bytes.length; ++index) {
+        subject.memory.burn(address + index, bytes[index]);
+      }
+    };
+    let subject;
+    beforeEach(() => {
+      subject = new Cpu(factory('D64'));
+      subject.clearInstruction();
+      subject.registers.get('S').set(0x1000);
+      const vectors = [
+        0x20, 0x00, 0x30, 0x00, 0x40, 0x00, 0x50, 0x00,
+        0x60, 0x00, 0x70, 0x00, 0x00, 0x00,
+      ];
+      loadMemory(0xfff2, vectors);
+      runToNext(subject);
+    });
+
+    each(
+        [
+          ['nmi', 9, 0x7000, 0x1000, cpus.FIRQ | cpus.IRQ],
+          ['reset', 9, 0x0000, 0x1000, cpus.FIRQ | cpus.IRQ],
+          ['firq', 9, 0x4000, 0x1000, cpus.FIRQ | cpus.IRQ],
+          ['irq', 9, 0x5000, 0x1000, cpus.IRQ],
+        ],
+    ).it('processes an interrupt request from wait',
+        (interruptLine, cycles, expectedPC, expectedS, expectedCC) => {
+          subject.runState = cpus.WAITING;
+          subject.callInterrupt(interruptLine);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.PC.fetch()).toBe(expectedPC);
+          expect(subject.registers.get('S').fetch()).toBe(expectedS);
+          expect(subject.CC.value & (cpus.FIRQ | cpus.IRQ)).
+              toBe(expectedCC);
+        });
   });
 });

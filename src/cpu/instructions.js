@@ -1,3 +1,5 @@
+const cpus = require('../../src/cpu/cpu_constants');
+
 instructions = {
   0x00: {
     'operation': 'NEG',
@@ -208,10 +210,11 @@ instructions = {
     'mode': 'inherent',
     'object': 'S',
     'target': 'AD',
-    'vector': 0xfff4,
+    'vector': cpus.vSWI2.vector,
+    'mask': 0x00,
     'code': [
       'SETENTIRE', 'TFROBTOTG', 'PUSH', 'TFRTGTOOB',
-      'VECTORHIGH', 'VECTORLOW', 'BUSY',
+      'VECTORHIGH', 'VECTORLOW', 'MASKIF',
     ],
   },
   0x108c: {
@@ -338,10 +341,11 @@ instructions = {
     'mode': 'inherent',
     'object': 'S',
     'target': 'AD',
-    'vector': 0xfff2,
+    'vector': cpus.vSWI3.vector,
+    'mask': 0,
     'code': [
       'SETENTIRE', 'TFROBTOTG', 'PUSH', 'TFRTGTOOB',
-      'VECTORHIGH', 'VECTORLOW', 'BUSY',
+      'VECTORHIGH', 'VECTORLOW', 'MASKIF',
     ],
   },
   0x1183: {
@@ -695,7 +699,8 @@ instructions = {
     'mode': 'inherent',
     'object': 'S',
     'target': 'AD',
-    'vector': 0xfffa,
+    'vector': cpus.vSWI.vector,
+    'mask': cpus.IRQ | cpus.FIRQ,
     'code': [
       'SETENTIRE', 'TFROBTOTG', 'PUSH', 'TFRTGTOOB',
       'VECTORHIGH', 'VECTORLOW', 'MASKIF',
@@ -1738,6 +1743,46 @@ instructions = {
     'target': 'AD',
     'code': [
       'READHIGH', 'READWLOW', 'TFRWTOTG', 'WRITEHIGH', 'WRITELOW',
+    ],
+  },
+  'vectorFromRunIF': {
+    'operation': 'HWI',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'AD',
+    'code': [
+      'SETENTIRE', 'TFROBTOTG', 'PUSH', 'TFRTGTOOB',
+      'VECTORHIGH', 'VECTORLOW', 'MASKIF',
+    ],
+  },
+  'vectorFromRun': {
+    'operation': 'HWI',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'AD',
+    'code': [
+      'SETENTIRE', 'TFROBTOTG', 'PUSH', 'TFRTGTOOB',
+      'VECTORHIGH', 'VECTORLOW', 'BUSY',
+    ],
+  },
+  'vectorFromWaitIF': {
+    'operation': 'HWI',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'AD',
+    'code': [
+      'VECTORHIGH', 'VECTORLOW', 'MASKIF',
+      'BUSY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
+    ],
+  },
+  'vectorFromWait': {
+    'operation': 'HWI',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'AD',
+    'code': [
+      'VECTORHIGH', 'VECTORLOW', 'BUSY',
+      'BUSY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
     ],
   },
 };

@@ -14,6 +14,49 @@ define('IRQ', 0x10);
 define('HALFCARRY', 0x20);
 define('FIRQ', 0x40);
 define('ENTIRE', 0x80);
+// interrupt lines
+define('vSWI3', {
+  'name': 'swi3',
+  'vector': 0xfff2,
+  'entire': true,
+  'flags': 0x00,
+});
+define('vSWI2', {
+  'name': 'swi2',
+  'vector': 0xfff4,
+  'entire': true,
+  'flags': 0x00,
+});
+define('vFIRQ', {
+  'name': 'firq',
+  'vector': 0xfff6,
+  'entire': false,
+  'flags': this.IRQ | this.FIRQ,
+});
+define('vIRQ', {
+  'name': 'irq',
+  'vector': 0xfff8,
+  'entire': true,
+  'flags': this.IRQ,
+});
+define('vSWI', {
+  'name': 'swi',
+  'vector': 0xfffa,
+  'entire': true,
+  'flags': this.IRQ | this.FIRQ,
+});
+define('vNMI', {
+  'name': 'nmi',
+  'vector': 0xfffc,
+  'entire': false,
+  'flags': this.IRQ | this.FIRQ,
+});
+define('vRESET', {
+  'name': 'reset',
+  'vector': 0xfffe,
+  'entire': true,
+  'flags': this.IRQ | this.FIRQ,
+});
 // cpu pseudo-micro instructions
 define('NEXT', 0); // get new instruction
 define('FETCH', 1); // get next byte of instruction

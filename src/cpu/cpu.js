@@ -29,9 +29,11 @@ class Cpu {
     this.lambdas = this.mapCodeToLambda();
     this.stackOrder = this.mapStackOrder();
     this.registerIds = this.mapRegisterIdentifier();
+    this.interruptLines = this.mapInterruptLines();
     this.code = [cpus.TFRWTOOB, cpus.READWLOW, cpus.READHIGH];
     this.PC.set(0xfffe);
     this.runState = cpus.RUNNING;
+    this.interruptQueue = [];
   }
 
   /**
@@ -180,6 +182,18 @@ class Cpu {
     return result;
   }
 
+  mapInterruptLines() {
+    const result = [];
+    result['reset'] = cpus.vRESET;
+    result['nmi'] = cpus.vNMI;
+    result['irq'] = cpus.vIRQ;
+    result['firq'] = cpus.vFIRQ;
+    result['swi'] = cpus.vSWI;
+    result['swi2'] = cpus.vSWI2;
+    result['swi3'] = cpus.vSWI3;
+    return result;
+  }
+
   /**
    * Create ordered list of cpus in stackable order
    * @return {[]} stacking list
@@ -308,7 +322,10 @@ class Cpu {
    * perform a single cpu clock cycle.
    */
   cycle() {
-    if (this.runState === cpus.RUNNING) {
+    if (this.interruptQueue.length > 0) {
+      this.serviceInterrupt(this.interruptQueue.pop());
+      this.runState = cpus.RUNNING;
+    } else if (this.runState === cpus.RUNNING) {
       const lambda = this.lambdas[this.code.pop()];
       lambda();
       if (this.code.length === 0) {
@@ -318,12 +335,62 @@ class Cpu {
   }
 
   /**
-   * evaluate register id to find register name
+   * evaluate register id to find register name.
    * @param {number} id 4bit identifier of register
    * @returns {string} register name
    */
   identifyRegister(id) {
     return this.registerIds[id];
+  }
+
+  /**
+   * queue a new interrupt.
+   * @param {string} line
+   */
+  callInterrupt(line) {
+    const interrupt = this.interruptLines[line];
+    if (typeof interrupt !== 'undefined') {
+      this.interruptQueue.push(interrupt);
+    }
+  }
+
+  /**
+   * process queued interrupt.
+   * @param {object} interrupt
+   */
+  serviceInterrupt(interrupt) {
+    if (this.runState === cpus.WAITING) {
+      // stack
+      const operation = 'vectorFromWaitIF';
+      const action = this.instructions[operation];
+      action.vector = interrupt.vector;
+      action.mask = interrupt.flags;
+      this.interpretInstruction(action);
+    }
+  }
+
+  /**
+   * transform operation object into cpu state and code stack
+   *
+   * @param {object} action
+   */
+  interpretInstruction(action) {
+    if (typeof action.object !== 'undefined') {
+      this.object = this.registers.get(action.object);
+    }
+    if (typeof action.target !== 'undefined') {
+      this.target = this.registers.get(action.target);
+    }
+    if (typeof action.condition !== 'undefined') {
+      this.condition = action.condition;
+    }
+    if (typeof action.vector !== 'undefined') {
+      this.vector = action.vector;
+    }
+    if (typeof action.mask !== 'undefined') {
+      this.mask = action.mask;
+    }
+    this.populateCodeStack(action.code);
   }
 
   swap_internal_registers = () => {
@@ -449,19 +516,7 @@ class Cpu {
       this.operation = nextByte << 8;
       this.code = [cpus.FETCH];
     } else {
-      if (typeof action.object !== 'undefined') {
-        this.object = this.registers.get(action.object);
-      }
-      if (typeof action.target !== 'undefined') {
-        this.target = this.registers.get(action.target);
-      }
-      if (typeof action.condition !== 'undefined') {
-        this.condition = action.condition;
-      }
-      if (typeof action.vector !== 'undefined') {
-        this.vector = action.vector;
-      }
-      this.populateCodeStack(action.code);
+      this.interpretInstruction(action);
     }
   };
 
@@ -823,8 +878,8 @@ class Cpu {
   }
 
   suspend_interrupts = () => {
-    this.CC.irq(true);
-    this.CC.firq(true);
+    this.CC.irq((this.mask & cpus.IRQ) !== 0);
+    this.CC.firq((this.mask & cpus.FIRQ) !== 0);
   }
 
   wait = () => {
