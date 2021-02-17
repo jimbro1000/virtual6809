@@ -2,6 +2,9 @@ const define = require('node-constants')(exports);
 // register scale
 define('SHORT', 8);
 define('LONG', 16);
+// cpu state
+define('RUNNING', 1);
+define('WAITING', 2);
 // condition register flags
 define('CARRY', 0x1);
 define('OVERFLOW', 0x2);
@@ -76,3 +79,4 @@ define('SETENTIRE', 60);
 define('VECTORHIGH', 61);
 define('VECTORLOW', 62);
 define('MASKIF', 63);
+define('WAIT', 64);

@@ -31,6 +31,7 @@ class Cpu {
     this.registerIds = this.mapRegisterIdentifier();
     this.code = [cpus.TFRWTOOB, cpus.READWLOW, cpus.READHIGH];
     this.PC.set(0xfffe);
+    this.runState = cpus.RUNNING;
   }
 
   /**
@@ -100,6 +101,7 @@ class Cpu {
     result['VECTORHIGH'] = cpus.VECTORHIGH;
     result['VECTORLOW'] = cpus.VECTORLOW;
     result['MASKIF'] = cpus.MASKIF;
+    result['WAIT'] = cpus.WAIT;
     return result;
   }
 
@@ -174,6 +176,7 @@ class Cpu {
     result[cpus.VECTORHIGH] = this.vector_msb;
     result[cpus.VECTORLOW] = this.vector_lsb;
     result[cpus.MASKIF] = this.suspend_interrupts;
+    result[cpus.WAIT] = this.wait;
     return result;
   }
 
@@ -305,10 +308,12 @@ class Cpu {
    * perform a single cpu clock cycle.
    */
   cycle() {
-    const lambda = this.lambdas[this.code.pop()];
-    lambda();
-    if (this.code.length === 0) {
-      this.clearInstruction();
+    if (this.runState === cpus.RUNNING) {
+      const lambda = this.lambdas[this.code.pop()];
+      lambda();
+      if (this.code.length === 0) {
+        this.clearInstruction();
+      }
     }
   }
 
@@ -732,7 +737,7 @@ class Cpu {
         const lowValue = nextEntry.fetch() & 0xff;
         this.memory.write(address--, lowValue);
         if (nextEntry.size === cpus.LONG) {
-          this.code.unshift(this.codes['BUSY']);
+          this.code.push(this.codes['BUSY']);
           const highValue = (nextEntry.fetch() & 0xff00) >> 8;
           this.memory.write(address--, highValue);
         }
@@ -760,7 +765,7 @@ class Cpu {
         const nextEntry = this.registers.get(register);
         let pulledValue = 0;
         if (nextEntry.size === cpus.LONG) {
-          this.code.unshift(this.codes['BUSY']);
+          this.code.push(this.codes['BUSY']);
           pulledValue += this.memory.read(++address) << 8;
         }
         pulledValue += this.memory.read(++address);
@@ -820,6 +825,10 @@ class Cpu {
   suspend_interrupts = () => {
     this.CC.irq(true);
     this.CC.firq(true);
+  }
+
+  wait = () => {
+    this.runState = cpus.WAITING;
   }
 
   check_cc = (initial, complement, object, sum, masked) => {

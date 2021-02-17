@@ -2059,5 +2059,33 @@ describe('6809 cpu', () => {
       expect(subject.CC.value & (cpus.IRQ | cpus.FIRQ)).
           toBe(0);
     });
+
+    it('stacks all registers and waits for an external interrupt', () => {
+      const address = 0x0000;
+      const code = [0x3c, 0xbf];
+      const initialSValue = 0x6000;
+      const expectedSValue = 0x5ff4;
+      const cycles = 20;
+      loadMemory(address, code);
+      subject.PC.set(address);
+      subject.registers.get('S').set(initialSValue);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('S').fetch()).toBe(expectedSValue);
+      expect(subject.runState).toBe(cpus.WAITING);
+    });
+
+    it('does not process instructions while in wait state', () => {
+      const address = 0x0000;
+      const code = [0x12];
+      const cycles = 1;
+      loadMemory(address, code);
+      subject.PC.set(address);
+      subject.runState = cpus.WAITING;
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.runState).toBe(cpus.WAITING);
+      expect(subject.PC.fetch()).toBe(address);
+    });
   });
 });

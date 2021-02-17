@@ -672,6 +672,16 @@ instructions = {
       'TFROBTOTG', 'PULLCC', 'PULLPC', 'TFRTGTOOB', 'BUSY',
     ],
   },
+  0x3c: {
+    'operation': 'CWAI',
+    'mode': 'immediate',
+    'object': 'S',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'ANDCC', 'SETENTIRE', 'TFROBTOTG', 'PUSH',
+      'TFRTGTOOB', 'BUSY', 'WAIT',
+    ],
+  },
   0x3d: {
     'operation': 'MUL',
     'mode': 'inherent',
