@@ -72,3 +72,7 @@ define('MULTIPLY', 56);
 define('TESTOB', 57);
 define('DECIMALADJUST', 58);
 define('PULLCC', 59);
+define('SETENTIRE', 60);
+define('VECTORHIGH', 61);
+define('VECTORLOW', 62);
+define('MASKIF', 63);

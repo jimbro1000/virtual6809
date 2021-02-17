@@ -8,6 +8,7 @@ __New:__
 * Add TST instructions
 * Add DAA instruction
 * RTI instruction
+* SWI instructions
 
 __Fixed:__
 * Correction to stack alignment on pull

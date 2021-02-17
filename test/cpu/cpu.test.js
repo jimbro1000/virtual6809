@@ -1996,5 +1996,68 @@ describe('6809 cpu', () => {
       expect(subject.registers.get('DP').fetch()).toBe(expectedDPValue);
       expect(subject.registers.get('PC').fetch()).toBe(expectedPCValue);
     });
+
+    it('stacks all registers on interrupt 1 and vectors from fffa', () => {
+      const address = 0x0000;
+      const code = [0x3f];
+      const vector = [0x40, 0x00];
+      const expectedPCValue = 0x4000;
+      const initialSValue = 0x6000;
+      const expectedSValue = 0x5ff4;
+      const cycles = 19;
+      loadMemory(address, code);
+      subject.memory.burn(0xfffa, vector[0]);
+      subject.memory.burn(0xfffb, vector[1]);
+      subject.PC.set(address);
+      subject.registers.get('S').set(initialSValue);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('S').fetch()).toBe(expectedSValue);
+      expect(subject.PC.fetch()).toBe(expectedPCValue);
+      expect(subject.CC.value & (cpus.IRQ | cpus.FIRQ)).
+          toBe(cpus.IRQ | cpus.FIRQ);
+    });
+
+    it('stacks all registers on interrupt 2 and vectors from fff4', () => {
+      const address = 0x0000;
+      const code = [0x10, 0x3f];
+      const vector = [0x40, 0x00];
+      const expectedPCValue = 0x4000;
+      const initialSValue = 0x6000;
+      const expectedSValue = 0x5ff4;
+      const cycles = 20;
+      loadMemory(address, code);
+      subject.memory.burn(0xfff4, vector[0]);
+      subject.memory.burn(0xfff5, vector[1]);
+      subject.PC.set(address);
+      subject.registers.get('S').set(initialSValue);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('S').fetch()).toBe(expectedSValue);
+      expect(subject.PC.fetch()).toBe(expectedPCValue);
+      expect(subject.CC.value & (cpus.IRQ | cpus.FIRQ)).
+          toBe(0);
+    });
+
+    it('stacks all registers on interrupt 3 and vectors from fff2', () => {
+      const address = 0x0000;
+      const code = [0x11, 0x3f];
+      const vector = [0x40, 0x00];
+      const expectedPCValue = 0x4000;
+      const initialSValue = 0x6000;
+      const expectedSValue = 0x5ff4;
+      const cycles = 20;
+      loadMemory(address, code);
+      subject.memory.burn(0xfff2, vector[0]);
+      subject.memory.burn(0xfff3, vector[1]);
+      subject.PC.set(address);
+      subject.registers.get('S').set(initialSValue);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('S').fetch()).toBe(expectedSValue);
+      expect(subject.PC.fetch()).toBe(expectedPCValue);
+      expect(subject.CC.value & (cpus.IRQ | cpus.FIRQ)).
+          toBe(0);
+    });
   });
 });

@@ -54,8 +54,9 @@ So far the instruction set is incomplete and only covers:
  * INC and DEC
  * PSH and PUL
  * JSR
+ * SWI, SWI2, SWI3
  * RTS
- * RTI  
+ * RTI
  * short branch
  * long branch
  * EXG and TFR

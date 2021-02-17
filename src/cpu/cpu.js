@@ -96,6 +96,10 @@ class Cpu {
     result['TESTOB'] = cpus.TESTOB;
     result['DECIMALADJUST'] = cpus.DECIMALADJUST;
     result['PULLCC'] = cpus.PULLCC;
+    result['SETENTIRE'] = cpus.SETENTIRE;
+    result['VECTORHIGH'] = cpus.VECTORHIGH;
+    result['VECTORLOW'] = cpus.VECTORLOW;
+    result['MASKIF'] = cpus.MASKIF;
     return result;
   }
 
@@ -166,6 +170,10 @@ class Cpu {
     result[cpus.TESTOB] = this.test_byte;
     result[cpus.DECIMALADJUST] = this.decimal_adjust;
     result[cpus.PULLCC] = this.pull_and_test_cc;
+    result[cpus.SETENTIRE] = this.set_entire_flag;
+    result[cpus.VECTORHIGH] = this.vector_msb;
+    result[cpus.VECTORLOW] = this.vector_lsb;
+    result[cpus.MASKIF] = this.suspend_interrupts;
     return result;
   }
 
@@ -290,6 +298,7 @@ class Cpu {
     this.code = [cpus.NEXT];
     this.operation = 0;
     this.condition = '';
+    this.vector = 0xfffe;
   }
 
   /**
@@ -443,6 +452,9 @@ class Cpu {
       }
       if (typeof action.condition !== 'undefined') {
         this.condition = action.condition;
+      }
+      if (typeof action.vector !== 'undefined') {
+        this.vector = action.vector;
       }
       this.populateCodeStack(action.code);
     }
@@ -788,6 +800,26 @@ class Cpu {
       this.code.push(this.codes['PULL']);
       this.W.set(0x7e);
     }
+  }
+
+  set_entire_flag = () => {
+    this.CC.entire(true);
+    this.W.set(0xff);
+  }
+
+  vector_msb = () => {
+    const msb = this.memory.read(this.vector);
+    this.PC.set(msb << 8);
+  }
+
+  vector_lsb = () => {
+    const lsb = this.memory.read(this.vector + 1);
+    this.PC.set(this.PC.fetch() | lsb);
+  }
+
+  suspend_interrupts = () => {
+    this.CC.irq(true);
+    this.CC.firq(true);
   }
 
   check_cc = (initial, complement, object, sum, masked) => {

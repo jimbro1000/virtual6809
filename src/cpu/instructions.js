@@ -203,6 +203,17 @@ instructions = {
       'READHIGH', 'READWLOW', 'ADDTGSWTOOBIF',
     ],
   },
+  0x103f: {
+    'operation': 'SWI2',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'AD',
+    'vector': 0xfff4,
+    'code': [
+      'SETENTIRE', 'TFROBTOTG', 'PUSH', 'TFRTGTOOB',
+      'VECTORHIGH', 'VECTORLOW', 'BUSY',
+    ],
+  },
   0x108c: {
     'operation': 'CMPY',
     'mode': 'immediate',
@@ -321,6 +332,17 @@ instructions = {
   0x11: {
     'operation': 'extended instruction',
     'mode': 'fetch',
+  },
+  0x113f: {
+    'operation': 'SWI3',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'AD',
+    'vector': 0xfff2,
+    'code': [
+      'SETENTIRE', 'TFROBTOTG', 'PUSH', 'TFRTGTOOB',
+      'VECTORHIGH', 'VECTORLOW', 'BUSY',
+    ],
   },
   0x1183: {
     'operation': 'CMPU',
@@ -656,6 +678,17 @@ instructions = {
     'code': [
       'MULTIPLY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
       'BUSY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
+    ],
+  },
+  0x3f: {
+    'operation': 'SWI',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'AD',
+    'vector': 0xfffa,
+    'code': [
+      'SETENTIRE', 'TFROBTOTG', 'PUSH', 'TFRTGTOOB',
+      'VECTORHIGH', 'VECTORLOW', 'MASKIF',
     ],
   },
   0x40: {
