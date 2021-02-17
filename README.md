@@ -110,7 +110,7 @@ nowhere yet).
 Changing `main.js` to alter the memory is simply a matter of changing these lines:
 
 ```javascript
-    const memory = Memory.factory("D64");
+const memory = Memory.factory("D64");
 const machine = new Cpu(memory);
 ```
 
@@ -118,7 +118,7 @@ At the moment the memory factory only knows D64 and D4 but it is possible to ass
 a custom model using the memory manager:
 
 ```javascript
-    const memory = new MemoryManager([
+const memory = new MemoryManager([
   [new Chip(chips.RAM, chips.K32), 0x0000],
   [new Chip(chips.ROM, chips.K4), 0xf000]
 ]);
