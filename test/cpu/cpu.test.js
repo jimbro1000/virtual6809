@@ -3,6 +3,8 @@ const each = require('jest-each').default;
 const {Cpu} = require('../../src/cpu/cpu');
 const cpus = require('../../src/cpu/cpu_constants');
 
+const RUN_LIMIT = 50;
+
 /**
  * Cycle processor to complete a single instruction.
  *
@@ -14,7 +16,7 @@ function runToNext(subject) {
   do {
     subject.cycle();
     cycles++;
-  } while (subject.code[0] !== cpus.NEXT);
+  } while (subject.code[0] !== cpus.NEXT && cycles < RUN_LIMIT);
   return cycles;
 }
 
@@ -656,7 +658,7 @@ describe('6809 cpu', () => {
       const finalAddress = 0x3fff;
       const initialAddress = 0x3ffa;
       loadMemory(address, code);
-      loadMemory(initialAddress, stackContent);
+      loadMemory(initialAddress + 1, stackContent);
       subject.registers.get(register).set(initialAddress);
       subject.registers.get('PC').set(address);
       const cycles = 10;
@@ -703,7 +705,7 @@ describe('6809 cpu', () => {
     it('returns from subroutine', () => {
       const pcAddress = 0x0000;
       const code = [0x39];
-      const stack = [0x00, 0x80];
+      const stack = [0x80, 0x00];
       const stackAddress = 0x3ffd;
       const expectedAddress = 0x8000;
       loadMemory(pcAddress, code);
@@ -1785,6 +1787,446 @@ describe('6809 cpu', () => {
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
           expect(subject.memory.read(atAddress)).toBe(expectedValue);
+        });
+
+    each(
+        [
+          [0x0000, [0x1e, 0x12], 'X', 'Y', 0x8000, 0x0001, 8],
+          [0x0000, [0x1e, 0x8b], 'A', 'DP', 0x55, 0xaa, 8],
+        ],
+    ).it('exchanges the value of one register with another',
+        (
+            address, code, register1, register2,
+            initialValue1, initialValue2, cycles,
+        ) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(register1).set(initialValue1);
+          subject.registers.get(register2).set(initialValue2);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register1).fetch()).toBe(initialValue2);
+          expect(subject.registers.get(register2).fetch()).toBe(initialValue1);
+        });
+
+    it('cannot exchange an 8 bit and 16 bit register pair', () => {
+      const address = 0x0000;
+      const code = [0x1e, 0x18];
+      const register1 = 'X';
+      const register2 = 'A';
+      const initialValue1 = 0x5555;
+      const initialValue2 = 0xaa;
+      const cycles = 8;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      subject.registers.get(register1).set(initialValue1);
+      subject.registers.get(register2).set(initialValue2);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get(register1).fetch()).toBe(initialValue1);
+      expect(subject.registers.get(register2).fetch()).toBe(initialValue2);
+    });
+
+    each(
+        [
+          [0x0000, [0x1f, 0x12], 'X', 'Y', 0x8000, 0x0001, 7],
+          [0x0000, [0x1f, 0x8b], 'A', 'DP', 0x55, 0xaa, 7],
+        ],
+    ).it('transfers the value of one register to another',
+        (
+            address, code, register1, register2,
+            initialValue1, initialValue2, cycles,
+        ) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(register1).set(initialValue1);
+          subject.registers.get(register2).set(initialValue2);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register1).fetch()).toBe(initialValue1);
+          expect(subject.registers.get(register2).fetch()).toBe(initialValue1);
+        });
+
+    it('cannot transfer an 8 bit to a 16 bit register', () => {
+      const address = 0x0000;
+      const code = [0x1f, 0x81];
+      const register1 = 'A';
+      const register2 = 'X';
+      const initialValue1 = 0xaa;
+      const initialValue2 = 0x5555;
+      const cycles = 7;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      subject.registers.get(register1).set(initialValue1);
+      subject.registers.get(register2).set(initialValue2);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get(register2).fetch()).toBe(initialValue2);
+    });
+
+    each(
+        [
+          [0x0000, [0x1d], 0x80, 0xff, cpus.NEGATIVE, 2],
+          [0x0000, [0x1d], 0x00, 0x00, cpus.ZERO, 2],
+          [0x0000, [0x1d], 0x0f, 0x00, 0x00, 2],
+        ],
+    ).it('extends B into D with respect to sign',
+        (address, code, initialValue, expectedValue, ccFlags, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get('B').set(initialValue);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get('A').fetch()).toBe(expectedValue);
+          expect(subject.CC.value).toBe(ccFlags);
+        });
+
+    it('multiplies the A and B register together into D', () => {
+      const address = 0x0000;
+      const code = [0x3d];
+      const valueA = 0x10;
+      const valueB = 0x20;
+      const expectedValue = 0x0200;
+      const cycles = 11;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      subject.registers.get('A').set(valueA);
+      subject.registers.get('B').set(valueB);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('D').fetch()).toBe(expectedValue);
+    });
+
+    each(
+        [
+          [0x0000, [0x4d], 'A', 0x00, cpus.ZERO, 2],
+          [0x0000, [0x5d], 'B', 0x80, cpus.NEGATIVE, 2],
+        ],
+    ).it('tests an 8 bit register',
+        (address, code, register, value, ccFlags, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(register).set(value);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.CC.value).toBe(ccFlags);
+        });
+
+    each(
+        [
+          [0x0000, [0x0d, 0x02, 0x00], 0x00, cpus.ZERO, 6],
+          [0x0000, [0x7d, 0x00, 0x03, 0x80], 0x00, cpus.NEGATIVE, 7],
+        ],
+    ).it('tests a memory address',
+        (address, code, dp, ccFlags, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.CC.value).toBe(ccFlags);
+        });
+
+    it('performs decimal adjust on A register', () => {
+      const address = 0x0000;
+      const code = [0x19];
+      const register = 'A';
+      const initialValueA = 0x1b;
+      const initialCC = cpus.HALFCARRY;
+      const expectedValueA = 0x21;
+      const cycles = 2;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      subject.registers.get(register).set(initialValueA);
+      subject.CC.value = initialCC;
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get(register).fetch()).toBe(expectedValueA);
+    });
+
+    it('returns to prior execution on return from fast interrupt', () => {
+      const address = 0x0000;
+      const code = [0x3b];
+      const initialSValue = 0x2000;
+      const initialStack = [cpus.NEGATIVE, 0x10, 0x00];
+      const expectedPCValue = 0x1000;
+      const expectedSValue = 0x2003;
+      const cycles = 6;
+      loadMemory(address, code);
+      loadMemory(initialSValue + 1, initialStack);
+      subject.registers.get('PC').set(address);
+      subject.registers.get('S').set(initialSValue);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('PC').fetch()).toBe(expectedPCValue);
+      expect(subject.registers.get('S').fetch()).toBe(expectedSValue);
+    });
+
+    it('returns from slow interrupt and restores all registers', () => {
+      const address = 0x0000;
+      const code = [0x3b];
+      const initialSValue = 0x2000;
+      const expectedPCValue = 0x1000;
+      const expectedSValue = 0x200c;
+      const expectedAValue = 0x01;
+      const expectedBValue = 0x02;
+      const expectedDPValue = 0x03;
+      const expectedXValue = 0x0405;
+      const expectedYValue = 0x0607;
+      const expectedUValue = 0x0809;
+      const initialStack = [
+        cpus.ENTIRE, expectedAValue,
+        expectedBValue, expectedDPValue,
+        (expectedXValue & 0xff00) >> 8, expectedXValue & 0xff,
+        (expectedYValue & 0xff00) >> 8, expectedYValue & 0xff,
+        (expectedUValue & 0xff00) >> 8, expectedUValue & 0xff,
+        0x10, 0x00,
+      ];
+      const cycles = 15;
+      loadMemory(address, code);
+      loadMemory(initialSValue + 1, initialStack);
+      subject.registers.get('PC').set(address);
+      subject.registers.get('S').set(initialSValue);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('A').fetch()).toBe(expectedAValue);
+      expect(subject.registers.get('B').fetch()).toBe(expectedBValue);
+      expect(subject.registers.get('X').fetch()).toBe(expectedXValue);
+      expect(subject.registers.get('Y').fetch()).toBe(expectedYValue);
+      expect(subject.registers.get('U').fetch()).toBe(expectedUValue);
+      expect(subject.registers.get('S').fetch()).toBe(expectedSValue);
+      expect(subject.registers.get('DP').fetch()).toBe(expectedDPValue);
+      expect(subject.registers.get('PC').fetch()).toBe(expectedPCValue);
+    });
+
+    it('stacks all registers on interrupt 1 and vectors from fffa', () => {
+      const address = 0x0000;
+      const code = [0x3f];
+      const vector = [0x40, 0x00];
+      const expectedPCValue = 0x4000;
+      const initialSValue = 0x6000;
+      const expectedSValue = 0x5ff4;
+      const cycles = 19;
+      loadMemory(address, code);
+      subject.memory.burn(0xfffa, vector[0]);
+      subject.memory.burn(0xfffb, vector[1]);
+      subject.PC.set(address);
+      subject.registers.get('S').set(initialSValue);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('S').fetch()).toBe(expectedSValue);
+      expect(subject.PC.fetch()).toBe(expectedPCValue);
+      expect(subject.CC.value & (cpus.IRQ | cpus.FIRQ)).
+          toBe(cpus.IRQ | cpus.FIRQ);
+    });
+
+    it('stacks all registers on interrupt 2 and vectors from fff4', () => {
+      const address = 0x0000;
+      const code = [0x10, 0x3f];
+      const vector = [0x40, 0x00];
+      const expectedPCValue = 0x4000;
+      const initialSValue = 0x6000;
+      const expectedSValue = 0x5ff4;
+      const cycles = 20;
+      loadMemory(address, code);
+      subject.memory.burn(0xfff4, vector[0]);
+      subject.memory.burn(0xfff5, vector[1]);
+      subject.PC.set(address);
+      subject.registers.get('S').set(initialSValue);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('S').fetch()).toBe(expectedSValue);
+      expect(subject.PC.fetch()).toBe(expectedPCValue);
+      expect(subject.CC.value & (cpus.IRQ | cpus.FIRQ)).
+          toBe(0);
+    });
+
+    it('stacks all registers on interrupt 3 and vectors from fff2', () => {
+      const address = 0x0000;
+      const code = [0x11, 0x3f];
+      const vector = [0x40, 0x00];
+      const expectedPCValue = 0x4000;
+      const initialSValue = 0x6000;
+      const expectedSValue = 0x5ff4;
+      const cycles = 20;
+      loadMemory(address, code);
+      subject.memory.burn(0xfff2, vector[0]);
+      subject.memory.burn(0xfff3, vector[1]);
+      subject.PC.set(address);
+      subject.registers.get('S').set(initialSValue);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('S').fetch()).toBe(expectedSValue);
+      expect(subject.PC.fetch()).toBe(expectedPCValue);
+      expect(subject.CC.value & (cpus.IRQ | cpus.FIRQ)).
+          toBe(0);
+    });
+
+    it('stacks all registers and waits for an external interrupt', () => {
+      const address = 0x0000;
+      const code = [0x3c, 0xbf];
+      const initialSValue = 0x6000;
+      const expectedSValue = 0x5ff4;
+      const cycles = 20;
+      loadMemory(address, code);
+      subject.PC.set(address);
+      subject.registers.get('S').set(initialSValue);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('S').fetch()).toBe(expectedSValue);
+      expect(subject.runState).toBe(cpus.WAITING);
+    });
+
+    it('does not process instructions while in wait state', () => {
+      const address = 0x0000;
+      const code = [0x12];
+      const cycles = 1;
+      loadMemory(address, code);
+      subject.PC.set(address);
+      subject.runState = cpus.WAITING;
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.runState).toBe(cpus.WAITING);
+      expect(subject.PC.fetch()).toBe(address);
+    });
+
+    it('syncs and waits for masked interrupt', () => {
+      const address = 0x0000;
+      const code = [0x13];
+      const cycles = 2;
+      loadMemory(address, code);
+      subject.PC.set(address);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.runState).toBe(cpus.SYNCING);
+    });
+
+    it('does not execute instructions while syncing', () => {
+      const address = 0x0000;
+      const code = [0x12];
+      const cycles = 1;
+      loadMemory(address, code);
+      subject.PC.set(address);
+      subject.runState = cpus.SYNCING;
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.PC.fetch()).toBe(address);
+      expect(subject.runState).toBe(cpus.SYNCING);
+    });
+
+    it('continues execution when a masked interrupt occurs', () => {
+      const address = 0x0000;
+      const code = [0x12];
+      const desyncCycles = 1;
+      const cycles = 2;
+      loadMemory(address, code);
+      subject.PC.set(address);
+      subject.runState = cpus.SYNCING;
+      subject.callInterrupt('irq');
+      subject.CC.value = cpus.IRQ;
+      const syncCount = runToNext(subject);
+      const cycleCount = runToNext(subject);
+      expect(syncCount).toBe(desyncCycles);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.PC.fetch()).toBe(address + 1);
+      expect(subject.runState).toBe(cpus.RUNNING);
+    });
+
+    it('stacks and interrupts when an unmasked interrupt occurs', () => {
+      const address = 0x0000;
+      const code = [0x12];
+      const vector = [0x40, 0x00];
+      const expectedPCValue = 0x4000;
+      const initialSValue = 0x2000;
+      loadMemory(address, code);
+      subject.memory.burn(0xfff8, vector[0]);
+      subject.memory.burn(0xfff9, vector[1]);
+      subject.PC.set(address);
+      subject.registers.get('S').set(initialSValue);
+      subject.runState = cpus.SYNCING;
+      subject.callInterrupt('irq');
+      runToNext(subject);
+      expect(subject.PC.fetch()).toBe(expectedPCValue);
+      expect(subject.runState).toBe(cpus.RUNNING);
+    });
+  });
+
+  describe('interrupt request handling', () => {
+    loadMemory = (address, bytes) => {
+      for (let index = 0; index < bytes.length; ++index) {
+        subject.memory.burn(address + index, bytes[index]);
+      }
+    };
+    let subject;
+    beforeEach(() => {
+      subject = new Cpu(factory('D64'));
+      subject.clearInstruction();
+      subject.registers.get('S').set(0x1000);
+      const vectors = [
+        0x20, 0x00, 0x30, 0x00, 0x40, 0x00, 0x50, 0x00,
+        0x60, 0x00, 0x70, 0x00, 0x00, 0x00,
+      ];
+      loadMemory(0xfff2, vectors);
+      runToNext(subject);
+    });
+
+    each(
+        [
+          ['nmi', 9, 0x7000, 0x1000, cpus.FIRQ | cpus.IRQ],
+          ['reset', 9, 0x0000, 0x1000, cpus.FIRQ | cpus.IRQ],
+          ['firq', 9, 0x4000, 0x1000, cpus.FIRQ | cpus.IRQ],
+          ['irq', 9, 0x5000, 0x1000, cpus.IRQ],
+        ],
+    ).it('processes an interrupt request from wait',
+        (interruptLine, cycles, expectedPC, expectedS, expectedCC) => {
+          subject.runState = cpus.WAITING;
+          subject.callInterrupt(interruptLine);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.PC.fetch()).toBe(expectedPC);
+          expect(subject.registers.get('S').fetch()).toBe(expectedS);
+          expect(subject.CC.value & (cpus.FIRQ | cpus.IRQ))
+              .toBe(expectedCC);
+        });
+
+    each(
+        [
+          ['nmi', 21, 0x7000, 0x0ff4, cpus.FIRQ | cpus.IRQ],
+          ['reset', 21, 0x0000, 0x0ff4, cpus.FIRQ | cpus.IRQ],
+          ['firq', 12, 0x4000, 0x0ffd, cpus.FIRQ | cpus.IRQ],
+          ['irq', 21, 0x5000, 0x0ff4, cpus.IRQ],
+        ],
+    ).it('processes an interrupt request from running',
+        (interruptLine, cycles, expectedPC, expectedS, expectedCC) => {
+          subject.runState = cpus.RUNNING;
+          subject.callInterrupt(interruptLine);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.PC.fetch()).toBe(expectedPC);
+          expect(subject.registers.get('S').fetch()).toBe(expectedS);
+          expect(subject.CC.value & (cpus.FIRQ | cpus.IRQ))
+              .toBe(expectedCC);
+        });
+
+    each(
+        [
+          ['nmi', cpus.IRQ, 0x7000],
+          ['nmi', cpus.FIRQ, 0x7000],
+          ['reset', cpus.IRQ, 0x0000],
+          ['reset', cpus.FIRQ, 0x0000],
+          ['irq', cpus.IRQ, 0x0100],
+          ['irq', cpus.FIRQ, 0x5000],
+          ['firq', cpus.IRQ, 0x4000],
+          ['firq', cpus.FIRQ, 0x0100],
+        ],
+    ).it('can ignore an interrupt if it is masked',
+        (interruptLine, initialCC, expectedPC) => {
+          subject.PC.set(0x100);
+          subject.runState = cpus.RUNNING;
+          subject.CC.value = subject.CC.value | initialCC;
+          subject.callInterrupt(interruptLine);
+          runToNext(subject);
+          expect(subject.PC.fetch()).toBe(expectedPC);
         });
   });
 });

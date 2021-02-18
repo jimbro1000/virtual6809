@@ -1,6 +1,6 @@
 {
   "name": "virtual6809",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Emulation of Motorola 6809 design",
   "repository": "https://github.com/jimbro1000/virtual6809",
   "main": "index.js",

@@ -1,3 +1,5 @@
+const cpus = require('../../src/cpu/cpu_constants');
+
 instructions = {
   0x00: {
     'operation': 'NEG',
@@ -45,6 +47,14 @@ instructions = {
     'object': 'W',
     'code': [
       'DIRECT', 'SWAPWAD', 'READWLOW', 'ROTATELEFT', 'WRITEWLOW',
+    ],
+  },
+  0x0d: {
+    'operation': 'TST',
+    'object': 'W',
+    'target': 'AD',
+    'code': [
+      'DIRECT', 'SWAPWAD', 'READWLOW', 'TESTOB', 'BUSY',
     ],
   },
   0x0e: {
@@ -195,6 +205,18 @@ instructions = {
       'READHIGH', 'READWLOW', 'ADDTGSWTOOBIF',
     ],
   },
+  0x103f: {
+    'operation': 'SWI2',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'AD',
+    'vector': cpus.vSWI2.vector,
+    'mask': 0x00,
+    'code': [
+      'SETENTIRE', 'TFROBTOTG', 'PUSH', 'TFRTGTOOB',
+      'VECTORHIGH', 'VECTORLOW', 'MASKIF',
+    ],
+  },
   0x108c: {
     'operation': 'CMPY',
     'mode': 'immediate',
@@ -314,6 +336,18 @@ instructions = {
     'operation': 'extended instruction',
     'mode': 'fetch',
   },
+  0x113f: {
+    'operation': 'SWI3',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'AD',
+    'vector': cpus.vSWI3.vector,
+    'mask': 0,
+    'code': [
+      'SETENTIRE', 'TFROBTOTG', 'PUSH', 'TFRTGTOOB',
+      'VECTORHIGH', 'VECTORLOW', 'MASKIF',
+    ],
+  },
   0x1183: {
     'operation': 'CMPU',
     'mode': 'immediate',
@@ -370,9 +404,11 @@ instructions = {
   },
   0x12: {
     'operation': 'NOP',
-    'code': [
-      'BUSY',
-    ],
+    'code': ['BUSY'],
+  },
+  0x13: {
+    'operation': 'SYNC',
+    'code': ['SYNC'],
   },
   0x16: {
     'operation': 'LBRA',
@@ -394,6 +430,12 @@ instructions = {
       'READHIGH', 'READWLOW', 'PUSHPC', 'ADDTGSWTOOBIF', 'BUSY', 'BUSY', 'BUSY',
     ],
   },
+  0x19: {
+    'operation': 'DAA',
+    'mode': 'inherent',
+    'object': 'A',
+    'code': ['DECIMALADJUST'],
+  },
   0x1a: {
     'operation': 'ORCC',
     'mode': 'immediate',
@@ -410,6 +452,27 @@ instructions = {
     'target': 'AD',
     'code': [
       'READWLOW', 'ANDCC',
+    ],
+  },
+  0x1d: {
+    'operation': 'SEX',
+    'mode': 'inherent',
+    'code': ['SIGNEXTEND'],
+  },
+  0x1e: {
+    'operation': 'EXG',
+    'mode': 'inherent',
+    'object': 'W',
+    'code': [
+      'READLOW', 'EXCHANGE', 'BUSY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
+    ],
+  },
+  0x1f: {
+    'operation': 'EXG',
+    'mode': 'inherent',
+    'object': 'W',
+    'code': [
+      'READLOW', 'TRANSFER', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
     ],
   },
   0x20: {
@@ -601,8 +664,48 @@ instructions = {
     'operation': 'RTS',
     'mode': 'immediate',
     'object': 'S',
+    'target': 'AD',
     'code': [
-      'PULLPC', 'BUSY', 'BUSY', 'BUSY',
+      'TFROBTOTG', 'PULLPC', 'TFRTGTOOB', 'BUSY',
+    ],
+  },
+  0x3b: {
+    'operation': 'RTI',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'AD',
+    'code': [
+      'TFROBTOTG', 'PULLCC', 'PULLPC', 'TFRTGTOOB', 'BUSY',
+    ],
+  },
+  0x3c: {
+    'operation': 'CWAI',
+    'mode': 'immediate',
+    'object': 'S',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'ANDCC', 'SETENTIRE', 'TFROBTOTG', 'PUSH',
+      'TFRTGTOOB', 'BUSY', 'WAIT',
+    ],
+  },
+  0x3d: {
+    'operation': 'MUL',
+    'mode': 'inherent',
+    'code': [
+      'MULTIPLY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
+      'BUSY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
+    ],
+  },
+  0x3f: {
+    'operation': 'SWI',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'AD',
+    'vector': cpus.vSWI.vector,
+    'mask': cpus.IRQ | cpus.FIRQ,
+    'code': [
+      'SETENTIRE', 'TFROBTOTG', 'PUSH', 'TFRTGTOOB',
+      'VECTORHIGH', 'VECTORLOW', 'MASKIF',
     ],
   },
   0x40: {
@@ -667,6 +770,13 @@ instructions = {
       'INCOB',
     ],
   },
+  0x4d: {
+    'operation': 'TSTA',
+    'object': 'A',
+    'code': [
+      'TESTOB',
+    ],
+  },
   0x50: {
     'operation': 'NEGB',
     'mode': 'inherent',
@@ -727,6 +837,13 @@ instructions = {
     'object': 'B',
     'code': [
       'INCOB',
+    ],
+  },
+  0x5d: {
+    'operation': 'TSTB',
+    'object': 'B',
+    'code': [
+      'TESTOB',
     ],
   },
   0x70: {
@@ -791,6 +908,15 @@ instructions = {
     'object': 'AD',
     'code': [
       'READHIGH', 'READLOW', 'READADWLOW', 'INCW', 'WRITEWLOW',
+    ],
+  },
+  0x7d: {
+    'operation': 'TST',
+    'mode': 'extended',
+    'object': 'W',
+    'target': 'AD',
+    'code': [
+      'READHIGH', 'READWLOW', 'SWAPWAD', 'READWLOW', 'TESTOB', 'BUSY',
     ],
   },
   0x7e: {
@@ -1619,6 +1745,37 @@ instructions = {
     'target': 'AD',
     'code': [
       'READHIGH', 'READWLOW', 'TFRWTOTG', 'WRITEHIGH', 'WRITELOW',
+    ],
+  },
+  'fastVectorFromRun': {
+    'operation': 'HWI',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'AD',
+    'code': [
+      'TFROBTOTG', 'PUSHIR', 'TFRTGTOOB',
+      'VECTORHIGH', 'VECTORLOW', 'MASKIF',
+      'BUSY', 'BUSY', 'BUSY',
+    ],
+  },
+  'vectorFromRun': {
+    'operation': 'HWI',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'AD',
+    'code': [
+      'SETENTIRE', 'TFROBTOTG', 'PUSH', 'TFRTGTOOB',
+      'VECTORHIGH', 'VECTORLOW', 'MASKIF', 'BUSY', 'BUSY',
+    ],
+  },
+  'vectorFromWait': {
+    'operation': 'HWI',
+    'mode': 'inherent',
+    'object': 'S',
+    'target': 'AD',
+    'code': [
+      'VECTORHIGH', 'VECTORLOW', 'MASKIF',
+      'BUSY', 'BUSY', 'BUSY', 'BUSY', 'BUSY',
     ],
   },
 };

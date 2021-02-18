@@ -41,24 +41,34 @@ So far the instruction set is incomplete and only covers:
  * JMP
  * ABX
  * ADD and ADC
+ * DAA
  * SUB and SBC
+ * SEX
+ * MUL
  * AND, OR, EOR
  * LSL, LSR, ROL and ROR  
  * BIT, COM, NEG
  * NOP
  * 8 bit CMP (immediate, direct, extended)
+ * TST
  * INC and DEC
  * PSH and PUL
  * JSR
+ * SWI, SWI2, SWI3
+ * CWAI, SYNC
  * RTS
+ * RTI
  * short branch
  * long branch
+ * EXG and TFR
 
 indexed/indirect addressing is not implemented  
-ALU is partially implemented (add, subtract, add with carry, subtract with carry, and)  
-condition logic contained in control register not ALU  
+ALU is fully implemented but condition logic contained in control 
+register not ALU  
 
-The processor bootstraps correctly using the vector stored at 0xfffe
+The processor bootstraps correctly using the hard reset vector stored at 0xfffe.
+If no memory exists at that address it will be interpreted as starting from 
+0x0000.
 
 ## Video ##
 
@@ -101,7 +111,7 @@ nowhere yet).
 Changing `main.js` to alter the memory is simply a matter of changing these lines:
 
 ```javascript
-    const memory = Memory.factory("D64");
+const memory = Memory.factory("D64");
 const machine = new Cpu(memory);
 ```
 
@@ -109,7 +119,7 @@ At the moment the memory factory only knows D64 and D4 but it is possible to ass
 a custom model using the memory manager:
 
 ```javascript
-    const memory = new MemoryManager([
+const memory = new MemoryManager([
   [new Chip(chips.RAM, chips.K32), 0x0000],
   [new Chip(chips.ROM, chips.K4), 0xf000]
 ]);

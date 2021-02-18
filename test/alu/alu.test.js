@@ -179,6 +179,30 @@ describe('Arithmetic Logic Unit', () => {
         });
   });
 
+  describe('Multiplication', () => {
+    it('multiplies two values', () => {
+      const s1 = 0x20;
+      const s2 = 0x08;
+      const expected = 0x0100;
+      const result = subject.mul8(s1, s2);
+      expect(result).toBe(expected);
+    });
+
+    it('sets carry if bit 7 of the result is set', () => {
+      const s1 = 0x10;
+      const s2 = 0x08;
+      subject.mul8(s1, s2);
+      expect(cc.value & cpus.CARRY).toBe(cpus.CARRY);
+    });
+
+    it('sets zero if the result is zero', () => {
+      const s1 = 0x00;
+      const s2 = 0x00;
+      subject.mul8(s1, s2);
+      expect(cc.value & cpus.ZERO).toBe(cpus.ZERO);
+    });
+  });
+
   describe('Bitwise AND', () => {
     each(
         [
@@ -186,7 +210,7 @@ describe('Arithmetic Logic Unit', () => {
           [0xff, 0x55, 0x55, 0x00],
         ],
     ).it('ANDs two values and sets NZV', (s1, s2, expected, flags) => {
-      const result = subject.and(s1, s2);
+      const result = subject.and8(s1, s2);
       expect(result).toBe(expected);
       expect(cc.value).toBe(flags);
     });
@@ -199,7 +223,7 @@ describe('Arithmetic Logic Unit', () => {
     ).it(
         'does not modify cc if condition parameter is false',
         (s1, s2, expected) => {
-          const result = subject.and(s1, s2, false);
+          const result = subject.and8(s1, s2, false);
           expect(result).toBe(expected);
           expect(cc.value).toBe(0);
         });
@@ -213,7 +237,7 @@ describe('Arithmetic Logic Unit', () => {
           [0x55, 0x2a, 0x7f, 0x00],
         ],
     ).it('ORs two values and sets NZV', (s1, s2, expected, flags) => {
-      const result = subject.or(s1, s2);
+      const result = subject.or8(s1, s2);
       expect(result).toBe(expected);
       expect(cc.value).toBe(flags);
     });
@@ -226,7 +250,7 @@ describe('Arithmetic Logic Unit', () => {
     ).it(
         'does not modify cc if condition parameter is false',
         (s1, s2, expected) => {
-          const result = subject.or(s1, s2, false);
+          const result = subject.or8(s1, s2, false);
           expect(result).toBe(expected);
           expect(cc.value).toBe(0);
         });
@@ -241,7 +265,7 @@ describe('Arithmetic Logic Unit', () => {
     ).it(
         'Exclusive-ORs two values bitwise and sets NZV',
         (s1, s2, expected, flags) => {
-          const result = subject.eor(s1, s2);
+          const result = subject.eor8(s1, s2);
           expect(result).toBe(expected);
           expect(cc.value).toBe(flags);
         });
@@ -255,7 +279,7 @@ describe('Arithmetic Logic Unit', () => {
           [0x00, 0x00, cpus.ZERO],
         ],
     ).it('performs arithmetic shift left', (s1, expected, flags) => {
-      const result = subject.shiftLeft(s1);
+      const result = subject.shiftLeft8(s1);
       expect(result).toBe(expected);
       expect(cc.value).toBe(flags);
     });
@@ -268,7 +292,7 @@ describe('Arithmetic Logic Unit', () => {
           [0x01, 0x00, cpus.ZERO | cpus.CARRY],
         ],
     ).it('performs arithmetic shift right', (s1, expected, expectedFlags) => {
-      const result = subject.shiftRight(s1);
+      const result = subject.shiftRight8(s1);
       expect(result).toBe(expected);
       expect(cc.value).toBe(expectedFlags);
     });
@@ -281,7 +305,7 @@ describe('Arithmetic Logic Unit', () => {
     ).it('performs rotate left',
         (s1, expected, initialFlags, expectedFlags) => {
           cc.value = initialFlags;
-          const result = subject.rotateLeft(s1, true);
+          const result = subject.rotateLeft8(s1, true);
           expect(result).toBe(expected);
           expect(cc.value).toBe(expectedFlags);
         });
@@ -295,7 +319,7 @@ describe('Arithmetic Logic Unit', () => {
     ).it('performs rotate right',
         (s1, expected, initialFlags, expectedFlags) => {
           cc.value = initialFlags;
-          const result = subject.rotateRight(s1);
+          const result = subject.rotateRight8(s1);
           expect(result).toBe(expected);
           expect(cc.value).toBe(expectedFlags);
         });
@@ -304,7 +328,7 @@ describe('Arithmetic Logic Unit', () => {
   describe('general operations', () => {
     it('performs a 1s complement', () => {
       const s1 = 0x55;
-      const result = subject.complement(s1);
+      const result = subject.complement8(s1);
       expect(result).toBe(0xaa);
       expect(cc.value).toBe(cpus.CARRY | cpus.NEGATIVE);
     });
@@ -316,9 +340,78 @@ describe('Arithmetic Logic Unit', () => {
           [0x80, 0x80, cpus.CARRY | cpus.OVERFLOW | cpus.NEGATIVE],
         ],
     ).it('performs a 2s complement', (initialValue, expectedValue, ccFlags) => {
-      const result = subject.negate(initialValue);
+      const result = subject.negate8(initialValue);
       expect(result).toBe(expectedValue);
       expect(cc.value).toBe(ccFlags);
+    });
+
+    it('tests an 8 bit value for negative flag', () => {
+      const ccFlags = cpus.NEGATIVE;
+      const testValue = 0x80;
+      subject.test8(testValue);
+      expect(cc.value & ccFlags).toBe(ccFlags);
+    });
+
+    it('tests an 8 bit value for zero flag', () => {
+      const ccFlags = cpus.ZERO;
+      const testValue = 0x00;
+      subject.test8(testValue);
+      expect(cc.value & ccFlags).toBe(ccFlags);
+    });
+
+    it('clears the overflow flag after testing', () => {
+      const ccFlags = cpus.OVERFLOW;
+      cc.value = 0xff;
+      subject.test8(0x01);
+      expect(cc.value & ccFlags).toBe(0x00);
+    });
+
+    describe('decimal adjust accumulator', () => {
+      it('corrects the value if a half carry is present', () => {
+        cc.value = cpus.HALFCARRY;
+        const result = subject.daa(0x03);
+        expect(result).toBe(0x19);
+      });
+
+      it('corrects the value if low nibble is over 9', () => {
+        const result = subject.daa(0x0b);
+        expect(result).toBe(0x11);
+      });
+
+      it('corrects the upper nibble if a carry is present', () => {
+        cc.value = cpus.CARRY;
+        const result = subject.daa(0x18);
+        expect(result).toBe(0x78);
+      });
+
+      it('corrects the upper nibble if it is over 9', () => {
+        const result = subject.daa(0xa6);
+        expect(result).toBe(0x06);
+      });
+
+      it(
+          'corrects the upper nibble if higher is over 8 and lower is over 9',
+          () => {
+            const result = subject.daa(0x9a);
+            expect(result).toBe(0x00);
+          });
+
+      it('sets the carry flag if the adjustment overflows the upper nibble',
+          () => {
+            cc.value = cpus.HALFCARRY | cpus.CARRY;
+            subject.daa(0x91);
+            expect(cc.value & cpus.CARRY).toBe(cpus.CARRY);
+          });
+
+      it('sets the negative flag when the result is negative', () => {
+        subject.daa(0x80);
+        expect(cc.value & cpus.NEGATIVE).toBe(cpus.NEGATIVE);
+      });
+
+      it('sets the zero flag when the result is zero', () => {
+        subject.daa(0x00);
+        expect(cc.value & cpus.ZERO).toBe(cpus.ZERO);
+      });
     });
   });
 });
