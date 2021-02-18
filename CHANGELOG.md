@@ -9,6 +9,7 @@ __New:__
 * Add DAA instruction
 * RTI instruction
 * SWI instructions
+* CWAI and SYNC instructions
 
 Interrupt handler
 

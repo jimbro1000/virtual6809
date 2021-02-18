@@ -55,6 +55,7 @@ So far the instruction set is incomplete and only covers:
  * PSH and PUL
  * JSR
  * SWI, SWI2, SWI3
+ * CWAI, SYNC
  * RTS
  * RTI
  * short branch

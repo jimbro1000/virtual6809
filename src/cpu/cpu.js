@@ -105,6 +105,7 @@ class Cpu {
     result['VECTORLOW'] = cpus.VECTORLOW;
     result['MASKIF'] = cpus.MASKIF;
     result['WAIT'] = cpus.WAIT;
+    result['SYNC'] = cpus.SYNC;
     return result;
   }
 
@@ -181,6 +182,7 @@ class Cpu {
     result[cpus.VECTORLOW] = this.vector_lsb;
     result[cpus.MASKIF] = this.suspend_interrupts;
     result[cpus.WAIT] = this.wait;
+    result[cpus.SYNC] = this.sync;
     return result;
   }
 
@@ -325,29 +327,49 @@ class Cpu {
    */
   cycle() {
     if (this.interruptQueue.length > 0 && this.code[0] === cpus.NEXT) {
-      let unmasked;
       const interrupt = this.interruptQueue.shift();
-      switch (interrupt.name) {
-        case 'irq':
-          unmasked = this.CC.ifirqclear();
-          break;
-        case 'firq':
-          unmasked = this.CC.iffirqclear();
-          break;
-        default:
-          unmasked = true;
-          break;
-      }
-      if (unmasked) {
+      if (this.interruptUnmasked(interrupt.name)) {
         this.serviceInterrupt(interrupt);
         this.runState = cpus.RUNNING;
+      } else {
+        if (this.runState === cpus.SYNCING) {
+          this.runState = cpus.RUNNING;
+        }
       }
     } else if (this.runState === cpus.RUNNING) {
-      const lambda = this.lambdas[this.code.pop()];
-      lambda();
-      if (this.code.length === 0) {
-        this.clearInstruction();
-      }
+      this.executeNext();
+    }
+  }
+
+  /**
+   * Check if interrupt can happen.
+   * @param {string} bit
+   * @returns {boolean}
+   */
+  interruptUnmasked(bit) {
+    let unmasked;
+    switch (bit) {
+      case 'irq':
+        unmasked = this.CC.ifirqclear();
+        break;
+      case 'firq':
+        unmasked = this.CC.iffirqclear();
+        break;
+      default:
+        unmasked = true;
+        break;
+    }
+    return unmasked;
+  }
+
+  /**
+   * execute next instruction.
+   */
+  executeNext() {
+    const lambda = this.lambdas[this.code.pop()];
+    lambda();
+    if (this.code.length === 0) {
+      this.clearInstruction();
     }
   }
 
@@ -907,6 +929,10 @@ class Cpu {
 
   wait = () => {
     this.runState = cpus.WAITING;
+  }
+
+  sync = () => {
+    this.runState = cpus.SYNCING;
   }
 
   check_cc = (initial, complement, object, sum, masked) => {

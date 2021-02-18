@@ -5,6 +5,7 @@ define('LONG', 16);
 // cpu state
 define('RUNNING', 1);
 define('WAITING', 2);
+define('SYNCING', 3);
 // condition register flags
 define('CARRY', 0x1);
 define('OVERFLOW', 0x2);
@@ -124,3 +125,4 @@ define('VECTORLOW', 62);
 define('MASKIF', 63);
 define('WAIT', 64);
 define('PUSHIR', 65);
+define('SYNC', 66);

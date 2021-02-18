@@ -2089,6 +2089,66 @@ describe('6809 cpu', () => {
       expect(subject.runState).toBe(cpus.WAITING);
       expect(subject.PC.fetch()).toBe(address);
     });
+
+    it('syncs and waits for masked interrupt', () => {
+      const address = 0x0000;
+      const code = [0x13];
+      const cycles = 2;
+      loadMemory(address, code);
+      subject.PC.set(address);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.runState).toBe(cpus.SYNCING);
+    });
+
+    it('does not execute instructions while syncing', () => {
+      const address = 0x0000;
+      const code = [0x12];
+      const cycles = 1;
+      loadMemory(address, code);
+      subject.PC.set(address);
+      subject.runState = cpus.SYNCING;
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.PC.fetch()).toBe(address);
+      expect(subject.runState).toBe(cpus.SYNCING);
+    });
+
+    it('continues execution when a masked interrupt occurs', () => {
+      const address = 0x0000;
+      const code = [0x12];
+      const desyncCycles = 1;
+      const cycles = 2;
+      loadMemory(address, code);
+      subject.PC.set(address);
+      subject.runState = cpus.SYNCING;
+      subject.callInterrupt('irq');
+      subject.CC.value = cpus.IRQ;
+      const syncCount = runToNext(subject);
+      const cycleCount = runToNext(subject);
+      expect(syncCount).toBe(desyncCycles);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.PC.fetch()).toBe(address + 1);
+      expect(subject.runState).toBe(cpus.RUNNING);
+    });
+
+    it('stacks and interrupts when an unmasked interrupt occurs', () => {
+      const address = 0x0000;
+      const code = [0x12];
+      const vector = [0x40, 0x00];
+      const expectedPCValue = 0x4000;
+      const initialSValue = 0x2000;
+      loadMemory(address, code);
+      subject.memory.burn(0xfff8, vector[0]);
+      subject.memory.burn(0xfff9, vector[1]);
+      subject.PC.set(address);
+      subject.registers.get('S').set(initialSValue);
+      subject.runState = cpus.SYNCING;
+      subject.callInterrupt('irq');
+      runToNext(subject);
+      expect(subject.PC.fetch()).toBe(expectedPCValue);
+      expect(subject.runState).toBe(cpus.RUNNING);
+    });
   });
 
   describe('interrupt request handling', () => {

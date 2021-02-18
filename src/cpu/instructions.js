@@ -404,9 +404,11 @@ instructions = {
   },
   0x12: {
     'operation': 'NOP',
-    'code': [
-      'BUSY',
-    ],
+    'code': ['BUSY'],
+  },
+  0x13: {
+    'operation': 'SYNC',
+    'code': ['SYNC'],
   },
   0x16: {
     'operation': 'LBRA',
