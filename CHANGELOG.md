@@ -1,6 +1,8 @@
 # Virtual 6809 CHANGELOG #
 
 ## Unreleased ##
+
+## V0.3.0 - Feb 18 2021 ##
 __New:__
 * Add EXG and TFR instructions
 * Add Sign Extend (SEX) instruction
@@ -10,8 +12,7 @@ __New:__
 * RTI instruction
 * SWI instructions
 * CWAI and SYNC instructions
-
-Interrupt handler
+* Interrupt handler
 
 __Fixed:__
 * Correction to stack alignment on pull
