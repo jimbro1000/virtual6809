@@ -2,6 +2,10 @@ const define = require('node-constants')(exports);
 // register scale
 define('SHORT', 8);
 define('LONG', 16);
+// cpu state
+define('RUNNING', 1);
+define('WAITING', 2);
+define('SYNCING', 3);
 // condition register flags
 define('CARRY', 0x1);
 define('OVERFLOW', 0x2);
@@ -11,6 +15,49 @@ define('IRQ', 0x10);
 define('HALFCARRY', 0x20);
 define('FIRQ', 0x40);
 define('ENTIRE', 0x80);
+// interrupt lines
+define('vSWI3', {
+  'name': 'swi3',
+  'vector': 0xfff2,
+  'entire': true,
+  'flags': 0x00,
+});
+define('vSWI2', {
+  'name': 'swi2',
+  'vector': 0xfff4,
+  'entire': true,
+  'flags': 0x00,
+});
+define('vFIRQ', {
+  'name': 'firq',
+  'vector': 0xfff6,
+  'entire': false,
+  'flags': this.IRQ | this.FIRQ,
+});
+define('vIRQ', {
+  'name': 'irq',
+  'vector': 0xfff8,
+  'entire': true,
+  'flags': this.IRQ,
+});
+define('vSWI', {
+  'name': 'swi',
+  'vector': 0xfffa,
+  'entire': true,
+  'flags': this.IRQ | this.FIRQ,
+});
+define('vNMI', {
+  'name': 'nmi',
+  'vector': 0xfffc,
+  'entire': true,
+  'flags': this.IRQ | this.FIRQ,
+});
+define('vRESET', {
+  'name': 'reset',
+  'vector': 0xfffe,
+  'entire': true,
+  'flags': this.IRQ | this.FIRQ,
+});
 // cpu pseudo-micro instructions
 define('NEXT', 0); // get new instruction
 define('FETCH', 1); // get next byte of instruction
@@ -71,3 +118,11 @@ define('SIGNEXTEND', 55);
 define('MULTIPLY', 56);
 define('TESTOB', 57);
 define('DECIMALADJUST', 58);
+define('PULLCC', 59);
+define('SETENTIRE', 60);
+define('VECTORHIGH', 61);
+define('VECTORLOW', 62);
+define('MASKIF', 63);
+define('WAIT', 64);
+define('PUSHIR', 65);
+define('SYNC', 66);

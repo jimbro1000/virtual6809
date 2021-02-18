@@ -1,11 +1,20 @@
 # Virtual 6809 CHANGELOG #
 
 ## Unreleased ##
+__New:__
 * Add EXG and TFR instructions
 * Add Sign Extend (SEX) instruction
 * Add MUL instruction
 * Add TST instructions
 * Add DAA instruction
+* RTI instruction
+* SWI instructions
+* CWAI and SYNC instructions
+
+Interrupt handler
+
+__Fixed:__
+* Correction to stack alignment on pull
 
 ## V0.2.1 (fix) - Feb 13 2021 ##
 * Use real semver to fix npm install

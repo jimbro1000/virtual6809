@@ -29,8 +29,11 @@ class Cpu {
     this.lambdas = this.mapCodeToLambda();
     this.stackOrder = this.mapStackOrder();
     this.registerIds = this.mapRegisterIdentifier();
+    this.interruptLines = this.mapInterruptLines();
     this.code = [cpus.TFRWTOOB, cpus.READWLOW, cpus.READHIGH];
     this.PC.set(0xfffe);
+    this.runState = cpus.RUNNING;
+    this.interruptQueue = [];
   }
 
   /**
@@ -95,6 +98,14 @@ class Cpu {
     result['MULTIPLY'] = cpus.MULTIPLY;
     result['TESTOB'] = cpus.TESTOB;
     result['DECIMALADJUST'] = cpus.DECIMALADJUST;
+    result['PUSHIR'] = cpus.PUSHIR;
+    result['PULLCC'] = cpus.PULLCC;
+    result['SETENTIRE'] = cpus.SETENTIRE;
+    result['VECTORHIGH'] = cpus.VECTORHIGH;
+    result['VECTORLOW'] = cpus.VECTORLOW;
+    result['MASKIF'] = cpus.MASKIF;
+    result['WAIT'] = cpus.WAIT;
+    result['SYNC'] = cpus.SYNC;
     return result;
   }
 
@@ -164,6 +175,26 @@ class Cpu {
     result[cpus.MULTIPLY] = this.multiply;
     result[cpus.TESTOB] = this.test_byte;
     result[cpus.DECIMALADJUST] = this.decimal_adjust;
+    result[cpus.PUSHIR] = this.push_pc_and_cc;
+    result[cpus.PULLCC] = this.pull_and_test_cc;
+    result[cpus.SETENTIRE] = this.set_entire_flag;
+    result[cpus.VECTORHIGH] = this.vector_msb;
+    result[cpus.VECTORLOW] = this.vector_lsb;
+    result[cpus.MASKIF] = this.suspend_interrupts;
+    result[cpus.WAIT] = this.wait;
+    result[cpus.SYNC] = this.sync;
+    return result;
+  }
+
+  mapInterruptLines() {
+    const result = [];
+    result['reset'] = cpus.vRESET;
+    result['nmi'] = cpus.vNMI;
+    result['irq'] = cpus.vIRQ;
+    result['firq'] = cpus.vFIRQ;
+    result['swi'] = cpus.vSWI;
+    result['swi2'] = cpus.vSWI2;
+    result['swi3'] = cpus.vSWI3;
     return result;
   }
 
@@ -288,12 +319,53 @@ class Cpu {
     this.code = [cpus.NEXT];
     this.operation = 0;
     this.condition = '';
+    this.vector = 0xfffe;
   }
 
   /**
    * perform a single cpu clock cycle.
    */
   cycle() {
+    if (this.interruptQueue.length > 0 && this.code[0] === cpus.NEXT) {
+      const interrupt = this.interruptQueue.shift();
+      if (this.interruptUnmasked(interrupt.name)) {
+        this.serviceInterrupt(interrupt);
+        this.runState = cpus.RUNNING;
+      } else {
+        if (this.runState === cpus.SYNCING) {
+          this.runState = cpus.RUNNING;
+        }
+      }
+    } else if (this.runState === cpus.RUNNING) {
+      this.executeNext();
+    }
+  }
+
+  /**
+   * Check if interrupt can happen.
+   * @param {string} bit
+   * @returns {boolean}
+   */
+  interruptUnmasked(bit) {
+    let unmasked;
+    switch (bit) {
+      case 'irq':
+        unmasked = this.CC.ifirqclear();
+        break;
+      case 'firq':
+        unmasked = this.CC.iffirqclear();
+        break;
+      default:
+        unmasked = true;
+        break;
+    }
+    return unmasked;
+  }
+
+  /**
+   * execute next instruction.
+   */
+  executeNext() {
     const lambda = this.lambdas[this.code.pop()];
     lambda();
     if (this.code.length === 0) {
@@ -302,12 +374,63 @@ class Cpu {
   }
 
   /**
-   * evaluate register id to find register name
+   * evaluate register id to find register name.
    * @param {number} id 4bit identifier of register
    * @returns {string} register name
    */
   identifyRegister(id) {
     return this.registerIds[id];
+  }
+
+  /**
+   * queue a new interrupt.
+   * @param {string} line
+   */
+  callInterrupt(line) {
+    const interrupt = this.interruptLines[line];
+    if (typeof interrupt !== 'undefined') {
+      this.interruptQueue.push(interrupt);
+    }
+  }
+
+  /**
+   * process queued interrupt.
+   * @param {object} interrupt
+   */
+  serviceInterrupt(interrupt) {
+    let operation = 'fastVectorFromRun';
+    if (this.runState === cpus.WAITING) {
+      operation = 'vectorFromWait';
+    } else if (interrupt.entire) {
+      operation = 'vectorFromRun';
+    }
+    const action = this.instructions[operation];
+    action.vector = interrupt.vector;
+    action.mask = interrupt.flags;
+    this.interpretInstruction(action);
+  }
+
+  /**
+   * transform operation object into cpu state and code stack.
+   * @param {object} action
+   */
+  interpretInstruction(action) {
+    if (typeof action.object !== 'undefined') {
+      this.object = this.registers.get(action.object);
+    }
+    if (typeof action.target !== 'undefined') {
+      this.target = this.registers.get(action.target);
+    }
+    if (typeof action.condition !== 'undefined') {
+      this.condition = action.condition;
+    }
+    if (typeof action.vector !== 'undefined') {
+      this.vector = action.vector;
+    }
+    if (typeof action.mask !== 'undefined') {
+      this.mask = action.mask;
+    }
+    this.populateCodeStack(action.code);
   }
 
   swap_internal_registers = () => {
@@ -433,16 +556,7 @@ class Cpu {
       this.operation = nextByte << 8;
       this.code = [cpus.FETCH];
     } else {
-      if (typeof action.object !== 'undefined') {
-        this.object = this.registers.get(action.object);
-      }
-      if (typeof action.target !== 'undefined') {
-        this.target = this.registers.get(action.target);
-      }
-      if (typeof action.condition !== 'undefined') {
-        this.condition = action.condition;
-      }
-      this.populateCodeStack(action.code);
+      this.interpretInstruction(action);
     }
   };
 
@@ -718,7 +832,7 @@ class Cpu {
         const lowValue = nextEntry.fetch() & 0xff;
         this.memory.write(address--, lowValue);
         if (nextEntry.size === cpus.LONG) {
-          this.code.unshift(this.codes['BUSY']);
+          this.code.push(this.codes['BUSY']);
           const highValue = (nextEntry.fetch() & 0xff00) >> 8;
           this.memory.write(address--, highValue);
         }
@@ -746,10 +860,10 @@ class Cpu {
         const nextEntry = this.registers.get(register);
         let pulledValue = 0;
         if (nextEntry.size === cpus.LONG) {
-          this.code.unshift(this.codes['BUSY']);
-          pulledValue += this.memory.read(address++) << 8;
+          this.code.push(this.codes['BUSY']);
+          pulledValue += this.memory.read(++address) << 8;
         }
-        pulledValue += this.memory.read(address++);
+        pulledValue += this.memory.read(++address);
         nextEntry.set(pulledValue);
         this.target.set(address);
         loop = false;
@@ -771,12 +885,55 @@ class Cpu {
   };
 
   pull_pc_from_ad = () => {
-    let address = this.registers.get('S').fetch();
-    const lowValue = this.memory.read(++address);
+    let address = this.target.fetch();
     const highValue = this.memory.read(++address) << 8;
+    const lowValue = this.memory.read(++address);
     this.PC.set(highValue | lowValue);
-    this.registers.get('S').set(address);
+    this.target.set(address);
   };
+
+  pull_and_test_cc = () => {
+    let address = this.target.fetch();
+    this.CC.value = this.memory.read(++address);
+    this.target.set(address);
+    if(this.CC.ifentireset()) {
+      this.code.push(this.codes['PULL']);
+      this.W.set(0x7e);
+    }
+  }
+
+  push_pc_and_cc = () => {
+    this.W.set(0x81);
+    this.push_reg_to_ad();
+  }
+
+  set_entire_flag = () => {
+    this.CC.entire(true);
+    this.W.set(0xff);
+  }
+
+  vector_msb = () => {
+    const msb = this.memory.read(this.vector);
+    this.PC.set(msb << 8);
+  }
+
+  vector_lsb = () => {
+    const lsb = this.memory.read(this.vector + 1);
+    this.PC.set(this.PC.fetch() | lsb);
+  }
+
+  suspend_interrupts = () => {
+    this.CC.irq((this.mask & cpus.IRQ) !== 0);
+    this.CC.firq((this.mask & cpus.FIRQ) !== 0);
+  }
+
+  wait = () => {
+    this.runState = cpus.WAITING;
+  }
+
+  sync = () => {
+    this.runState = cpus.SYNCING;
+  }
 
   check_cc = (initial, complement, object, sum, masked) => {
     this.CC.zero(masked === 0);
