@@ -956,6 +956,7 @@ class Cpu {
     const OFFSET_MASK = 0x1f;
     const INDIRECT_MASK = 0x10;
     const postByte = this.W.fetch();
+    this.W.set(0);
     const register = this.postbyte_to_register(postByte);
     const direct = (INDIRECT_MASK & postByte) !== INDIRECT_MASK;
     let offset = (postByte & OFFSET_MASK);
@@ -1045,6 +1046,27 @@ class Cpu {
             this.AD.set(this.direct_word_offset(
                 (this.fetchNextByte() << 8) + this.fetchNextByte(), register
             ));
+            break;
+          case 11:
+            this.AD.set(this.direct_word_offset(
+                this.registers.get('D').fetch(), register
+            ));
+            break;
+          case 12:
+            this.AD.set(this.direct_byte_offset(
+                this.fetchNextByte(), this.PC
+            ));
+            break;
+          case 13:
+            this.AD.set(this.direct_word_offset(
+                (this.fetchNextByte() << 8) + this.fetchNextByte(), this.PC
+            ));
+            this.code.push(this.codes['BUSY']);
+            break;
+          case 15:
+            this.AD.set((this.fetchNextByte() << 8) + this.fetchNextByte());
+            this.code.push(this.codes['BUSY']);
+            this.code.push(this.codes['BUSY']);
             break;
         }
         this.code.push(this.codes['SWAPWAD']);

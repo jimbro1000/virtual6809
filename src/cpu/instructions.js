@@ -846,6 +846,22 @@ instructions = {
       'TESTOB',
     ],
   },
+  0x67: {
+    'operation': 'ASR',
+    'mode': 'indexed',
+    'object': 'W',
+    'code': [
+      'READWLOW', 'INDEX', 'READADWLOW', 'SHIFTRIGHT', 'WRITEWLOW',
+    ],
+  },
+  0x68: {
+    'operation': 'ASL',
+    'mode': 'indexed',
+    'object': 'W',
+    'code': [
+      'READWLOW', 'INDEX', 'READADWLOW', 'SHIFTLEFT', 'WRITEWLOW',
+    ],
+  },
   0x70: {
     'operation': 'NEG',
     'mode': 'extended',
@@ -871,7 +887,7 @@ instructions = {
     ],
   },
   0x77: {
-    'operation': 'ASL',
+    'operation': 'ASR',
     'mode': 'extended',
     'object': 'W',
     'code': [
@@ -1191,6 +1207,24 @@ instructions = {
     'target': 'AD',
     'code': [
       'DIRECT', 'TFRWTOTG', 'WRITEHIGH', 'WRITELOW',
+    ],
+  },
+  0xa4: {
+    'operation': 'ANDA',
+    'mode': 'indexed',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READAND',
+    ],
+  },
+  0xa9: {
+    'operation': 'ADCA',
+    'mode': 'indexed',
+    'object': 'A',
+    'target': 'PC',
+    'code': [
+      'READWLOW', 'INDEX', 'ADDCTGTOOB',
     ],
   },
   0xab: {
@@ -1619,6 +1653,24 @@ instructions = {
       'READADWLOW',
       'ADDTGBTOOB',
       'BUSY', 'BUSY', 'BUSY',
+    ],
+  },
+  0xe4: {
+    'operation': 'ANDB',
+    'mode': 'indexed',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READAND',
+    ],
+  },
+  0xe9: {
+    'operation': 'ADCB',
+    'mode': 'indexed',
+    'object': 'B',
+    'target': 'PC',
+    'code': [
+      'READWLOW', 'INDEX', 'ADDCTGTOOB',
     ],
   },
   0xeb: {

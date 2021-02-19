@@ -2,6 +2,7 @@
 
 ## Unreleased ##
 * Add Indexed Direct Addressing
+* Add Indexed Indirect Addressing
 
 ## V0.3.0 - Feb 18 2021 ##
 __New:__
