@@ -23,7 +23,10 @@ and appropriate hardware mapping.
 
 For the purposes of emulation access to memory is independent of the clock
 cycle allowing video hardware to read paged memory without interfering with the 
-CPU interaction.
+CPU interaction. This also means emulation of tristating the bus is not required and 
+this in-turn means the emulated hardware is capable of some things that the real
+CPU cannot do such as what would appear to be DMA actions from peripherals without
+syncing the CPU.
 
 ## Processor ##
 
@@ -62,7 +65,7 @@ So far the instruction set is incomplete and only covers:
  * long branch
  * EXG and TFR
 
-indexed/indirect addressing is not implemented  
+indirect addressing is not implemented  
 ALU is fully implemented but condition logic contained in control 
 register not ALU  
 

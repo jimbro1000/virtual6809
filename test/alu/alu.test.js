@@ -340,7 +340,7 @@ describe('Arithmetic Logic Unit', () => {
           [0x80, 0x80, cpus.CARRY | cpus.OVERFLOW | cpus.NEGATIVE],
         ],
     ).it('performs a 2s complement', (initialValue, expectedValue, ccFlags) => {
-      const result = subject.negate8(initialValue);
+      const result = subject.negate8andTest(initialValue);
       expect(result).toBe(expectedValue);
       expect(cc.value).toBe(ccFlags);
     });
@@ -413,5 +413,32 @@ describe('Arithmetic Logic Unit', () => {
         expect(cc.value & cpus.ZERO).toBe(cpus.ZERO);
       });
     });
+  });
+
+  describe('effective address', () => {
+    each(
+        [[0x10, 0x200, 0x1f0], [0x0f, 0x200, 0x20f]],
+    ).it('calculates effective address 5 bit offset from register',
+        (offset, registerValue, expectedAddress) => {
+          const effectiveAddress = subject.offsetEA5(offset, registerValue);
+          expect(effectiveAddress).toBe(expectedAddress);
+        });
+
+    each(
+        [[0xf0, 0x200, 0x1f0], [0x2f, 0x200, 0x22f]],
+    ).it('calculates effective address 8 bit offset from register',
+        (offset, registerValue, expectedAddress) => {
+          const effectiveAddress = subject.offsetEA8(offset, registerValue);
+          expect(effectiveAddress).toBe(expectedAddress);
+        });
+
+    each(
+        [[0xfff0, 0x0200, 0x1f0], [0x012f, 0x0200, 0x32f],
+          [0xff00, 0x0000, 0xff00]],
+    ).it('calculates effective address 16 bit offset from register',
+        (offset, registerValue, expectedAddress) => {
+          const effectiveAddress = subject.offsetEA16(offset, registerValue);
+          expect(effectiveAddress).toBe(expectedAddress);
+        });
   });
 });

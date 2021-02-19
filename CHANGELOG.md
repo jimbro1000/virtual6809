@@ -1,6 +1,7 @@
 # Virtual 6809 CHANGELOG #
 
 ## Unreleased ##
+* Add Indexed Direct Addressing
 
 ## V0.3.0 - Feb 18 2021 ##
 __New:__

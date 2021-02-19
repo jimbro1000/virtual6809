@@ -30,6 +30,7 @@ class Cpu {
     this.stackOrder = this.mapStackOrder();
     this.registerIds = this.mapRegisterIdentifier();
     this.interruptLines = this.mapInterruptLines();
+    this.postbyteRegisters = this.mapPostbyteToRegister();
     this.code = [cpus.TFRWTOOB, cpus.READWLOW, cpus.READHIGH];
     this.PC.set(0xfffe);
     this.runState = cpus.RUNNING;
@@ -106,6 +107,7 @@ class Cpu {
     result['MASKIF'] = cpus.MASKIF;
     result['WAIT'] = cpus.WAIT;
     result['SYNC'] = cpus.SYNC;
+    result['INDEX'] = cpus.INDEX;
     return result;
   }
 
@@ -183,6 +185,7 @@ class Cpu {
     result[cpus.MASKIF] = this.suspend_interrupts;
     result[cpus.WAIT] = this.wait;
     result[cpus.SYNC] = this.sync;
+    result[cpus.INDEX] = this.calculate_index_to_ad;
     return result;
   }
 
@@ -217,7 +220,7 @@ class Cpu {
 
   /**
    * Create ordered list of register identifiers
-   * @returns {[]} register list
+   * @return {[]} register list
    */
   mapRegisterIdentifier() {
     const result = [];
@@ -231,6 +234,19 @@ class Cpu {
     result[9] = 'B';
     result[10] = 'CC';
     result[11] = 'DP';
+    return result;
+  }
+
+  /**
+   * Create ordered list of postbyte registers.
+   * @return {[]} register list
+   */
+  mapPostbyteToRegister() {
+    const result = [];
+    result[0] = 'X';
+    result[1] = 'Y';
+    result[2] = 'U';
+    result[3] = 'S';
     return result;
   }
 
@@ -764,7 +780,7 @@ class Cpu {
   }
 
   negate_byte = () => {
-    this.object.set(this.alu1.negate8(this.object.fetch()));
+    this.object.set(this.alu1.negate8andTest(this.object.fetch()));
   }
 
   sign_extend = () => {
@@ -933,6 +949,117 @@ class Cpu {
 
   sync = () => {
     this.runState = cpus.SYNCING;
+  }
+
+  calculate_index_to_ad = () => {
+    const OFFSET_TYPE_MASK = 0x80;
+    const OFFSET_MASK = 0x1f;
+    const INDIRECT_MASK = 0x10;
+    const postByte = this.W.fetch();
+    const register = this.postbyte_to_register(postByte);
+    const direct = (INDIRECT_MASK & postByte) !== INDIRECT_MASK;
+    let offset = (postByte & OFFSET_MASK);
+    if ((postByte & OFFSET_TYPE_MASK) === OFFSET_TYPE_MASK) {
+      if (direct) {
+        const mode = (postByte & OFFSET_MASK);
+        switch (mode) {
+          case 0:
+            this.AD.set(this.direct_increment(1, register));
+            break;
+          case 1:
+            this.AD.set(this.direct_increment(2, register));
+            break;
+          case 2:
+            this.AD.set(this.direct_decrement(1, register));
+            break;
+          case 3:
+            this.AD.set(this.direct_decrement(2, register));
+            break;
+          case 4:
+            this.AD.set(register.fetch());
+            break;
+          case 5:
+            this.AD.set(this.direct_byte_offset(
+                this.registers.get('B').fetch(), register
+            ));
+            break;
+          case 6:
+            this.AD.set(this.direct_byte_offset(
+                this.registers.get('A').fetch(), register
+            ));
+            break;
+          case 8:
+            this.AD.set(this.direct_byte_offset(
+                this.fetchNextByte(), register
+            ));
+            break;
+          case 9:
+            this.AD.set(this.direct_word_offset(
+                (this.fetchNextByte() << 8) + this.fetchNextByte(), register
+            ));
+            break;
+          case 11:
+            this.AD.set(this.direct_word_offset(
+                this.registers.get('D').fetch(), register
+            ));
+            break;
+          case 12:
+            this.AD.set(this.direct_byte_offset(
+                this.fetchNextByte(), this.PC
+            ));
+            break;
+          case 13:
+            this.AD.set(this.direct_word_offset(
+                (this.fetchNextByte() << 8) + this.fetchNextByte(), this.PC
+            ));
+            this.code.push(this.codes['BUSY']);
+        }
+      }
+    } else {
+      this.AD.set(this.direct_constant_offset(offset, register));
+    }
+  }
+
+  direct_constant_offset = (offset, register) => {
+    this.code.push(this.codes['BUSY']);
+    return this.alu1.offsetEA5(offset, register.fetch());
+  }
+
+  direct_byte_offset = (offset, register) => {
+    this.code.push(this.codes['BUSY']);
+    return this.alu1.offsetEA8(offset, register.fetch());
+  }
+
+  direct_word_offset = (offset, register) => {
+    this.code.push(this.codes['BUSY']);
+    this.code.push(this.codes['BUSY']);
+    this.code.push(this.codes['BUSY']);
+    this.code.push(this.codes['BUSY']);
+    return this.alu1.offsetEA16(offset, register.fetch());
+  }
+
+  direct_increment = (step, register) => {
+    for (let counter = 0; counter <= step; ++counter) {
+      this.code.push(this.codes['BUSY']);
+    }
+    const address = register.fetch();
+    register.set(address + step);
+    return address;
+  }
+
+  direct_decrement = (step, register) => {
+    for (let counter = 0; counter <= step; ++counter) {
+      this.code.push(this.codes['BUSY']);
+    }
+    const address = register.fetch() - step;
+    register.set(address);
+    return address;
+  }
+
+  postbyte_to_register = (postByte) => {
+    const REGISTER_MASK = 0x60;
+    const register = (postByte & REGISTER_MASK) >> 5;
+    return this.registers.get(this.postbyteRegisters[register]);
   }
 
   check_cc = (initial, complement, object, sum, masked) => {

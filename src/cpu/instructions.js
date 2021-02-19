@@ -1193,6 +1193,15 @@ instructions = {
       'DIRECT', 'TFRWTOTG', 'WRITEHIGH', 'WRITELOW',
     ],
   },
+  0xab: {
+    'operation': 'ADDA',
+    'mode': 'indexed',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'ADDTGBTOOB',
+    ],
+  },
   0xb0: {
     'operation': 'SUBA',
     'mode': 'extended',
@@ -1596,6 +1605,15 @@ instructions = {
     'target': 'AD',
     'code': [
       'DIRECT', 'TFRWTOTG', 'WRITEHIGH', 'WRITELOW',
+    ],
+  },
+  0xeb: {
+    'operation': 'ADDB',
+    'mode': 'indexed',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'ADDTGBTOOB',
     ],
   },
   0xf0: {
