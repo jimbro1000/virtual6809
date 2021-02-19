@@ -1607,6 +1607,20 @@ instructions = {
       'DIRECT', 'TFRWTOTG', 'WRITEHIGH', 'WRITELOW',
     ],
   },
+  0xe3: {
+    'operation': 'ADDD',
+    'mode': 'indexed',
+    'object': 'D',
+    'target': 'W',
+    'code': [
+      'READWLOW',
+      'INDEX',
+      'READADHIGH',
+      'READADWLOW',
+      'ADDTGBTOOB',
+      'BUSY', 'BUSY', 'BUSY',
+    ],
+  },
   0xeb: {
     'operation': 'ADDB',
     'mode': 'indexed',

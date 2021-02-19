@@ -1014,6 +1014,42 @@ class Cpu {
             ));
             this.code.push(this.codes['BUSY']);
         }
+      } else {
+        const mode = (postByte & OFFSET_MASK) - INDIRECT_MASK;
+        switch (mode) {
+          case 1:
+            this.AD.set(this.direct_increment(2, register));
+            break;
+          case 3:
+            this.AD.set(this.direct_decrement(2, register));
+            break;
+          case 4:
+            this.AD.set(register.fetch());
+            break;
+          case 5:
+            this.AD.set(this.direct_byte_offset(
+                this.registers.get('B').fetch(), register
+            ));
+            break;
+          case 6:
+            this.AD.set(this.direct_byte_offset(
+                this.registers.get('A').fetch(), register
+            ));
+            break;
+          case 8:
+            this.AD.set(this.direct_byte_offset(
+                this.fetchNextByte(), register
+            ));
+            break;
+          case 9:
+            this.AD.set(this.direct_word_offset(
+                (this.fetchNextByte() << 8) + this.fetchNextByte(), register
+            ));
+            break;
+        }
+        this.code.push(this.codes['SWAPWAD']);
+        this.code.push(this.codes['READADWLOW']);
+        this.code.push(this.codes['READADHIGH']);
       }
     } else {
       this.AD.set(this.direct_constant_offset(offset, register));
