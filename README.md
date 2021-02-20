@@ -31,7 +31,7 @@ syncing the CPU.
 ## Processor ##
 
 The CPU emulation is based on a strict read/process/write cpu cycle as detailed in the 
-6809 assembly language programming book by Leventhal[1]. The aim is to achieve the same 
+"6809 assembly language programming" book by Leventhal[1]. The aim is to achieve the same 
 instruction timing.
 
 The emulated processor can operate at any clock speed within the limits of the 
@@ -46,13 +46,14 @@ So far the instruction set is incomplete and only covers:
  * ADD and ADC
  * DAA
  * SUB and SBC
+ * CLR
  * SEX
  * MUL
  * AND, OR, EOR
  * LSL, LSR, ROL and ROR  
  * BIT, COM, NEG
  * NOP
- * 8 bit CMP (immediate, direct, extended)
+ * CMP
  * TST
  * INC and DEC
  * PSH and PUL

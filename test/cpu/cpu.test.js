@@ -422,7 +422,7 @@ describe('6809 cpu', () => {
               cpus.CARRY;
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
-          expect(subject.CC.save() & ccMask).toBe(expected);
+          expect(subject.CC.value & ccMask).toBe(expected);
         });
 
     each([
@@ -440,7 +440,7 @@ describe('6809 cpu', () => {
               cpus.CARRY;
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
-          expect(subject.CC.save() & ccMask).toBe(expected);
+          expect(subject.CC.value & ccMask).toBe(expected);
         });
 
     each([
@@ -455,7 +455,23 @@ describe('6809 cpu', () => {
               cpus.CARRY;
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
-          expect(subject.CC.save() & ccMask).toBe(expected);
+          expect(subject.CC.value & ccMask).toBe(expected);
+        });
+
+    each(
+        [
+          [0x0000, 'A', 0x20, [0xa1, 0x84], 'X', 0x1020, cpus.OVERFLOW | cpus.ZERO, 4],
+          [0x0000, 'B', 0x55, [0xe1, 0x84], 'X', 0x1020, cpus.OVERFLOW | cpus.ZERO, 4],
+        ],
+    ).it('Compares an 8 bit register against indexed memory',
+        (address, register, value, code, index, initialIndex, expected, cycles) => {
+          prepareByteComparison(address, code, value, initialIndex, register);
+          subject.registers.get(index).set(initialIndex);
+          const ccMask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW |
+              cpus.CARRY;
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.CC.value & ccMask).toBe(expected);
         });
 
     each([
@@ -463,6 +479,7 @@ describe('6809 cpu', () => {
       [0x0000, 'Y', [0x10, 0x8c, 0x55, 0xaa], 0x55aa, 0x06, 5],
       [0x0000, 'S', [0x11, 0x8c, 0x55, 0xaa], 0x55aa, 0x06, 5],
       [0x0000, 'U', [0x11, 0x83, 0x55, 0xaa], 0x55aa, 0x06, 5],
+      [0x0000, 'D', [0x10, 0x83, 0x55, 0xaa], 0x55aa, 0x06, 5],
     ]).it(
         'Compares a 16 bit register against immediate memory',
         (address, register, code, value, expected, cycles) => {
@@ -479,6 +496,7 @@ describe('6809 cpu', () => {
       [0x0000, 'Y', 0x11, [0x10, 0x9c, 0xaa], 0x55aa, 0x11aa, 0x06, 7],
       [0x0000, 'S', 0x12, [0x11, 0x9c, 0xaa], 0x55aa, 0x12aa, 0x06, 7],
       [0x0000, 'U', 0x13, [0x11, 0x93, 0xaa], 0x55aa, 0x13aa, 0x06, 7],
+      [0x0000, 'D', 0x13, [0x10, 0x93, 0xaa], 0x55aa, 0x13aa, 0x06, 7],
     ]).it(
         'Compares a 16 bit register against direct memory',
         (
@@ -499,6 +517,7 @@ describe('6809 cpu', () => {
       [0x0000, 'Y', [0x10, 0xbc, 0x11, 0xaa], 0x55aa, 0x11aa, 0x06, 8],
       [0x0000, 'S', [0x11, 0xbc, 0x12, 0xaa], 0x55aa, 0x12aa, 0x06, 8],
       [0x0000, 'U', [0x11, 0xb3, 0x13, 0xaa], 0x55aa, 0x13aa, 0x06, 8],
+      [0x0000, 'D', [0x10, 0xb3, 0x13, 0xaa], 0x55aa, 0x13aa, 0x06, 8],
     ]).it(
         'Compares a 16 bit register against direct memory',
         (address, register, code, value, atAddress, expected, cycles) => {
@@ -509,6 +528,26 @@ describe('6809 cpu', () => {
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
           expect(subject.CC.save() & ccMask).toBe(expected);
+        });
+
+    each([
+      [0x0000, 'X', 'Y', [0xac, 0xa4], 0x55aa, 0x10aa, 0x06, 6],
+      [0x0000, 'Y', 'X', [0x10, 0xac, 0x84], 0x55aa, 0x11aa, 0x06, 7],
+      [0x0000, 'S', 'X', [0x11, 0xac, 0x84], 0x55aa, 0x12aa, 0x06, 7],
+      [0x0000, 'U', 'X', [0x11, 0xa3, 0x84], 0x55aa, 0x13aa, 0x06, 7],
+      [0x0000, 'D', 'X', [0x10, 0xa3, 0x84], 0x55aa, 0x13aa, 0x06, 7],
+    ]).it(
+        'Compares a 16 bit register against indexed memory',
+        (
+            address, register, index, code, value, initialIndex, expected,
+            cycles) => {
+          prepareWordComparison(address, code, value, initialIndex, register);
+          subject.registers.get(index).set(initialIndex);
+          const ccMask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW |
+              cpus.CARRY;
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.CC.value & ccMask).toBe(expected);
         });
 
     each([
@@ -2311,6 +2350,62 @@ describe('6809 cpu', () => {
       expect(subject.PC.fetch()).toBe(expectedPCValue);
       expect(subject.runState).toBe(cpus.RUNNING);
     });
+
+    each(
+        [
+          [0x0000, [0x4f], 'A', 0x55, 0, 2],
+          [0x0000, [0x5f], 'B', 0x55, 0, 2],
+        ],
+    ).it('clears an accumulator',
+        (address, code, register, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.PC.set(address);
+          subject.registers.get(register).set(initial);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each(
+        [
+          [0x0000, [0x0f, 0x02, 0x55], 0x00, 0x0002, 0x00, 6],
+        ],
+    ).it('clears a direct page address',
+        (address, code, dp, atAddress, expected, cycles) => {
+          loadMemory(address, code);
+          subject.PC.set(address);
+          subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.memory.read(atAddress)).toBe(expected);
+        });
+
+    each(
+        [
+          [0x0000, [0x7f, 0x00, 0x03, 0x55], 0x0003, 0x00, 7],
+        ],
+    ).it('clears a direct page address',
+        (address, code, atAddress, expected, cycles) => {
+          loadMemory(address, code);
+          subject.PC.set(address);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.memory.read(atAddress)).toBe(expected);
+        });
+
+    each(
+        [
+          [0x0000, [0x6f, 0x84, 0x55], 'X', 0x0002, 0x00, 6],
+        ],
+    ).it('clears a direct page address',
+        (address, code, register, index, expected, cycles) => {
+          loadMemory(address, code);
+          subject.PC.set(address);
+          subject.registers.get(register).set(index);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.memory.read(index)).toBe(expected);
+        });
   });
 
   describe('interrupt request handling', () => {

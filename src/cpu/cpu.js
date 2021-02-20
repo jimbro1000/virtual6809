@@ -108,6 +108,7 @@ class Cpu {
     result['WAIT'] = cpus.WAIT;
     result['SYNC'] = cpus.SYNC;
     result['INDEX'] = cpus.INDEX;
+    result['CLEAR'] = cpus.CLEAR;
     return result;
   }
 
@@ -186,6 +187,7 @@ class Cpu {
     result[cpus.WAIT] = this.wait;
     result[cpus.SYNC] = this.sync;
     result[cpus.INDEX] = this.calculate_index_to_ad;
+    result[cpus.CLEAR] = this.clear_register;
     return result;
   }
 
@@ -671,6 +673,11 @@ class Cpu {
     const masked = temp & 0xffff;
     this.check_cc(n, w, o, temp, masked);
   };
+
+  clear_register = () => {
+    this.object.load(0);
+    this.CC.carry(false);
+  }
 
   inc_ob = () => {
     this.inc(this.object);
