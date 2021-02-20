@@ -108,6 +108,7 @@ class Cpu {
     result['WAIT'] = cpus.WAIT;
     result['SYNC'] = cpus.SYNC;
     result['INDEX'] = cpus.INDEX;
+    result['LOADEFFECTIVE'] = cpus.LOADEFFECTIVE;
     result['CLEAR'] = cpus.CLEAR;
     return result;
   }
@@ -187,6 +188,7 @@ class Cpu {
     result[cpus.WAIT] = this.wait;
     result[cpus.SYNC] = this.sync;
     result[cpus.INDEX] = this.calculate_index_to_ad;
+    result[cpus.LOADEFFECTIVE] = this.calculate_index_to_ob;
     result[cpus.CLEAR] = this.clear_register;
     return result;
   }
@@ -958,6 +960,11 @@ class Cpu {
     this.runState = cpus.SYNCING;
   }
 
+  calculate_index_to_ob = () => {
+    this.calculate_index_to_ad();
+    this.transfer_target_to_object();
+  }
+
   calculate_index_to_ad = () => {
     const OFFSET_TYPE_MASK = 0x80;
     const OFFSET_MASK = 0x1f;
@@ -972,52 +979,52 @@ class Cpu {
         const mode = (postByte & OFFSET_MASK);
         switch (mode) {
           case 0:
-            this.AD.set(this.direct_increment(1, register));
+            this.target.set(this.direct_increment(1, register));
             break;
           case 1:
-            this.AD.set(this.direct_increment(2, register));
+            this.target.set(this.direct_increment(2, register));
             break;
           case 2:
-            this.AD.set(this.direct_decrement(1, register));
+            this.target.set(this.direct_decrement(1, register));
             break;
           case 3:
-            this.AD.set(this.direct_decrement(2, register));
+            this.target.set(this.direct_decrement(2, register));
             break;
           case 4:
-            this.AD.set(register.fetch());
+            this.target.set(register.fetch());
             break;
           case 5:
-            this.AD.set(this.direct_byte_offset(
+            this.target.set(this.direct_byte_offset(
                 this.registers.get('B').fetch(), register
             ));
             break;
           case 6:
-            this.AD.set(this.direct_byte_offset(
+            this.target.set(this.direct_byte_offset(
                 this.registers.get('A').fetch(), register
             ));
             break;
           case 8:
-            this.AD.set(this.direct_byte_offset(
+            this.target.set(this.direct_byte_offset(
                 this.fetchNextByte(), register
             ));
             break;
           case 9:
-            this.AD.set(this.direct_word_offset(
+            this.target.set(this.direct_word_offset(
                 (this.fetchNextByte() << 8) + this.fetchNextByte(), register
             ));
             break;
           case 11:
-            this.AD.set(this.direct_word_offset(
+            this.target.set(this.direct_word_offset(
                 this.registers.get('D').fetch(), register
             ));
             break;
           case 12:
-            this.AD.set(this.direct_byte_offset(
+            this.target.set(this.direct_byte_offset(
                 this.fetchNextByte(), this.PC
             ));
             break;
           case 13:
-            this.AD.set(this.direct_word_offset(
+            this.target.set(this.direct_word_offset(
                 (this.fetchNextByte() << 8) + this.fetchNextByte(), this.PC
             ));
             this.code.push(this.codes['BUSY']);
@@ -1026,52 +1033,52 @@ class Cpu {
         const mode = (postByte & OFFSET_MASK) - INDIRECT_MASK;
         switch (mode) {
           case 1:
-            this.AD.set(this.direct_increment(2, register));
+            this.target.set(this.direct_increment(2, register));
             break;
           case 3:
-            this.AD.set(this.direct_decrement(2, register));
+            this.target.set(this.direct_decrement(2, register));
             break;
           case 4:
-            this.AD.set(register.fetch());
+            this.target.set(register.fetch());
             break;
           case 5:
-            this.AD.set(this.direct_byte_offset(
+            this.target.set(this.direct_byte_offset(
                 this.registers.get('B').fetch(), register
             ));
             break;
           case 6:
-            this.AD.set(this.direct_byte_offset(
+            this.target.set(this.direct_byte_offset(
                 this.registers.get('A').fetch(), register
             ));
             break;
           case 8:
-            this.AD.set(this.direct_byte_offset(
+            this.target.set(this.direct_byte_offset(
                 this.fetchNextByte(), register
             ));
             break;
           case 9:
-            this.AD.set(this.direct_word_offset(
+            this.target.set(this.direct_word_offset(
                 (this.fetchNextByte() << 8) + this.fetchNextByte(), register
             ));
             break;
           case 11:
-            this.AD.set(this.direct_word_offset(
+            this.target.set(this.direct_word_offset(
                 this.registers.get('D').fetch(), register
             ));
             break;
           case 12:
-            this.AD.set(this.direct_byte_offset(
+            this.target.set(this.direct_byte_offset(
                 this.fetchNextByte(), this.PC
             ));
             break;
           case 13:
-            this.AD.set(this.direct_word_offset(
+            this.target.set(this.direct_word_offset(
                 (this.fetchNextByte() << 8) + this.fetchNextByte(), this.PC
             ));
             this.code.push(this.codes['BUSY']);
             break;
           case 15:
-            this.AD.set((this.fetchNextByte() << 8) + this.fetchNextByte());
+            this.target.set((this.fetchNextByte() << 8) + this.fetchNextByte());
             this.code.push(this.codes['BUSY']);
             this.code.push(this.codes['BUSY']);
             break;
@@ -1081,7 +1088,7 @@ class Cpu {
         this.code.push(this.codes['READADHIGH']);
       }
     } else {
-      this.AD.set(this.direct_constant_offset(offset, register));
+      this.target.set(this.direct_constant_offset(offset, register));
     }
   }
 

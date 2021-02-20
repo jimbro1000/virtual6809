@@ -57,6 +57,14 @@ instructions = {
       'DIRECT', 'SWAPWAD', 'READADWLOW', 'DECW', 'WRITEWLOW',
     ],
   },
+  0x0c: {
+    'operation': 'INC',
+    'mode': 'direct',
+    'object': 'W',
+    'code': [
+      'DIRECT', 'SWAPWAD', 'READADWLOW', 'INCW', 'WRITEWLOW',
+    ],
+  },
   0x0d: {
     'operation': 'TST',
     'object': 'W',
@@ -293,7 +301,7 @@ instructions = {
   },
   0x10a3: {
     'operation': 'CMPD',
-    'mode': 'extended',
+    'mode': 'indexed',
     'object': 'D',
     'target': 'AD',
     'code': [
@@ -303,12 +311,21 @@ instructions = {
   },
   0x10ac: {
     'operation': 'CMPY',
-    'mode': 'extended',
+    'mode': 'indexed',
     'object': 'Y',
     'target': 'AD',
     'code': [
       'READWLOW', 'INDEX',
       'READADHIGH', 'READADWLOW', 'COMPAREW',
+    ],
+  },
+  0x10ae: {
+    'operation': 'LDY',
+    'mode': 'direct',
+    'object': 'Y',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READADHIGH', 'READADLOW',
     ],
   },
   0x10b3: {
@@ -373,6 +390,15 @@ instructions = {
     'target': 'AD',
     'code': [
       'DIRECT', 'TFRWTOTG', 'WRITEHIGH', 'WRITELOW',
+    ],
+  },
+  0x10ee: {
+    'operation': 'LDS',
+    'mode': 'direct',
+    'object': 'S',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READADHIGH', 'READADLOW',
     ],
   },
   0x10fe: {
@@ -701,6 +727,33 @@ instructions = {
       'READWLOW', 'ADDTGSTOOBIF',
     ],
   },
+  0x30: {
+    'operation': 'LEAX',
+    'mode': 'indexed',
+    'object': 'X',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'LOADEFFECTIVE',
+    ],
+  },
+  0x31: {
+    'operation': 'LEAY',
+    'mode': 'indexed',
+    'object': 'Y',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'LOADEFFECTIVE',
+    ],
+  },
+  0x32: {
+    'operation': 'LEAS',
+    'mode': 'indexed',
+    'object': 'S',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'LOADEFFECTIVE',
+    ],
+  },
   0x34: {
     'operation': 'PSHS',
     'object': 'S',
@@ -949,6 +1002,7 @@ instructions = {
     'operation': 'COM',
     'mode': 'indexed',
     'object': 'W',
+    'target': 'AD',
     'code': [
       'READWLOW', 'INDEX', 'READWLOW', 'COMPLEMENT', 'WRITEWLOW',
     ],
@@ -957,6 +1011,7 @@ instructions = {
     'operation': 'ASR',
     'mode': 'indexed',
     'object': 'W',
+    'target': 'AD',
     'code': [
       'READWLOW', 'INDEX', 'READADWLOW', 'SHIFTRIGHT', 'WRITEWLOW',
     ],
@@ -965,6 +1020,7 @@ instructions = {
     'operation': 'ASL',
     'mode': 'indexed',
     'object': 'W',
+    'target': 'AD',
     'code': [
       'READWLOW', 'INDEX', 'READADWLOW', 'SHIFTLEFT', 'WRITEWLOW',
     ],
@@ -973,14 +1029,34 @@ instructions = {
     'operation': 'DEC',
     'mode': 'indexed',
     'object': 'W',
+    'target': 'AD',
     'code': [
       'READWLOW', 'INDEX', 'READADWLOW', 'DECW', 'WRITEWLOW',
+    ],
+  },
+  0x6c: {
+    'operation': 'INC',
+    'mode': 'indexed',
+    'object': 'W',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READADWLOW', 'INCW', 'WRITEWLOW',
+    ],
+  },
+  0x6e: {
+    'operation': 'JMP',
+    'mode': 'indexed',
+    'object': 'PC',
+    'target': 'PC',
+    'code': [
+      'READWLOW', 'INDEX',
     ],
   },
   0x6f: {
     'operation': 'CLR',
     'mode': 'indexed',
     'object': 'W',
+    'target': 'AD',
     'code': ['READWLOW', 'INDEX', 'CLEAR', 'WRITELOW', 'BUSY'],
   },
   0x70: {
@@ -1363,6 +1439,24 @@ instructions = {
       'READWLOW', 'INDEX', 'BITTEST',
     ],
   },
+  0xa6: {
+    'operation': 'LDA',
+    'mode': 'indexed',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READADLOW',
+    ],
+  },
+  0xa8: {
+    'operation': 'EORA',
+    'mode': 'indexed',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READEOR',
+    ],
+  },
   0xa9: {
     'operation': 'ADCA',
     'mode': 'indexed',
@@ -1383,12 +1477,30 @@ instructions = {
   },
   0xac: {
     'operation': 'CMPX',
-    'mode': 'extended',
+    'mode': 'indexed',
     'object': 'X',
     'target': 'AD',
     'code': [
       'READWLOW', 'INDEX',
       'READADHIGH', 'READADWLOW', 'COMPAREW',
+    ],
+  },
+  0xad: {
+    'operation': 'JSR',
+    'mode': 'indexed',
+    'object': 'PC',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'PUSHPC', 'SWAPWAD', 'TFRWTOOB', 'BUSY',
+    ],
+  },
+  0xae: {
+    'operation': 'LDX',
+    'mode': 'direct',
+    'object': 'X',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READADHIGH', 'READADLOW',
     ],
   },
   0xb0: {
@@ -1809,14 +1921,15 @@ instructions = {
     'operation': 'ADDD',
     'mode': 'indexed',
     'object': 'D',
-    'target': 'W',
+    'target': 'AD',
     'code': [
       'READWLOW',
       'INDEX',
       'READADHIGH',
       'READADWLOW',
+      'SWAPWAD',
       'ADDTGBTOOB',
-      'BUSY', 'BUSY', 'BUSY',
+      'BUSY', 'BUSY',
     ],
   },
   0xe4: {
@@ -1837,11 +1950,29 @@ instructions = {
       'READWLOW', 'INDEX', 'BITTEST',
     ],
   },
+  0xe6: {
+    'operation': 'LDB',
+    'mode': 'indexed',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READADLOW',
+    ],
+  },
+  0xe8: {
+    'operation': 'EORB',
+    'mode': 'indexed',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READEOR',
+    ],
+  },
   0xe9: {
     'operation': 'ADCB',
     'mode': 'indexed',
     'object': 'B',
-    'target': 'PC',
+    'target': 'AD',
     'code': [
       'READWLOW', 'INDEX', 'ADDCTGTOOB',
     ],
@@ -1853,6 +1984,24 @@ instructions = {
     'target': 'AD',
     'code': [
       'READWLOW', 'INDEX', 'ADDTGBTOOB',
+    ],
+  },
+  0xec: {
+    'operation': 'LDD',
+    'mode': 'direct',
+    'object': 'D',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READADHIGH', 'READADLOW',
+    ],
+  },
+  0xee: {
+    'operation': 'LDU',
+    'mode': 'direct',
+    'object': 'U',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READADHIGH', 'READADLOW',
     ],
   },
   0xf0: {
