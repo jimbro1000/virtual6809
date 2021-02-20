@@ -49,6 +49,14 @@ instructions = {
       'DIRECT', 'SWAPWAD', 'READWLOW', 'ROTATELEFT', 'WRITEWLOW',
     ],
   },
+  0x0a: {
+    'operation': 'DEC',
+    'mode': 'direct',
+    'object': 'W',
+    'code': [
+      'DIRECT', 'SWAPWAD', 'READADWLOW', 'DECW', 'WRITEWLOW',
+    ],
+  },
   0x0d: {
     'operation': 'TST',
     'object': 'W',
@@ -937,6 +945,14 @@ instructions = {
     'object': 'B',
     'code': ['CLEAR'],
   },
+  0x63: {
+    'operation': 'COM',
+    'mode': 'indexed',
+    'object': 'W',
+    'code': [
+      'READWLOW', 'INDEX', 'READWLOW', 'COMPLEMENT', 'WRITEWLOW',
+    ],
+  },
   0x67: {
     'operation': 'ASR',
     'mode': 'indexed',
@@ -951,6 +967,14 @@ instructions = {
     'object': 'W',
     'code': [
       'READWLOW', 'INDEX', 'READADWLOW', 'SHIFTLEFT', 'WRITEWLOW',
+    ],
+  },
+  0x6a: {
+    'operation': 'DEC',
+    'mode': 'indexed',
+    'object': 'W',
+    'code': [
+      'READWLOW', 'INDEX', 'READADWLOW', 'DECW', 'WRITEWLOW',
     ],
   },
   0x6f: {

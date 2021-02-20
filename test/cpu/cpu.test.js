@@ -589,16 +589,17 @@ describe('6809 cpu', () => {
 
     each([
       [0x0000, 'A', [0x4a], 0x02, 0x01, 2, 0x00],
-      [0x0000, 'A', [0x4a], 0x00, 0xff, 2, cpus.NEGATIVE],
+      [0x0000, 'A', [0x4a], 0x00, 0xff, 2, cpus.NEGATIVE | cpus.OVERFLOW],
       [0x0000, 'B', [0x5a], 0x02, 0x01, 2, 0x00],
       [0x0000, 'B', [0x5a], 0x01, 0x00, 2, cpus.ZERO],
     ]).it('decrements a register',
         (address, register, code, value, expected, cycles, ccFlags) => {
+          const ccMask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW;
           prepareTest(address, code, register, value);
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
           expect(subject.registers.get(register).fetch()).toBe(expected);
-          expect(subject.CC.save() & ccFlags).toBe(ccFlags);
+          expect(subject.CC.save() & ccMask).toBe(ccFlags);
         });
 
     each([
@@ -607,14 +608,55 @@ describe('6809 cpu', () => {
     ]).it(
         'decrements a byte in extended memory',
         (address, code, value, atAddress, expected, cycles, ccFlags) => {
+          const ccMask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW;
           loadMemory(address, code);
           subject.memory.write(atAddress, value);
           subject.registers.get('PC').set(address);
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
           expect(subject.memory.read(atAddress)).toBe(expected);
-          expect(subject.CC.save() & ccFlags).toBe(ccFlags);
+          expect(subject.CC.save() & ccMask).toBe(ccFlags);
         });
+
+    it('decrements a byte in paged memory', () => {
+      const address = 0x0000;
+      const code = [0x0a, 0x20];
+      const dp = 0x01;
+      const atAddress = 0x0120;
+      const value = 0x02;
+      const expected = 0x01;
+      const ccFlags = 0x00;
+      const cycles = 6;
+      const ccMask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW;
+      loadMemory(address, code);
+      subject.memory.write(atAddress, value);
+      subject.registers.get('PC').set(address);
+      subject.registers.get('DP').set(dp);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.memory.read(atAddress)).toBe(expected);
+      expect(subject.CC.save() & ccMask).toBe(ccFlags);
+    });
+
+    it('decrements a byte in indexed memory', () => {
+      const address = 0x0000;
+      const code = [0x6a, 0x84];
+      const index = 'X';
+      const indexAddress = 0x0120;
+      const value = 0x02;
+      const expected = 0x01;
+      const ccFlags = 0x00;
+      const cycles = 6;
+      const ccMask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW;
+      loadMemory(address, code);
+      subject.memory.write(indexAddress, value);
+      subject.registers.get('PC').set(address);
+      subject.registers.get(index).set(indexAddress);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.memory.read(indexAddress)).toBe(expected);
+      expect(subject.CC.save() & ccMask).toBe(ccFlags);
+    });
 
     it('pushes registers to the S stack', () => {
       const code = [0x34, 0x87];
@@ -1959,6 +2001,17 @@ describe('6809 cpu', () => {
           expect(cycleCount).toBe(cycles);
           expect(subject.memory.read(atAddress)).toBe(expectedValue);
         });
+
+    it('performs ones complement on an indexed memory address', () => {
+      const address = 0x0000;
+      const indexAddress = 0x0002;
+      loadMemory(address, [0x63, 0x84, 0x55]);
+      subject.PC.set(address);
+      subject.registers.get('X').set(indexAddress);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(6);
+      expect(subject.memory.read(indexAddress)).toBe(0xaa);
+    });
 
     each(
         [
