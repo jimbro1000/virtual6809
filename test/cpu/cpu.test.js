@@ -1178,6 +1178,27 @@ describe('6809 cpu', () => {
 
     each(
         [
+          // [0x0000, 'A', [0xa0, 0x84, 0x55], 'X', 0x0002, 0xff, 0xaa, 4],
+          // [0x0000, 'B', [0xe0, 0xa4, 0xaa], 'Y', 0x0002, 0xff, 0x55, 4],
+          [0x0000, 'D', [0xa3, 0x84, 0x55, 0xaa], 'X', 0x0002, 0xffff, 0xaa55, 6],
+        ],
+    ).it('subtracts indexed value from the object register',
+        (
+            pcAddress, register, code, index, initialIndex, initialValue,
+            expectedValue, cycles,
+        ) => {
+          loadMemory(pcAddress, code);
+          subject.registers.get('PC').set(pcAddress);
+          subject.registers.get(register).set(initialValue);
+          subject.registers.get(index).set(initialIndex);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).
+              toBe(expectedValue);
+        });
+
+    each(
+        [
           [0x0000, 'A', [0x82, 0x55], 0xff, 0xa9, true, 2],
           [0x0000, 'B', [0xc2, 0x56], 0x01, 0xaa, true, 2],
           [0x0000, 'A', [0x82, 0x55], 0xff, 0xaa, false, 2],
@@ -2401,6 +2422,20 @@ describe('6809 cpu', () => {
           loadMemory(address, code);
           subject.registers.get('PC').set(address);
           subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.CC.value).toBe(ccFlags);
+        });
+
+    each(
+        [
+          [0x0000, [0x6d, 0x84, 0x00], 'X', 0x0002, cpus.ZERO, 6],
+        ],
+    ).it('tests an indexed memory address',
+        (address, code, index, atAddress, ccFlags, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(index).set(atAddress);
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
           expect(subject.CC.value).toBe(ccFlags);

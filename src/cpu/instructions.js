@@ -1097,6 +1097,15 @@ instructions = {
       'READWLOW', 'INDEX', 'READADWLOW', 'INCW', 'WRITEWLOW',
     ],
   },
+  0x6d: {
+    'operation': 'TST',
+    'mode': 'indexed',
+    'object': 'W',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READWLOW', 'TESTOB', 'BUSY',
+    ],
+  },
   0x6e: {
     'operation': 'JMP',
     'mode': 'indexed',
@@ -1466,6 +1475,15 @@ instructions = {
       'DIRECT', 'TFRWTOTG', 'WRITEHIGH', 'WRITELOW',
     ],
   },
+  0xa0: {
+    'operation': 'SUBA',
+    'mode': 'indexed',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'SUBTGFROMOB',
+    ],
+  },
   0xa1: {
     'operation': 'CMPA',
     'mode': 'indexed',
@@ -1482,6 +1500,15 @@ instructions = {
     'target': 'AD',
     'code': [
       'READWLOW', 'INDEX', 'SUBCTGFROMOB',
+    ],
+  },
+  0xa3: {
+    'operation': 'SUBD',
+    'mode': 'indexed',
+    'object': 'D',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READADHIGH', 'READADWLOW', 'SUBWFROMOB',
     ],
   },
   0xa4: {
@@ -1996,6 +2023,15 @@ instructions = {
     'target': 'AD',
     'code': [
       'DIRECT', 'TFRWTOTG', 'WRITEHIGH', 'WRITELOW',
+    ],
+  },
+  0xe0: {
+    'operation': 'SUBB',
+    'mode': 'indexed',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'SUBTGFROMOB',
     ],
   },
   0xe1: {

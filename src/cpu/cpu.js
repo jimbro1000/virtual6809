@@ -79,6 +79,7 @@ class Cpu {
     result['SUBPCFROMOB'] = cpus.SUBPCFROMOB;
     result['SUBCPCFROMOB'] = cpus.SUBCPCFROMOB;
     result['SUBTGFROMOB'] = cpus.SUBTGFROMOB;
+    result['SUBWFROMOB'] = cpus.SUBWFROMOB;
     result['SUBCTGFROMOB'] = cpus.SUBCTGFROMOB;
     result['SWAPWAD'] = cpus.SWAPWAD;
     result['READAND'] = cpus.READAND;
@@ -148,6 +149,7 @@ class Cpu {
     result[cpus.SUBPCFROMOB] = this.sub_pc_from_object;
     result[cpus.SUBCPCFROMOB] = this.sub_pc_with_carry_from_object;
     result[cpus.SUBTGFROMOB] = this.sub_target_value_from_object;
+    result[cpus.SUBWFROMOB] = this.sub_w_from_object;
     result[cpus.SUBCTGFROMOB] = this.sub_target_value_with_carry_from_object;
     result[cpus.READLOWCOMPARE] = this.read_and_compare_low_byte;
     result[cpus.READADLOWCOMPARE] = this.read_ad_and_compare_low_byte;
@@ -541,6 +543,11 @@ class Cpu {
           this.alu1.sub16(this.object.fetch(), this.target.fetch()));
     }
   };
+
+  sub_w_from_object = () => {
+      this.object.load(
+          this.alu1.sub16(this.object.fetch(), this.W.fetch()));
+  }
 
   sub_target_value_with_carry_from_object = () => {
     this.object.load(this.alu1.sub8(
