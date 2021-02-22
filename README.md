@@ -23,12 +23,15 @@ and appropriate hardware mapping.
 
 For the purposes of emulation access to memory is independent of the clock
 cycle allowing video hardware to read paged memory without interfering with the 
-CPU interaction.
+CPU interaction. This also means emulation of tri-stating the bus is not required and 
+this in-turn means the emulated hardware is capable of some things that the real
+CPU cannot do such as what would appear to be DMA actions from peripherals without
+syncing the CPU.
 
 ## Processor ##
 
 The CPU emulation is based on a strict read/process/write cpu cycle as detailed in the 
-6809 assembly language programming book by Leventhal[1]. The aim is to achieve the same 
+"6809 assembly language programming" book by Leventhal[1]. The aim is to achieve the same 
 instruction timing.
 
 The emulated processor can operate at any clock speed within the limits of the 
@@ -36,20 +39,21 @@ supporting hardware allowing for fine-tuning that was not possible with real
 hardware.
 
 So far the instruction set is incomplete and only covers:
- * LD (immediate, direct, extended)
- * ST (direct, extended)
+ * LD
+ * ST
  * JMP
  * ABX
  * ADD and ADC
  * DAA
  * SUB and SBC
+ * CLR
  * SEX
  * MUL
  * AND, OR, EOR
  * LSL, LSR, ROL and ROR  
  * BIT, COM, NEG
  * NOP
- * 8 bit CMP (immediate, direct, extended)
+ * CMP
  * TST
  * INC and DEC
  * PSH and PUL
@@ -61,8 +65,7 @@ So far the instruction set is incomplete and only covers:
  * short branch
  * long branch
  * EXG and TFR
-
-indexed/indirect addressing is not implemented  
+ 
 ALU is fully implemented but condition logic contained in control 
 register not ALU  
 

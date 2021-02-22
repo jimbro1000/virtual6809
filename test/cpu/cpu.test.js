@@ -220,6 +220,22 @@ describe('6809 cpu', () => {
         });
 
     each([
+      [0x0, 'A', 'X', [0xa6, 0x84], 0x21, 0x0120, 4],
+      [0x0, 'B', 'X', [0xe6, 0x84], 0x22, 0x0122, 4],
+    ]).it(
+        'processes load instruction from indexed memory into an 8 bit register',
+        (
+            address, registerName, index, code, expected, atAddress,
+            cycles) => {
+          prepareByteComparison(address, code, expected, atAddress,
+              registerName);
+          subject.registers.get(index).set(atAddress);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(registerName).fetch()).toBe(expected);
+        });
+
+    each([
       [0x0, 'X', [0x8e, 0x20, 0x55], 0x2055, 3],
       [0x0, 'X', [0x8e, 0xff, 0x01], 0xff01, 3],
       [0x0, 'Y', [0x10, 0x8e, 0x20, 0x55], 0x2055, 4],
@@ -261,6 +277,25 @@ describe('6809 cpu', () => {
           expect(cycleCount).toBe(cycles);
           expect(subject.registers.get(registerName).fetch()).
               toBe(expected);
+        });
+
+    each([
+      [0x0, 'X', 'Y', [0xae, 0xa4], 0x10, 0x2055, 5],
+      [0x0, 'Y', 'X', [0x10, 0xae, 0x84], 0x20, 0x2055, 6],
+      [0x0, 'S', 'X', [0x10, 0xee, 0x84], 0x40, 0x2055, 6],
+      [0x0, 'U', 'X', [0xee, 0x84], 0x80, 0x2055, 5],
+      [0x0, 'D', 'X', [0xec, 0x84], 0x5555, 0x0f10, 5],
+    ]).it(
+        'processes a load instruction from indexed memory into a 16bit register',
+        (
+            address, registerName, index, code, expected, atAddress,
+            cycles) => {
+          prepareWordComparison(address, code, expected, atAddress,
+              registerName);
+          subject.registers.get(index).set(atAddress);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(registerName).fetch()).toBe(expected);
         });
 
     each([
@@ -334,6 +369,21 @@ describe('6809 cpu', () => {
         });
 
     each([
+      [0x0, 'A', [0xa7, 0x84], 'X', 0x2000, 0x10, 4],
+      [0x0, 'B', [0xe7, 0xa4], 'Y', 0x2200, 0xff, 4],
+    ]).it(
+        'processes store to indexed memory from an 8 bit register',
+        (
+            address, registerName, code, index, atAddress, expected,
+            cycles) => {
+          prepareTest(address, code, registerName, expected);
+          subject.registers.get(index).set(atAddress);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.memory.read(atAddress)).toBe(expected);
+        });
+
+    each([
       [0x0, 'X', [0xbf, 0x20, 0x00], 0x1020, 0x2000, 6],
       [0x0, 'X', [0xbf, 0x20, 0x00], 0xffff, 0x2000, 6],
       [0x0, 'Y', [0x10, 0xbf, 0x22, 0x00], 0xff55, 0x2200, 7],
@@ -378,6 +428,26 @@ describe('6809 cpu', () => {
           expect(actual).toBe(expected);
         });
 
+    each([
+      [0x0, 'X', 'Y', [0xaf, 0xa4], 0x1020, 0x2000, 5],
+      [0x0, 'Y', 'X', [0x10, 0xaf, 0x84], 0xff55, 0x2200, 6],
+      [0x0, 'S', 'Y', [0x10, 0xef, 0xa4], 0x1020, 0x2000, 6],
+      [0x0, 'U', 'X', [0xef, 0x84], 0xff55, 0x2200, 5],
+      [0x0, 'D', 'Y', [0xed, 0xa4], 0xaaaa, 0x10fe, 5],
+    ]).it(
+        'processes store to indexed memory from 16 bit register',
+        (
+            address, registerName, index, code, expected, atAddress,
+            cycles) => {
+          prepareTest(address, code, registerName, expected);
+          subject.registers.get(index).set(atAddress);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          const actual = subject.memory.read(atAddress) << 8 |
+              subject.memory.read(atAddress + 1);
+          expect(actual).toBe(expected);
+        });
+
     it('process a nop instruction', () => {
       const code = [0x12];
       loadMemory(0x0000, code);
@@ -394,6 +464,26 @@ describe('6809 cpu', () => {
       subject.registers.get('PC').set(0x0000);
       const cycleCount = runToNext(subject);
       expect(cycleCount).toBe(4);
+      expect(subject.registers.get('PC').fetch()).toBe(0x8000);
+    });
+
+    it('process a direct page jmp to reload the program counter', () => {
+      const code = [0x0e, 0x00];
+      loadMemory(0x0000, code);
+      subject.registers.get('PC').set(0x0000);
+      subject.registers.get('DP').set(0x80);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(3);
+      expect(subject.registers.get('PC').fetch()).toBe(0x8000);
+    });
+
+    it('process an indexed jmp to reload the program counter', () => {
+      const code = [0x6e, 0x84];
+      loadMemory(0x0000, code);
+      subject.registers.get('PC').set(0x0000);
+      subject.registers.get('X').set(0x8000);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(3);
       expect(subject.registers.get('PC').fetch()).toBe(0x8000);
     });
 
@@ -422,7 +512,7 @@ describe('6809 cpu', () => {
               cpus.CARRY;
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
-          expect(subject.CC.save() & ccMask).toBe(expected);
+          expect(subject.CC.value & ccMask).toBe(expected);
         });
 
     each([
@@ -440,7 +530,7 @@ describe('6809 cpu', () => {
               cpus.CARRY;
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
-          expect(subject.CC.save() & ccMask).toBe(expected);
+          expect(subject.CC.value & ccMask).toBe(expected);
         });
 
     each([
@@ -455,7 +545,23 @@ describe('6809 cpu', () => {
               cpus.CARRY;
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
-          expect(subject.CC.save() & ccMask).toBe(expected);
+          expect(subject.CC.value & ccMask).toBe(expected);
+        });
+
+    each(
+        [
+          [0x0000, 'A', 0x20, [0xa1, 0x84], 'X', 0x1020, cpus.OVERFLOW | cpus.ZERO, 4],
+          [0x0000, 'B', 0x55, [0xe1, 0x84], 'X', 0x1020, cpus.OVERFLOW | cpus.ZERO, 4],
+        ],
+    ).it('Compares an 8 bit register against indexed memory',
+        (address, register, value, code, index, initialIndex, expected, cycles) => {
+          prepareByteComparison(address, code, value, initialIndex, register);
+          subject.registers.get(index).set(initialIndex);
+          const ccMask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW |
+              cpus.CARRY;
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.CC.value & ccMask).toBe(expected);
         });
 
     each([
@@ -463,6 +569,7 @@ describe('6809 cpu', () => {
       [0x0000, 'Y', [0x10, 0x8c, 0x55, 0xaa], 0x55aa, 0x06, 5],
       [0x0000, 'S', [0x11, 0x8c, 0x55, 0xaa], 0x55aa, 0x06, 5],
       [0x0000, 'U', [0x11, 0x83, 0x55, 0xaa], 0x55aa, 0x06, 5],
+      [0x0000, 'D', [0x10, 0x83, 0x55, 0xaa], 0x55aa, 0x06, 5],
     ]).it(
         'Compares a 16 bit register against immediate memory',
         (address, register, code, value, expected, cycles) => {
@@ -479,6 +586,7 @@ describe('6809 cpu', () => {
       [0x0000, 'Y', 0x11, [0x10, 0x9c, 0xaa], 0x55aa, 0x11aa, 0x06, 7],
       [0x0000, 'S', 0x12, [0x11, 0x9c, 0xaa], 0x55aa, 0x12aa, 0x06, 7],
       [0x0000, 'U', 0x13, [0x11, 0x93, 0xaa], 0x55aa, 0x13aa, 0x06, 7],
+      [0x0000, 'D', 0x13, [0x10, 0x93, 0xaa], 0x55aa, 0x13aa, 0x06, 7],
     ]).it(
         'Compares a 16 bit register against direct memory',
         (
@@ -499,6 +607,7 @@ describe('6809 cpu', () => {
       [0x0000, 'Y', [0x10, 0xbc, 0x11, 0xaa], 0x55aa, 0x11aa, 0x06, 8],
       [0x0000, 'S', [0x11, 0xbc, 0x12, 0xaa], 0x55aa, 0x12aa, 0x06, 8],
       [0x0000, 'U', [0x11, 0xb3, 0x13, 0xaa], 0x55aa, 0x13aa, 0x06, 8],
+      [0x0000, 'D', [0x10, 0xb3, 0x13, 0xaa], 0x55aa, 0x13aa, 0x06, 8],
     ]).it(
         'Compares a 16 bit register against direct memory',
         (address, register, code, value, atAddress, expected, cycles) => {
@@ -509,6 +618,26 @@ describe('6809 cpu', () => {
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
           expect(subject.CC.save() & ccMask).toBe(expected);
+        });
+
+    each([
+      [0x0000, 'X', 'Y', [0xac, 0xa4], 0x55aa, 0x10aa, 0x06, 6],
+      [0x0000, 'Y', 'X', [0x10, 0xac, 0x84], 0x55aa, 0x11aa, 0x06, 7],
+      [0x0000, 'S', 'X', [0x11, 0xac, 0x84], 0x55aa, 0x12aa, 0x06, 7],
+      [0x0000, 'U', 'X', [0x11, 0xa3, 0x84], 0x55aa, 0x13aa, 0x06, 7],
+      [0x0000, 'D', 'X', [0x10, 0xa3, 0x84], 0x55aa, 0x13aa, 0x06, 7],
+    ]).it(
+        'Compares a 16 bit register against indexed memory',
+        (
+            address, register, index, code, value, initialIndex, expected,
+            cycles) => {
+          prepareWordComparison(address, code, value, initialIndex, register);
+          subject.registers.get(index).set(initialIndex);
+          const ccMask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW |
+              cpus.CARRY;
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.CC.value & ccMask).toBe(expected);
         });
 
     each([
@@ -528,14 +657,7 @@ describe('6809 cpu', () => {
 
     each([
       [0x0000, [0x7c, 0x20, 0x01], 0x00, 0x2001, 0x01, 6, 0x00],
-      [
-        0x0000,
-        [0x7c, 0x20, 0x02],
-        0xff,
-        0x2002,
-        0x00,
-        6,
-        cpus.ZERO | cpus.OVERFLOW],
+      [0x0000, [0x7c, 0x20, 0x02], 0xff, 0x2002, 0x00, 6, cpus.ZERO | cpus.OVERFLOW],
     ]).it(
         'increments a byte in extended memory',
         (address, code, value, atAddress, expected, cycles, ccFlags) => {
@@ -548,18 +670,49 @@ describe('6809 cpu', () => {
           expect(subject.CC.save() & ccFlags).toBe(ccFlags);
         });
 
+    it('increments a byte in direct page memory', () => {
+      const address = 0x0000;
+      const code = [0x0c, 0x02, 0x03];
+      const dp = 0x00;
+      const atAddress = 0x0002;
+      const expected = 0x04;
+      const cycles = 6;
+      loadMemory(address, code);
+      subject.PC.set(address);
+      subject.registers.get('DP').set(dp);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.memory.read(atAddress)).toBe(expected);
+    });
+
+    it('increments a byte in indexed memory', () => {
+      const address = 0x0000;
+      const code = [0x6c, 0x84, 0x03];
+      const dp = 0x00;
+      const atAddress = 0x0002;
+      const expected = 0x04;
+      const cycles = 6;
+      loadMemory(address, code);
+      subject.PC.set(address);
+      subject.registers.get('X').set(atAddress);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.memory.read(atAddress)).toBe(expected);
+    });
+
     each([
       [0x0000, 'A', [0x4a], 0x02, 0x01, 2, 0x00],
-      [0x0000, 'A', [0x4a], 0x00, 0xff, 2, cpus.NEGATIVE],
+      [0x0000, 'A', [0x4a], 0x00, 0xff, 2, cpus.NEGATIVE | cpus.OVERFLOW],
       [0x0000, 'B', [0x5a], 0x02, 0x01, 2, 0x00],
       [0x0000, 'B', [0x5a], 0x01, 0x00, 2, cpus.ZERO],
     ]).it('decrements a register',
         (address, register, code, value, expected, cycles, ccFlags) => {
+          const ccMask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW;
           prepareTest(address, code, register, value);
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
           expect(subject.registers.get(register).fetch()).toBe(expected);
-          expect(subject.CC.save() & ccFlags).toBe(ccFlags);
+          expect(subject.CC.save() & ccMask).toBe(ccFlags);
         });
 
     each([
@@ -568,14 +721,55 @@ describe('6809 cpu', () => {
     ]).it(
         'decrements a byte in extended memory',
         (address, code, value, atAddress, expected, cycles, ccFlags) => {
+          const ccMask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW;
           loadMemory(address, code);
           subject.memory.write(atAddress, value);
           subject.registers.get('PC').set(address);
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
           expect(subject.memory.read(atAddress)).toBe(expected);
-          expect(subject.CC.save() & ccFlags).toBe(ccFlags);
+          expect(subject.CC.save() & ccMask).toBe(ccFlags);
         });
+
+    it('decrements a byte in paged memory', () => {
+      const address = 0x0000;
+      const code = [0x0a, 0x20];
+      const dp = 0x01;
+      const atAddress = 0x0120;
+      const value = 0x02;
+      const expected = 0x01;
+      const ccFlags = 0x00;
+      const cycles = 6;
+      const ccMask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW;
+      loadMemory(address, code);
+      subject.memory.write(atAddress, value);
+      subject.registers.get('PC').set(address);
+      subject.registers.get('DP').set(dp);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.memory.read(atAddress)).toBe(expected);
+      expect(subject.CC.save() & ccMask).toBe(ccFlags);
+    });
+
+    it('decrements a byte in indexed memory', () => {
+      const address = 0x0000;
+      const code = [0x6a, 0x84];
+      const index = 'X';
+      const indexAddress = 0x0120;
+      const value = 0x02;
+      const expected = 0x01;
+      const ccFlags = 0x00;
+      const cycles = 6;
+      const ccMask = cpus.ZERO | cpus.NEGATIVE | cpus.OVERFLOW;
+      loadMemory(address, code);
+      subject.memory.write(indexAddress, value);
+      subject.registers.get('PC').set(address);
+      subject.registers.get(index).set(indexAddress);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.memory.read(indexAddress)).toBe(expected);
+      expect(subject.CC.save() & ccMask).toBe(ccFlags);
+    });
 
     it('pushes registers to the S stack', () => {
       const code = [0x34, 0x87];
@@ -702,6 +896,22 @@ describe('6809 cpu', () => {
       expect(subject.registers.get('S').fetch()).toBe(stackAddress - 2);
     });
 
+    it('jumps to subroutine at indexed address', () => {
+      const pcAddress = 0x0000;
+      const code = [0xad, 0x84];
+      const stackAddress = 0x3fff;
+      const expectedAddress = 0x0520;
+      loadMemory(pcAddress, code);
+      subject.registers.get('PC').set(pcAddress);
+      subject.registers.get('X').set(expectedAddress);
+      subject.registers.get('S').set(stackAddress);
+      const cycles = 7;
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('PC').fetch()).toBe(expectedAddress);
+      expect(subject.registers.get('S').fetch()).toBe(stackAddress - 2);
+    });
+
     it('returns from subroutine', () => {
       const pcAddress = 0x0000;
       const code = [0x39];
@@ -762,6 +972,92 @@ describe('6809 cpu', () => {
 
     each(
         [
+          [0x0000, [0xab, 0x1f, 0x05, 0x03],
+            'A', 'X', 'B', 0x40, 0x0003, 0xff, 0x45, 0x0003, 5],
+          [0x0000, [0xab, 0x02, 0x05, 0x03],
+            'A', 'X', 'B', 0x40, 0x0001, 0xff, 0x43, 0x0001, 5],
+          [0x0000, [0xab, 0x22, 0x05, 0x03],
+            'A', 'Y', 'B', 0x40, 0x0000, 0xff, 0x45, 0x0000, 5],
+          [0x0000, [0xab, 0x80, 0x06, 0x60],
+            'A', 'X', 'B', 0x20, 0x0002, 0xff, 0x26, 0x0003, 6],
+          [0x0000, [0xab, 0xa1, 0x06, 0x60],
+            'A', 'Y', 'B', 0x20, 0x0003, 0xff, 0x80, 0x0005, 7],
+          [0x0000, [0xab, 0x82, 0x06, 0x60],
+            'A', 'X', 'B', 0x20, 0x0003, 0xff, 0x26, 0x0002, 6],
+          [0x0000, [0xab, 0xc3, 0x06, 0x60],
+            'A', 'U', 'B', 0x20, 0x0004, 0xff, 0x26, 0x0002, 7],
+          [0x0000, [0xab, 0xe4, 0x06, 0x60],
+            'A', 'S', 'B', 0x20, 0x0003, 0xff, 0x80, 0x0003, 4],
+          [0x0000, [0xab, 0x85, 0x06, 0x60],
+            'A', 'X', 'B', 0x20, 0x0003, 0xff, 0x26, 0x0003, 5],
+          [0x0000, [0xeb, 0x86, 0x06, 0x60],
+            'B', 'X', 'A', 0x20, 0x0003, 0xff, 0x26, 0x0003, 5],
+          [0x0000, [0xab, 0x88, 0xfe, 0x60],
+            'A', 'X', 'B', 0x20, 0x0005, 0xff, 0x80, 0x0005, 5],
+          [0x0000, [0xab, 0x89, 0xff, 0xfe, 0x60],
+            'A', 'X', 'B', 0x20, 0x0006, 0xff, 0x80, 0x0006, 8],
+          [0x0000, [0xeb, 0x8b, 0x06, 0x60, 0x80, 0x08],
+            'B', 'X', 'D', 0x02, 0x0003, 0x0002, 0x0a, 0x0003, 8],
+          [0x0000, [0xab, 0x8c, 0x01, 0x00, 0x80],
+            'A', 'X', 'B', 0x20, 0xffff, 0xff, 0xa0, 0xffff, 5],
+          [0x0000, [0xab, 0x8d, 0x00, 0x01, 0x00, 0x80],
+            'A', 'X', 'B', 0x20, 0xffff, 0xff, 0xa0, 0xffff, 9],
+          [0x0000, [0xab, 0x91, 0x00, 0x04, 0x55],
+            'A', 'X', 'B', 0xaa, 0x0002, 0x00, 0xff, 0x0004, 10],
+          [0x0000, [0xab, 0x93, 0x00, 0x04, 0x55],
+            'A', 'X', 'B', 0xaa, 0x0004, 0x00, 0xff, 0x0002, 10],
+          [0x0000, [0xab, 0x94, 0x00, 0x04, 0x55],
+            'A', 'X', 'B', 0xaa, 0x0002, 0x00, 0xff, 0x0002, 7],
+          [0x0000, [0xab, 0x95, 0x00, 0x04, 0x06, 0x60],
+            'A', 'X', 'B', 0x20, 0x0003, 0xff, 0x26, 0x0003, 8],
+          [0x0000, [0xeb, 0x96, 0x00, 0x04, 0x06, 0x60],
+            'B', 'X', 'A', 0x20, 0x0003, 0xff, 0x26, 0x0003, 8],
+          [0x0000, [0xab, 0x98, 0xfe, 0x00, 0x05, 0x60],
+            'A', 'X', 'B', 0x20, 0x0005, 0xff, 0x80, 0x0005, 8],
+          [0x0000, [0xab, 0x99, 0xff, 0xfe, 0x00, 0x06, 0x60],
+            'A', 'X', 'B', 0x20, 0x0006, 0xff, 0x80, 0x0006, 11],
+          [0x0000, [0xeb, 0x9b, 0x06, 0x60, 0x80, 0x00, 0x07, 0x20],
+            'B', 'X', 'D', 0x02, 0x0003, 0x0002, 0x22, 0x0003, 11],
+          [0x0000, [0xab, 0x9c, 0x01, 0x00, 0x00, 0x06, 0x80],
+            'A', 'X', 'B', 0x20, 0xffff, 0xff, 0xa0, 0xffff, 8],
+          [0x0000, [0xab, 0x9d, 0x00, 0x01, 0x00, 0x00, 0x07, 0x80],
+            'A', 'X', 'B', 0x20, 0xffff, 0xff, 0xa0, 0xffff, 12],
+          [0x0000, [0xab, 0x9f, 0x00, 0x04, 0x00, 0x06, 0x02],
+            'A', 'X', 'B', 0x20, 0x0000, 0x00, 0x22, 0x0000, 9],
+        ],
+    ).it('adds the referenced direct indexed value to the object register',
+        (address, code, register, index, offsetRegister,
+            initialValue, initialIndex, initialOffset,
+            expectedValue, expectedIndex, cycles) => {
+          loadMemory(address, code);
+          subject.PC.set(address);
+          subject.registers.get(register).set(initialValue);
+          subject.registers.get(index).set(initialIndex);
+          subject.registers.get(offsetRegister).set(initialOffset);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expectedValue);
+          expect(subject.registers.get(index).fetch()).toBe(expectedIndex);
+        });
+
+    it('adds the reference indexed word to the d register', () => {
+      const address = 0x0000;
+      const code = [0xe3, 0x84, 0x55, 0xaa];
+      const initialValue = 0xaa55;
+      const initialIndex = 0x0002;
+      const expectedValue = 0xffff;
+      const cycles = 9;
+      loadMemory(address, code);
+      subject.PC.set(address);
+      subject.registers.get('D').set(initialValue);
+      subject.registers.get('X').set(initialIndex);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.registers.get('D').fetch()).toBe(expectedValue);
+    });
+
+    each(
+        [
           [0x0000, 'A', [0x89, 0x55], 0xaa, 0x00, true, 2],
           [0x0000, 'B', [0xc9, 0xaa], 0x01, 0xac, true, 2],
           [0x0000, 'A', [0x89, 0x55], 0xaa, 0xff, false, 2],
@@ -780,6 +1076,23 @@ describe('6809 cpu', () => {
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
           expect(subject.registers.get(register).fetch()).toBe(expectedValue);
+        });
+
+    each(
+        [
+          [0x0000, 'A', 'X', [0xa9, 0x84, 0x54], 0xaa, 0x0002, 0xff, true, 4],
+          [0x0000, 'B', 'X', [0xe9, 0x84, 0x54], 0xaa, 0x0002, 0xff, true, 4],
+        ],
+    ).it('adds the indexed byte and carry with the object register',
+        (address, register, index, code, initialValue, initialIndex, expected, cf, cycles) => {
+          loadMemory(address, code);
+          subject.PC.set(address);
+          subject.registers.get(register).set(initialValue);
+          subject.registers.get(index).set(initialIndex);
+          subject.CC.carry(cf);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
         });
 
     each(
@@ -865,6 +1178,27 @@ describe('6809 cpu', () => {
 
     each(
         [
+          // [0x0000, 'A', [0xa0, 0x84, 0x55], 'X', 0x0002, 0xff, 0xaa, 4],
+          // [0x0000, 'B', [0xe0, 0xa4, 0xaa], 'Y', 0x0002, 0xff, 0x55, 4],
+          [0x0000, 'D', [0xa3, 0x84, 0x55, 0xaa], 'X', 0x0002, 0xffff, 0xaa55, 6],
+        ],
+    ).it('subtracts indexed value from the object register',
+        (
+            pcAddress, register, code, index, initialIndex, initialValue,
+            expectedValue, cycles,
+        ) => {
+          loadMemory(pcAddress, code);
+          subject.registers.get('PC').set(pcAddress);
+          subject.registers.get(register).set(initialValue);
+          subject.registers.get(index).set(initialIndex);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).
+              toBe(expectedValue);
+        });
+
+    each(
+        [
           [0x0000, 'A', [0x82, 0x55], 0xff, 0xa9, true, 2],
           [0x0000, 'B', [0xc2, 0x56], 0x01, 0xaa, true, 2],
           [0x0000, 'A', [0x82, 0x55], 0xff, 0xaa, false, 2],
@@ -900,6 +1234,28 @@ describe('6809 cpu', () => {
           subject.registers.get('PC').set(pcAddress);
           subject.registers.get(register).set(initialValue);
           subject.registers.get('DP').set(dpValue);
+          subject.registers.get('CC').carry(cf);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).
+              toBe(expectedValue);
+        });
+
+    each(
+        [
+          [0x0000, 'A', [0xa2, 0x84, 0x55], 'X', 0x0002, 0xff, 0xa9, true, 4],
+          [0x0000, 'B', [0xe2, 0xa4, 0x56], 'Y', 0x0002, 0x01, 0xaa, true, 4],
+        ],
+    ).it(
+        'subtracts the indexed value from the object register',
+        (
+            pcAddress, register, code, index, initialIndex, initialValue,
+            expectedValue, cf, cycles,
+        ) => {
+          loadMemory(pcAddress, code);
+          subject.registers.get('PC').set(pcAddress);
+          subject.registers.get(register).set(initialValue);
+          subject.registers.get(index).set(initialIndex);
           subject.registers.get('CC').carry(cf);
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
@@ -1421,6 +1777,21 @@ describe('6809 cpu', () => {
         });
 
     each([
+      [0x0000, [0xa4, 0x84, 0x55], 'A', 'X', 0xaa, 0x0002, 0x00, 4],
+      [0x0000, [0xe4, 0x84, 0x55], 'B', 'X', 0xff, 0x0002, 0x55, 4],
+    ]).it(
+        'ANDs a register and an indexed value bitwise',
+        (address, code, register, index, initial, initialIndex, expected, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get(register).set(initial);
+          subject.registers.get(index).set(initialIndex);
+          subject.registers.get('PC').set(address);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each([
       [0x0000, [0x1c, 0x55], 0xaa, 0x00, 3],
     ]).it(
         'ANDs the CC register and a value bitwise',
@@ -1493,6 +1864,21 @@ describe('6809 cpu', () => {
         });
 
     each([
+      [0x0000, [0xaa, 0x84, 0xaa], 'A', 'X', 0x0002, 0xa5, 0xaf, 4],
+      [0x0000, [0xea, 0xa4, 0x55], 'B', 'Y', 0x0002, 0xaa, 0xff, 4],
+    ]).it(
+        'ORs a register and an indexed referenced value bitwise',
+        (address, code, register, index, initialIndex, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get(register).set(initial);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(index).set(initialIndex);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each([
       [0x0000, [0x88, 0xaa], 'A', 0x0a, 0xa0, 2],
       [0x0000, [0xb8, 0x00, 0x03, 0x55], 'A', 0xaa, 0xff, 5],
       [0x0000, [0xc8, 0x55], 'B', 0xaa, 0xff, 2],
@@ -1518,6 +1904,21 @@ describe('6809 cpu', () => {
           subject.registers.get(register).set(initial);
           subject.registers.get('PC').set(address);
           subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each([
+      [0x0000, [0xa8, 0x84, 0xaa], 'A', 'X', 0x0002, 0xa5, 0x0f, 4],
+      [0x0000, [0xe8, 0x84, 0x55], 'B', 'X', 0x0002, 0xa5, 0xf0, 4],
+    ]).it(
+        'EORs a register and an indexed value bitwise',
+        (address, code, register, index, indexValue, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get(register).set(initial);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(index).set(indexValue);
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
           expect(subject.registers.get(register).fetch()).toBe(expected);
@@ -1551,6 +1952,20 @@ describe('6809 cpu', () => {
       expect(subject.memory.read(atAddress)).toBe(expected);
     });
 
+    it('shifts an indexed memory address left 1 bit', () => {
+      const address = 0x0000;
+      const code = [0x68, 0x84, 0x00, 0x55];
+      const index = 0x0003;
+      const expected = 0xaa;
+      const cycles = 6;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      subject.registers.get('X').set(index);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.memory.read(index)).toBe(expected);
+    });
+
     each(
         [
           [0x0000, [0x48], 'A', 0x55, 0xaa, 2],
@@ -1579,6 +1994,20 @@ describe('6809 cpu', () => {
       const cycleCount = runToNext(subject);
       expect(cycleCount).toBe(cycles);
       expect(subject.memory.read(atAddress)).toBe(expected);
+    });
+
+    it('shifts an indexed memory address right 1 bit', () => {
+      const address = 0x0000;
+      const code = [0x67, 0x84, 0xaa];
+      const index = 0x0002;
+      const expected = 0xd5;
+      const cycles = 6;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      subject.registers.get('X').set(index);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.memory.read(index)).toBe(expected);
     });
 
     it('shifts an extended memory address right 1 bit', () => {
@@ -1637,6 +2066,21 @@ describe('6809 cpu', () => {
       expect(subject.memory.read(atAddress)).toBe(expected);
     });
 
+    it('rotates an indexed memory address left 1 bit', () => {
+      const address = 0x0000;
+      const code = [0x69, 0x84, 0x55];
+      const atAddress = 0x0002;
+      const index = 'X';
+      const expected = 0xaa;
+      const cycles = 6;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      subject.registers.get(index).set(atAddress);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.memory.read(atAddress)).toBe(expected);
+    });
+
     each(
         [
           [0x0000, [0x49], 'A', 0x55, 0xaa, 2],
@@ -1675,6 +2119,21 @@ describe('6809 cpu', () => {
       const cycles = 7;
       loadMemory(address, code);
       subject.registers.get('PC').set(address);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(cycles);
+      expect(subject.memory.read(atAddress)).toBe(expected);
+    });
+
+    it('rotates an indexed memory address right 1 bit', () => {
+      const address = 0x0000;
+      const code = [0x66, 0xa4, 0xaa];
+      const atAddress = 0x0002;
+      const index = 'Y';
+      const expected = 0x55;
+      const cycles = 6;
+      loadMemory(address, code);
+      subject.registers.get('PC').set(address);
+      subject.registers.get(index).set(atAddress);
       const cycleCount = runToNext(subject);
       expect(cycleCount).toBe(cycles);
       expect(subject.memory.read(atAddress)).toBe(expected);
@@ -1731,6 +2190,22 @@ describe('6809 cpu', () => {
 
     each(
         [
+          [0x0000, [0xa5, 0x84, 0x80], 'A', 'X', 0xf0, 0x0002, cpus.NEGATIVE, 4],
+          [0x0000, [0xe5, 0x84, 0x80], 'B', 'X', 0xf0, 0x0002, cpus.NEGATIVE, 4],
+        ],
+    ).it('masks a register against an indexed value',
+        (address, code, register, index, initialValue, initialIndex, expectedFlags, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(index).set(initialIndex);
+          subject.registers.get(register).set(initialValue);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get('CC').value).toBe(expectedFlags);
+        });
+
+    each(
+        [
           [0x0000, [0x43], 'A', 0xaa, 0x55, 2],
           [0x0000, [0x53], 'B', 0xff, 0x00, 2],
         ],
@@ -1759,6 +2234,17 @@ describe('6809 cpu', () => {
           expect(subject.memory.read(atAddress)).toBe(expectedValue);
         });
 
+    it('performs ones complement on an indexed memory address', () => {
+      const address = 0x0000;
+      const indexAddress = 0x0002;
+      loadMemory(address, [0x63, 0x84, 0x55]);
+      subject.PC.set(address);
+      subject.registers.get('X').set(indexAddress);
+      const cycleCount = runToNext(subject);
+      expect(cycleCount).toBe(6);
+      expect(subject.memory.read(indexAddress)).toBe(0xaa);
+    });
+
     each(
         [
           [0x0000, [0x40], 'A', 0xaa, 0x56, 2],
@@ -1784,6 +2270,20 @@ describe('6809 cpu', () => {
           loadMemory(address, code);
           subject.registers.get('PC').set(address);
           subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.memory.read(atAddress)).toBe(expectedValue);
+        });
+
+    each(
+        [
+          [0x0000, [0x60, 0x84, 0xaa], 0x0002, 'X', 0x0002, 0x56, 6],
+        ],
+    ).it('performs twos complement on an indexed memory address',
+        (address, code, atAddress, index, initialIndex, expectedValue, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(index).set(initialIndex);
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
           expect(subject.memory.read(atAddress)).toBe(expectedValue);
@@ -1922,6 +2422,20 @@ describe('6809 cpu', () => {
           loadMemory(address, code);
           subject.registers.get('PC').set(address);
           subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.CC.value).toBe(ccFlags);
+        });
+
+    each(
+        [
+          [0x0000, [0x6d, 0x84, 0x00], 'X', 0x0002, cpus.ZERO, 6],
+        ],
+    ).it('tests an indexed memory address',
+        (address, code, index, atAddress, ccFlags, cycles) => {
+          loadMemory(address, code);
+          subject.registers.get('PC').set(address);
+          subject.registers.get(index).set(atAddress);
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
           expect(subject.CC.value).toBe(ccFlags);
@@ -2149,6 +2663,79 @@ describe('6809 cpu', () => {
       expect(subject.PC.fetch()).toBe(expectedPCValue);
       expect(subject.runState).toBe(cpus.RUNNING);
     });
+
+    each(
+        [
+          [0x0000, [0x4f], 'A', 0x55, 0, 2],
+          [0x0000, [0x5f], 'B', 0x55, 0, 2],
+        ],
+    ).it('clears an accumulator',
+        (address, code, register, initial, expected, cycles) => {
+          loadMemory(address, code);
+          subject.PC.set(address);
+          subject.registers.get(register).set(initial);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
+
+    each(
+        [
+          [0x0000, [0x0f, 0x02, 0x55], 0x00, 0x0002, 0x00, 6],
+        ],
+    ).it('clears a direct page address',
+        (address, code, dp, atAddress, expected, cycles) => {
+          loadMemory(address, code);
+          subject.PC.set(address);
+          subject.registers.get('DP').set(dp);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.memory.read(atAddress)).toBe(expected);
+        });
+
+    each(
+        [
+          [0x0000, [0x7f, 0x00, 0x03, 0x55], 0x0003, 0x00, 7],
+        ],
+    ).it('clears a direct page address',
+        (address, code, atAddress, expected, cycles) => {
+          loadMemory(address, code);
+          subject.PC.set(address);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.memory.read(atAddress)).toBe(expected);
+        });
+
+    each(
+        [
+          [0x0000, [0x6f, 0x84, 0x55], 'X', 0x0002, 0x00, 6],
+        ],
+    ).it('clears a direct page address',
+        (address, code, register, index, expected, cycles) => {
+          loadMemory(address, code);
+          subject.PC.set(address);
+          subject.registers.get(register).set(index);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.memory.read(index)).toBe(expected);
+        });
+
+    each(
+        [
+          [0x0000, [0x30, 0x01], 'X', 'X', 0x0100, 0x0101, 5],
+          [0x0000, [0x31, 0x23], 'Y', 'Y', 0x0200, 0x0203, 5],
+          [0x0000, [0x32, 0x84], 'S', 'X', 0xaaaa, 0xaaaa, 4],
+          [0x0000, [0x33, 0x84], 'U', 'X', 0xaaaa, 0xaaaa, 4],
+        ],
+    ).it('loads a register with an effective address',
+        (address, code, register, index, indexValue, expected, cycles) => {
+          loadMemory(address, code);
+          subject.PC.set(address);
+          subject.registers.get(index).set(indexValue);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.registers.get(register).fetch()).toBe(expected);
+        });
   });
 
   describe('interrupt request handling', () => {
