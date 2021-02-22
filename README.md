@@ -3,11 +3,11 @@
 This project is a simple emulation of the Motorola 6809 8/16-bit processor in
 javascript
 
-In addition to the processor the project emulates the associated memory and 
+In addition to the processor the project simulates the associated memory and 
 interface chips that are required to interact with the "outside" world.
 
 The Motorola reference design utilises a 64k memory model, a 6847 VDG, and 6821
-PIA chips and while this project can emulate those chips it allows the use of 
+PIA chips and while this project can simulate those chips it allows the use of 
 other chip designs in the same role.
 
 ## Memory ##
@@ -40,6 +40,7 @@ hardware.
 
 So far the instruction set is incomplete and only covers:
  * LD
+ * LEA
  * ST
  * JMP
  * ABX
