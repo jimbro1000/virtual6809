@@ -1,6 +1,8 @@
 # Virtual 6809 CHANGELOG #
 
 ## Unreleased ##
+
+## V0.4.0 - Feb 22 2021 ##
 * Add Indexed Direct Addressing
 * Add Indexed Indirect Addressing
 * Add CLR instructions
