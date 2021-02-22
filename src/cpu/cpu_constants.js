@@ -126,3 +126,6 @@ define('MASKIF', 63);
 define('WAIT', 64);
 define('PUSHIR', 65);
 define('SYNC', 66);
+define('INDEX', 67);
+define('CLEAR', 68);
+define('SUBWFROMOB', 69);

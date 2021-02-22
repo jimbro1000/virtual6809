@@ -241,16 +241,53 @@ class Alu {
 
     /**
      * twos complement 8 bit value.
+     * Does not test result
      *
      * @param {number} reg1 register value
      * @return {number} complement result
      */
     this.negate8 = (reg1) => {
+      reg1 = (0x100 - reg1) & 0xff;
+      return reg1;
+    };
+
+    /**
+     * twos complement 8 bit value.
+     * Tests result for CC
+     *
+     * @param {number} reg1 register value
+     * @return {number} complement result
+     */
+    this.negate8andTest = (reg1) => {
       this.cc.carry(reg1 !== 0);
       this.cc.overflow(reg1 === 0x80);
-      reg1 = (0x100 - reg1) & 0xff;
+      reg1 = this.negate8(reg1);
       this.cc.zero(reg1 === 0);
       this.cc.negative( (reg1 & 0x80) !== 0);
+      return reg1;
+    };
+
+    /**
+     * twos complement 5 bit value.
+     * note: does not modify CC
+     *
+     * @param {number} reg1
+     * @return {number} complement result
+     */
+    this.negate5 = (reg1) => {
+      reg1 = (0x20 - reg1) & 0x1f;
+      return reg1;
+    };
+
+    /**
+     * twos complement 16 bit value.
+     * note: does not modify CC
+     *
+     * @param {number} reg1
+     * @return {number} complement result
+     */
+    this.negate16 = (reg1) => {
+      reg1 = (0x10000 - reg1) & 0xffff;
       return reg1;
     };
 
@@ -287,6 +324,60 @@ class Alu {
       this.cc.negative((result & 0x80) !== 0);
       this.cc.zero(result === 0);
       return result;
+    };
+
+    /**
+     * Calculates 16 bit value from signed offset and register value.
+     * @param {number} offset signed value (5 bit)
+     * @param {number} reg1 register value
+     * @return {number} calculated value
+     */
+    this.offsetEA5 = (offset, reg1) => {
+      const signMask = 0x10;
+      let result;
+      const negative = (signMask & offset) === signMask;
+      if (negative) {
+        result = reg1 - this.negate5(offset);
+      } else {
+        result = reg1 + offset;
+      }
+      return result & 0xffff;
+    };
+
+    /**
+     * Calculates 16 bit value from signed offset and register value.
+     * @param {number} offset signed value (8 bit)
+     * @param {number} reg1 register value
+     * @return {number} calculated value
+     */
+    this.offsetEA8 = (offset, reg1) => {
+      const signMask = 0x80;
+      let result;
+      const negative = (signMask & offset) === signMask;
+      if (negative) {
+        result = reg1 - this.negate8(offset);
+      } else {
+        result = reg1 + offset;
+      }
+      return result & 0xffff;
+    };
+
+    /**
+     * Calculates 16 bit value from signed offset and register value.
+     * @param {number} offset signed value (16 bit)
+     * @param {number} reg1 register value
+     * @return {number} calculated value
+     */
+    this.offsetEA16 = (offset, reg1) => {
+      const signMask = 0x8000;
+      let result;
+      const negative = (signMask & offset) === signMask;
+      if (negative) {
+        result = reg1 - this.negate16(offset);
+      } else {
+        result = reg1 + offset;
+      }
+      return result & 0xffff;
     };
   }
 }
