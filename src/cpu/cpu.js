@@ -108,7 +108,6 @@ class Cpu {
     result['WAIT'] = cpus.WAIT;
     result['SYNC'] = cpus.SYNC;
     result['INDEX'] = cpus.INDEX;
-    result['LOADEFFECTIVE'] = cpus.LOADEFFECTIVE;
     result['CLEAR'] = cpus.CLEAR;
     return result;
   }
@@ -188,7 +187,6 @@ class Cpu {
     result[cpus.WAIT] = this.wait;
     result[cpus.SYNC] = this.sync;
     result[cpus.INDEX] = this.calculate_index_to_ad;
-    result[cpus.LOADEFFECTIVE] = this.calculate_index_to_ob;
     result[cpus.CLEAR] = this.clear_register;
     return result;
   }
@@ -958,11 +956,6 @@ class Cpu {
 
   sync = () => {
     this.runState = cpus.SYNCING;
-  }
-
-  calculate_index_to_ob = () => {
-    this.calculate_index_to_ad();
-    this.transfer_target_to_object();
   }
 
   calculate_index_to_ad = () => {

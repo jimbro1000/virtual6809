@@ -2571,9 +2571,10 @@ describe('6809 cpu', () => {
 
     each(
         [
-          [0x0000, [0x30, 0x01], 'X', 'X', 0x0100, 0x0101, 4],
-          [0x0000, [0x31, 0x23], 'Y', 'Y', 0x0200, 0x0203, 4],
+          [0x0000, [0x30, 0x01], 'X', 'X', 0x0100, 0x0101, 5],
+          [0x0000, [0x31, 0x23], 'Y', 'Y', 0x0200, 0x0203, 5],
           [0x0000, [0x32, 0x84], 'S', 'X', 0xaaaa, 0xaaaa, 4],
+          [0x0000, [0x33, 0x84], 'U', 'X', 0xaaaa, 0xaaaa, 4],
         ],
     ).it('loads a register with an effective address',
         (address, code, register, index, indexValue, expected, cycles) => {

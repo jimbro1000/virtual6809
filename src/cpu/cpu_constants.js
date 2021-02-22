@@ -128,4 +128,3 @@ define('PUSHIR', 65);
 define('SYNC', 66);
 define('INDEX', 67);
 define('CLEAR', 68);
-define('LOADEFFECTIVE', 69);

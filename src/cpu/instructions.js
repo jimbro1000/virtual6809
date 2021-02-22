@@ -733,7 +733,7 @@ instructions = {
     'object': 'X',
     'target': 'AD',
     'code': [
-      'READWLOW', 'LOADEFFECTIVE',
+      'READWLOW', 'INDEX', 'TFRTGTOOB',
     ],
   },
   0x31: {
@@ -742,7 +742,7 @@ instructions = {
     'object': 'Y',
     'target': 'AD',
     'code': [
-      'READWLOW', 'LOADEFFECTIVE',
+      'READWLOW', 'INDEX', 'TFRTGTOOB',
     ],
   },
   0x32: {
@@ -751,7 +751,16 @@ instructions = {
     'object': 'S',
     'target': 'AD',
     'code': [
-      'READWLOW', 'LOADEFFECTIVE',
+      'READWLOW', 'INDEX', 'TFRTGTOOB',
+    ],
+  },
+  0x33: {
+    'operation': 'LEAU',
+    'mode': 'indexed',
+    'object': 'U',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'TFRTGTOOB',
     ],
   },
   0x34: {
