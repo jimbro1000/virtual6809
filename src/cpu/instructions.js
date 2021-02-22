@@ -1007,6 +1007,15 @@ instructions = {
     'object': 'B',
     'code': ['CLEAR'],
   },
+  0x60: {
+    'operation': 'NEG',
+    'mode': 'indexed',
+    'object': 'W',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READWLOW', 'NEGATE', 'WRITEWLOW',
+    ],
+  },
   0x63: {
     'operation': 'COM',
     'mode': 'indexed',
@@ -1014,6 +1023,15 @@ instructions = {
     'target': 'AD',
     'code': [
       'READWLOW', 'INDEX', 'READWLOW', 'COMPLEMENT', 'WRITEWLOW',
+    ],
+  },
+  0x66: {
+    'operation': 'ROR',
+    'mode': 'indexed',
+    'object': 'W',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READWLOW', 'ROTATERIGHT', 'WRITEWLOW',
     ],
   },
   0x67: {
@@ -1032,6 +1050,15 @@ instructions = {
     'target': 'AD',
     'code': [
       'READWLOW', 'INDEX', 'READADWLOW', 'SHIFTLEFT', 'WRITEWLOW',
+    ],
+  },
+  0x69: {
+    'operation': 'ROL',
+    'mode': 'indexed',
+    'object': 'W',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READWLOW', 'ROTATELEFT', 'WRITEWLOW',
     ],
   },
   0x6a: {
@@ -1430,6 +1457,15 @@ instructions = {
       'READWLOW', 'INDEX', 'READADLOWCOMPARE',
     ],
   },
+  0xa2: {
+    'operation': 'SBCA',
+    'mode': 'indexed',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'SUBCTGFROMOB',
+    ],
+  },
   0xa4: {
     'operation': 'ANDA',
     'mode': 'indexed',
@@ -1473,6 +1509,15 @@ instructions = {
     'target': 'PC',
     'code': [
       'READWLOW', 'INDEX', 'ADDCTGTOOB',
+    ],
+  },
+  0xaa: {
+    'operation': 'ORA',
+    'mode': 'index',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READOR',
     ],
   },
   0xab: {
@@ -1926,6 +1971,15 @@ instructions = {
       'READWLOW', 'INDEX', 'READADLOWCOMPARE',
     ],
   },
+  0xe2: {
+    'operation': 'SBCB',
+    'mode': 'indexed',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'SUBCTGFROMOB',
+    ],
+  },
   0xe3: {
     'operation': 'ADDD',
     'mode': 'indexed',
@@ -1984,6 +2038,15 @@ instructions = {
     'target': 'AD',
     'code': [
       'READWLOW', 'INDEX', 'ADDCTGTOOB',
+    ],
+  },
+  0xea: {
+    'operation': 'ORB',
+    'mode': 'indexed',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'READOR',
     ],
   },
   0xeb: {
