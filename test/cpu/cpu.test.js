@@ -369,6 +369,21 @@ describe('6809 cpu', () => {
         });
 
     each([
+      [0x0, 'A', [0xa7, 0x84], 'X', 0x2000, 0x10, 4],
+      [0x0, 'B', [0xe7, 0xa4], 'Y', 0x2200, 0xff, 4],
+    ]).it(
+        'processes store to indexed memory from an 8 bit register',
+        (
+            address, registerName, code, index, atAddress, expected,
+            cycles) => {
+          prepareTest(address, code, registerName, expected);
+          subject.registers.get(index).set(atAddress);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          expect(subject.memory.read(atAddress)).toBe(expected);
+        });
+
+    each([
       [0x0, 'X', [0xbf, 0x20, 0x00], 0x1020, 0x2000, 6],
       [0x0, 'X', [0xbf, 0x20, 0x00], 0xffff, 0x2000, 6],
       [0x0, 'Y', [0x10, 0xbf, 0x22, 0x00], 0xff55, 0x2200, 7],
@@ -406,6 +421,26 @@ describe('6809 cpu', () => {
             cycles) => {
           prepareTest(address, code, registerName, expected);
           subject.registers.get('DP').set(page);
+          const cycleCount = runToNext(subject);
+          expect(cycleCount).toBe(cycles);
+          const actual = subject.memory.read(atAddress) << 8 |
+              subject.memory.read(atAddress + 1);
+          expect(actual).toBe(expected);
+        });
+
+    each([
+      [0x0, 'X', 'Y', [0xaf, 0xa4], 0x1020, 0x2000, 5],
+      [0x0, 'Y', 'X', [0x10, 0xaf, 0x84], 0xff55, 0x2200, 6],
+      [0x0, 'S', 'Y', [0x10, 0xef, 0xa4], 0x1020, 0x2000, 6],
+      [0x0, 'U', 'X', [0xef, 0x84], 0xff55, 0x2200, 5],
+      [0x0, 'D', 'Y', [0xed, 0xa4], 0xaaaa, 0x10fe, 5],
+    ]).it(
+        'processes store to indexed memory from 16 bit register',
+        (
+            address, registerName, index, code, expected, atAddress,
+            cycles) => {
+          prepareTest(address, code, registerName, expected);
+          subject.registers.get(index).set(atAddress);
           const cycleCount = runToNext(subject);
           expect(cycleCount).toBe(cycles);
           const actual = subject.memory.read(atAddress) << 8 |

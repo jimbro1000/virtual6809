@@ -328,6 +328,15 @@ instructions = {
       'READWLOW', 'INDEX', 'READADHIGH', 'READADLOW',
     ],
   },
+  0x10af: {
+    'operation': 'STY',
+    'mode': 'indexed',
+    'object': 'Y',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'WRITEHIGH', 'WRITELOW',
+    ],
+  },
   0x10b3: {
     'operation': 'CMPD',
     'mode': 'extended',
@@ -399,6 +408,15 @@ instructions = {
     'target': 'AD',
     'code': [
       'READWLOW', 'INDEX', 'READADHIGH', 'READADLOW',
+    ],
+  },
+  0x10ef: {
+    'operation': 'STS',
+    'mode': 'indexed',
+    'object': 'S',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'WRITEHIGH', 'WRITELOW',
     ],
   },
   0x10fe: {
@@ -1493,6 +1511,15 @@ instructions = {
       'READWLOW', 'INDEX', 'READADLOW',
     ],
   },
+  0xa7: {
+    'operation': 'STA',
+    'mode': 'indexed',
+    'object': 'A',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'WRITELOW',
+    ],
+  },
   0xa8: {
     'operation': 'EORA',
     'mode': 'indexed',
@@ -1550,11 +1577,20 @@ instructions = {
   },
   0xae: {
     'operation': 'LDX',
-    'mode': 'direct',
+    'mode': 'indexed',
     'object': 'X',
     'target': 'AD',
     'code': [
       'READWLOW', 'INDEX', 'READADHIGH', 'READADLOW',
+    ],
+  },
+  0xaf: {
+    'operation': 'STX',
+    'mode': 'indexed',
+    'object': 'X',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'WRITEHIGH', 'WRITELOW',
     ],
   },
   0xb0: {
@@ -2022,6 +2058,15 @@ instructions = {
       'READWLOW', 'INDEX', 'READADLOW',
     ],
   },
+  0xe7: {
+    'operation': 'STB',
+    'mode': 'indexed',
+    'object': 'B',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'WRITELOW',
+    ],
+  },
   0xe8: {
     'operation': 'EORB',
     'mode': 'indexed',
@@ -2067,6 +2112,15 @@ instructions = {
       'READWLOW', 'INDEX', 'READADHIGH', 'READADLOW',
     ],
   },
+  0xed: {
+    'operation': 'STD',
+    'mode': 'indexed',
+    'object': 'D',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'WRITEHIGH', 'WRITELOW',
+    ],
+  },
   0xee: {
     'operation': 'LDU',
     'mode': 'direct',
@@ -2074,6 +2128,15 @@ instructions = {
     'target': 'AD',
     'code': [
       'READWLOW', 'INDEX', 'READADHIGH', 'READADLOW',
+    ],
+  },
+  0xef: {
+    'operation': 'STU',
+    'mode': 'indexed',
+    'object': 'U',
+    'target': 'AD',
+    'code': [
+      'READWLOW', 'INDEX', 'WRITEHIGH', 'WRITELOW',
     ],
   },
   0xf0: {
