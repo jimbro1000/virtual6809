@@ -143,6 +143,56 @@ The maximum expected memory model is 2Mb (the equivalent of using a 6829 MMU to 
 20 address lines) but paging is not implemented so in effect it will still only be 64k
 of addressable memory.
 
+### Sample Code ###
+The "interactive" (?) demo of the emulator runs a simple piece of code to clear the
+display, copy a message to the display and then infinitely cycle through one byte's
+values on the screen:
+
+```
+const screenbase=$400
+
+    org $2000
+start:
+    lds #$7fff
+    ldx #screenbase
+    bsr cls
+    bsr message
+    leax 32,x
+cycle:
+    inc ,x
+    bra cycle
+message:
+    leay messagetext,pcr
+    bsr print
+    rts
+cls:
+    pshs a,x
+    lda #$20
+clsloop:
+    sta ,x+
+    cmpx #$0600
+    bne clsloop
+    puls a,x
+    rts
+print:
+    pshs a,x,y
+printloop:
+    lda ,y+
+    beq printover
+print6847:
+    sta ,x+
+    bra printloop
+printover:
+    puls a,x,y
+    rts
+
+messagetext:
+    fcb "VIRTUAL 6809 V0.4.1",0
+```
+
+The reset vector is set to the code origin so in theory it should always 
+automatically run.
+
 ## References ##
 [1] **6809 Assembly Language Programming**, 1981 by Lance A. Leventhal  
 ISBN 0-931988-35-7
