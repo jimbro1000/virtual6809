@@ -30,7 +30,7 @@ class ControlRegister extends CpuRegister {
 
     test(condition) {
         const lambda = this.conditions[condition];
-        return lambda();
+        return lambda(this);
     }
 
     set(value) {
@@ -77,97 +77,97 @@ class ControlRegister extends CpuRegister {
         this.cc(value, cpus.FIRQ);
     }
 
-    ifalways = () => {
+    ifalways() {
         return true;
     }
 
-    ifnever = () => {
+    ifnever() {
         return false;
     }
 
-    ifcarryset = () => {
-        return (this.value & cpus.CARRY) > 0;
+    ifcarryset(cc) {
+        return (cc.value & cpus.CARRY) > 0;
     }
 
-    ifcarryclear = () => {
-        return !this.ifcarryset();
+    ifcarryclear(cc) {
+        return !cc.ifcarryset(cc);
     }
 
-    ifequal = () => {
-        return (this.value & cpus.ZERO) > 0;
+    ifequal(cc) {
+        return (cc.value & cpus.ZERO) > 0;
     }
 
-    ifnotequal = () => {
-        return !this.ifequal();
+    ifnotequal(cc) {
+        return !cc.ifequal(cc);
     }
 
-    ifnegative = () => {
-        return (this.value & cpus.NEGATIVE) > 0;
+    ifnegative(cc) {
+        return (cc.value & cpus.NEGATIVE) > 0;
     }
 
-    ifpositive = () => {
-        return !this.ifnegative();
+    ifpositive(cc) {
+        return !cc.ifnegative(cc);
     }
 
-    ifoverflow = () => {
-        return (this.value & cpus.OVERFLOW) > 0;
+    ifoverflow(cc) {
+        return (cc.value & cpus.OVERFLOW) > 0;
     }
 
-    ifnotoverflow = () => {
-        return !this.ifoverflow();
+    ifnotoverflow(cc) {
+        return !cc.ifoverflow(cc);
     }
 
-    ifgreaterorequal = () => {
-        const negative = (this.value & cpus.NEGATIVE) > 0;
-        const overflow = (this.value & cpus.OVERFLOW) > 0;
+    ifgreaterorequal(cc) {
+        const negative = (cc.value & cpus.NEGATIVE) > 0;
+        const overflow = (cc.value & cpus.OVERFLOW) > 0;
         return !((negative && !overflow) || (overflow && !negative));
     }
 
-    ifgreaterthan = () => {
-        const negative = (this.value & cpus.NEGATIVE) > 0;
-        const overflow = (this.value & cpus.OVERFLOW) > 0;
-        const zero = (this.value & cpus.ZERO) > 0;
+    ifgreaterthan(cc) {
+        const negative = (cc.value & cpus.NEGATIVE) > 0;
+        const overflow = (cc.value & cpus.OVERFLOW) > 0;
+        const zero = (cc.value & cpus.ZERO) > 0;
         return ((negative && !overflow) || (overflow && !negative)) && !zero;
     }
 
-    ifhigher = () => {
-        const carry = (this.value & cpus.CARRY) > 0;
-        const zero = (this.value & cpus.ZERO) > 0;
+    ifhigher(cc) {
+        const carry = (cc.value & cpus.CARRY) > 0;
+        const zero = (cc.value & cpus.ZERO) > 0;
         return (!carry && !zero);
     }
 
-    iflowerorsame = () => {
-        const carry = (this.value & cpus.CARRY) > 0;
-        const zero = (this.value & cpus.ZERO) > 0;
+    iflowerorsame(cc) {
+        const carry = (cc.value & cpus.CARRY) > 0;
+        const zero = (cc.value & cpus.ZERO) > 0;
         return (carry || zero);
     }
 
-    iflessorequal = () => {
-        const negative = (this.value & cpus.NEGATIVE) > 0;
-        const overflow = (this.value & cpus.OVERFLOW) > 0;
-        const zero = (this.value & cpus.ZERO) > 0;
+    iflessorequal(cc) {
+        const negative = (cc.value & cpus.NEGATIVE) > 0;
+        const overflow = (cc.value & cpus.OVERFLOW) > 0;
+        const zero = (cc.value & cpus.ZERO) > 0;
         return ((negative && !overflow) || (overflow && !negative)) && zero;
     }
 
-    iflessthan = () => {
-        const negative = (this.value & cpus.NEGATIVE) > 0;
-        const overflow = (this.value & cpus.OVERFLOW) > 0;
+    iflessthan(cc) {
+        const negative = (cc.value & cpus.NEGATIVE) > 0;
+        const overflow = (cc.value & cpus.OVERFLOW) > 0;
         return (negative && !overflow) || (overflow && !negative);
     }
-
-    ifhalfcarry = () => {
+//
+    ifhalfcarry() {
         return (this.value & cpus.HALFCARRY) > 0;
     }
 
-    ifentireset = () => {
+    ifentireset() {
         return (this.value & cpus.ENTIRE) > 0;
     }
 
-    ifirqclear = () => {
+    ifirqclear() {
         return (this.value & cpus.IRQ) === 0;
     }
 
-    iffirqclear = () => {
+    iffirqclear() {
         return (this.value & cpus.FIRQ) === 0
     }
 }
