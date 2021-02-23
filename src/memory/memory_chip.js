@@ -23,15 +23,15 @@ class Chip {
     }
   }
 
-  setBase = (address) => {
+  setBase(address) {
     this.base = address;
   }
 
-  getSize = () => {
+  getSize() {
     return this.size;
   }
 
-  setMemory = (address, byte) => {
+  setMemory(address, byte) {
     if (this.writeable) {
       const value = byte & 0xff;
       const effective_address = address - this.base;
@@ -42,7 +42,7 @@ class Chip {
     }
   }
 
-  getMemory = (address) => {
+  getMemory(address) {
     if (this.readable) {
       const effective_address = address - this.base;
       if (effective_address < 0 || effective_address >= this.size) {
@@ -52,7 +52,7 @@ class Chip {
     }
   }
 
-  burnMemory = (address, byte) => {
+  burnMemory(address, byte) {
     const value = byte & 0xff;
     const effective_address = address - this.base;
     if (effective_address < 0 || effective_address >= this.size) {
@@ -61,15 +61,15 @@ class Chip {
     this.memory[effective_address] = value;
   }
 
-  getReadable = () => {
+  getReadable() {
     return this.readable;
   }
 
-  getWriteable = () => {
+  getWriteable() {
     return this.writeable;
   }
 
-  getMapped = () => {
+  getMapped() {
     return this.hardmapped;
   }
 }
