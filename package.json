@@ -1,12 +1,13 @@
 {
   "name": "virtual6809",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "Emulation of Motorola 6809 design",
   "repository": "https://github.com/jimbro1000/virtual6809",
   "private":  true,
   "scripts": {
     "test": "jest",
     "start": "budo src/main.js -p $PORT ",
+    "local": "budo src/main.js",
     "build": "webpack"
   },
   "keywords": [],
