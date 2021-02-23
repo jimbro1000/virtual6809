@@ -38,37 +38,11 @@ The emulated processor can operate at any clock speed within the limits of the
 supporting hardware allowing for fine-tuning that was not possible with real 
 hardware.
 
-So far the instruction set is incomplete and only covers:
- * LD
- * LEA
- * ST
- * JMP
- * ABX
- * ADD and ADC
- * DAA
- * SUB and SBC
- * CLR
- * SEX
- * MUL
- * AND, OR, EOR
- * LSL, LSR, ROL and ROR  
- * BIT, COM, NEG
- * NOP
- * CMP
- * TST
- * INC and DEC
- * PSH and PUL
- * JSR
- * SWI, SWI2, SWI3
- * CWAI, SYNC
- * RTS
- * RTI
- * short branch
- * long branch
- * EXG and TFR
- 
-ALU is fully implemented but condition logic contained in control 
-register not ALU  
+So far the instruction should now be complete. All instructions are tested but this is
+still experimental so there may still be some wobbly bits
+
+The ALU is fully implemented but condition logic contained in control 
+register not ALU - this may be revised in future releases.  
 
 The processor bootstraps correctly using the hard reset vector stored at 0xfffe.
 If no memory exists at that address it will be interpreted as starting from 
@@ -142,6 +116,11 @@ it will be ram and not mapped.
 The maximum expected memory model is 2Mb (the equivalent of using a 6829 MMU to provide
 20 address lines) but paging is not implemented so in effect it will still only be 64k
 of addressable memory.
+
+### Trial Web App ###
+
+The project is being published to v6809.herokuapp.com. This is not a persistent
+app container so it may take a while to respond, please be patient!
 
 ### Sample Code ###
 The "interactive" (?) demo of the emulator runs a simple piece of code to clear the
