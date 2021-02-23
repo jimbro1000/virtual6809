@@ -6,7 +6,7 @@
   "private":  true,
   "scripts": {
     "test": "jest",
-    "start": "budo src/main.js -p 8000",
+    "start": "budo src/main.js -p $PORT ",
     "build": "webpack"
   },
   "keywords": [],
