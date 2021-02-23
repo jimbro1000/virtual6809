@@ -386,11 +386,24 @@ class Cpu {
    * execute next instruction.
    */
   executeNext() {
-    const lambda = this.lambdas[this.code.pop()];
-    lambda();
+    const microcode = this.code.pop();
+    const lambda = this.lambdas[microcode];
+    if (typeof lambda === 'function') {
+      lambda();
+    } else {
+      this.operandException(microcode);
+    }
     if (this.code.length === 0) {
       this.clearInstruction();
     }
+  }
+
+  /**
+   * report illegal microcode to console.
+   * @param {number} code
+   */
+  operandException(code) {
+    console.error("illegal microcode " + code + " at address " + this.PC.fetch());
   }
 
   /**
@@ -907,9 +920,9 @@ class Cpu {
   push_pc_to_ad = () => {
     let address = this.registers.get('S').fetch();
     const value = this.PC.fetch();
-    const lowValue = (value & 0xff00) >> 8;
+    const lowValue = value & 0xff;
     this.memory.write(address--, lowValue);
-    const highValue = value & 0xff;
+    const highValue = (value & 0xff00) >> 8;
     this.memory.write(address--, highValue);
     this.registers.get('S').set(address);
   };
