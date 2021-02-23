@@ -1,5 +1,8 @@
 # Virtual 6809 CHANGELOG #
 
+## V0.4.2 - Feb 23 2021 ##
+* Change to default port number for Heroku
+
 ## V0.4.1 - Feb 23 2021 ##
 * Fix byte order on pull pc
 * Update sample code on demo
