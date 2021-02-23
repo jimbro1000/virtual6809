@@ -72,30 +72,50 @@ window.onload = () => {
   const height = canvas.height;
   const imageData = context.createImageData(width, height);
 
-  const memory = Memory.factory('A64');
+  const memory = Memory.factory('D64');
   const machine = new Cpu(memory);
   const cyclesPerTick = 1000;
   const tick = 1; // milliseconds
 
   // set entry vector to 0x2000
   memory.burn(0xfffe, 0x20);
-  // simple program cycle the thirty-second byte of video memory
-  memory.write(0x2000, 0xb6);
-  memory.write(0x2001, 0x04);
-  memory.write(0x2002, 0x20);
-  memory.write(0x2003, 0x4c);
-  memory.write(0x2004, 0xb7);
-  memory.write(0x2005, 0x04);
-  memory.write(0x2006, 0x20);
-  memory.write(0x2007, 0x20);
-  memory.write(0x2008, 0xf7);
+  // // simple program cycle the thirty-second byte of video memory
 
-  const message = 'HeLlO wOrLd'.split('');
-  const videoAddress = 0x400;
-  let index = 0x400;
-  message.forEach((char) => {
-    memory.write(index++, char.charCodeAt(0));
-  });
+  const codeCycle = [
+    0x10, 0xce, 0x7f, 0xff, //LDS #$7fff
+    0x8e, 0x04, 0x00, //LDX #$0400
+    0x8d, 0x10, //BSR +16 (clr)
+    0x8d, 0x07, //BSR +7 (message)
+    0x30, 0x88, 0x20, //LEAX 32,X
+    0x6c, 0x84, //INC ,X
+    0x20, 0xfc, //BRA -4
+    0x31, 0x8d, 0x00, 0x1e, //LEAY +30, PC
+    0x8d, 0x0f, //BSR +15
+    0x39, //RTS
+    0x34, 0x12, //PSHS A,X
+    0x86, 0x20, //LDA #20
+    0xa7, 0x80, //STA ,X+
+    0x8c, 0x06, 0x00, //CMPX #$0600
+    0x26, 0xf9, //BNE -6
+    0x35, 0x12, //PULS A,X
+    0x39, //RTS
+    0x34, 0x32, //PSHS A,X,Y
+    0xa6, 0xa0, //LDA ,Y+
+    0x27, 0x04, //BEQ +10
+    0xa7, 0x80, //STA ,X+
+    0x20, 0xf8, //BRA -8
+    0x35, 0x32, //PULS A,X,Y
+    0x39, //RTS
+    0x56, 0x49, 0x52, 0x54, 0x55, 0x41, 0x4C, 0x20, 0x36, 0x38,
+    0x30, 0x39, 0x20, 0x56, 0x30, 0x2E, 0x34, 0x2E, 0x31, 0x00
+  ];
+
+  let codeAddress = 0x2000;
+  for(let index = 0; index < codeCycle.length; ++index) {
+    memory.write(codeAddress + index, codeCycle[index]);
+  }
+
+  const videoAddress = 0x0400;
 
   const main = (tframe) => {
     window.requestAnimationFrame(main);

@@ -1,6 +1,8 @@
 # Virtual 6809 CHANGELOG #
 
 ## Unreleased ##
+* Fix byte order on pull
+* Update sample code on demo
 
 ## V0.4.0 - Feb 22 2021 ##
 * Add Indexed Direct Addressing
