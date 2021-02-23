@@ -170,7 +170,7 @@ class Alu {
       if (typeof(rotate) === 'undefined') {
         rotate = false;
       }
-      const result = (reg1 << 1) + (rotate && this.cc.ifcarryset() ? 1 : 0);
+      const result = (reg1 << 1) + (rotate && this.cc.ifcarryset(this.cc) ? 1 : 0);
       const maskedResult = result & 0xff;
       const carry = result !== maskedResult;
       const negative = (result & 0x80) !== 0;
@@ -194,7 +194,7 @@ class Alu {
         rotate = false;
       }
       const carry = (reg1 & 0x01) !== 0;
-      const msb = rotate ? (this.cc.ifcarryset() ? 0x80 : 0) : (reg1 & 0x80);
+      const msb = rotate ? (this.cc.ifcarryset(this.cc) ? 0x80 : 0) : (reg1 & 0x80);
       const result = ((reg1 & 0xfe) >> 1) | msb;
       const negative = (result & 0x80) !== 0;
       this.cc.carry(carry);
@@ -311,7 +311,7 @@ class Alu {
     this.daa = (reg1) => {
       let highNibble = reg1 >> 4;
       let lowNibble = reg1 & 0xf;
-      if (this.cc.ifcarryset() || (highNibble > 9) ||
+      if (this.cc.ifcarryset(this.cc) || (highNibble > 9) ||
           (highNibble > 8 && lowNibble > 9)) {
         highNibble += 6;
       }

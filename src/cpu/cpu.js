@@ -389,7 +389,7 @@ class Cpu {
     const microcode = this.code.pop();
     const lambda = this.lambdas[microcode];
     if (typeof lambda === 'function') {
-      lambda();
+      lambda(this);
     } else {
       this.operandException(microcode);
     }
@@ -466,391 +466,391 @@ class Cpu {
     this.populateCodeStack(action.code);
   }
 
-  swap_internal_registers = () => {
-    const temp = this.W.fetch();
-    this.W.set(this.AD.fetch());
-    this.AD.set(temp);
+  swap_internal_registers(cpu) {
+    const temp = cpu.W.fetch();
+    cpu.W.set(cpu.AD.fetch());
+    cpu.AD.set(temp);
   };
 
-  add_target_to_object = () => {
-    this.W.set(this.object.fetch() + this.target.fetch());
+  add_target_to_object(cpu) {
+    cpu.W.set(cpu.object.fetch() + cpu.target.fetch());
   };
 
-  add_pc_to_object = () => {
-    this.object.load(
-        this.alu1.add8(this.object.fetch(), this.fetchNextByte()));
+  add_pc_to_object(cpu) {
+    cpu.object.load(
+        cpu.alu1.add8(cpu.object.fetch(), cpu.fetchNextByte()));
   };
 
-  add_pc_to_object_with_carry = () => {
-    this.object.load(this.alu1.add8(
-        this.object.fetch(), this.fetchNextByte(),
-        (this.CC.save() & cpus.CARRY) === cpus.CARRY ? 1 : 0,
+  add_pc_to_object_with_carry(cpu) {
+    cpu.object.load(cpu.alu1.add8(
+        cpu.object.fetch(), cpu.fetchNextByte(),
+        (cpu.CC.save() & cpus.CARRY) === cpus.CARRY ? 1 : 0,
     ));
   };
 
-  add_target_byte_to_object = () => {
-    if (this.object.size === cpus.SHORT) {
-      this.object.load(this.alu1.add8(this.object.fetch(),
-          this.memory.read(this.target.fetch())));
+  add_target_byte_to_object(cpu) {
+    if (cpu.object.size === cpus.SHORT) {
+      cpu.object.load(cpu.alu1.add8(cpu.object.fetch(),
+          cpu.memory.read(cpu.target.fetch())));
     } else {
-      this.object.load(
-          this.alu1.add16(this.object.fetch(), this.target.fetch()));
+      cpu.object.load(
+          cpu.alu1.add16(cpu.object.fetch(), cpu.target.fetch()));
     }
   };
 
-  add_target_signed_byte_value_to_object_if_condition_met = () => {
-    if (this.CC.test(this.condition)) {
-      this.add_target_signed_byte_to_object();
+  add_target_signed_byte_value_to_object_if_condition_met(cpu) {
+    if (cpu.CC.test(cpu.condition)) {
+      cpu.add_target_signed_byte_to_object(cpu);
     }
   };
 
-  add_target_signed_word_value_to_object_if_condition_met = () => {
-    if (this.CC.test(this.condition)) {
-      this.add_target_signed_word_to_object();
-      this.code.push(cpus.BUSY);
+  add_target_signed_word_value_to_object_if_condition_met(cpu) {
+    if (cpu.CC.test(cpu.condition)) {
+      cpu.add_target_signed_word_to_object(cpu);
+      cpu.code.push(cpus.BUSY);
     }
   };
 
-  add_target_signed_byte_to_object = () => {
-    let byte = this.target.fetch();
+  add_target_signed_byte_to_object(cpu) {
+    let byte = cpu.target.fetch();
     if (byte > 0x7f) {
       byte = byte - 0x100;
     }
-    this.object.set(this.object.fetch() + byte);
+    cpu.object.set(cpu.object.fetch() + byte);
   };
 
-  add_target_signed_word_to_object = () => {
-    let word = this.target.fetch();
+  add_target_signed_word_to_object(cpu) {
+    let word = cpu.target.fetch();
     if (word > 0x7fff) {
       word = word - 0x10000;
     }
-    this.object.set(this.object.fetch() + word);
+    cpu.object.set(cpu.object.fetch() + word);
   };
 
-  add_target_to_object_with_carry = () => {
-    this.object.load(this.alu1.add8(
-        this.object.fetch(),
-        this.memory.read(this.target.fetch()),
-        (this.CC.save() & cpus.CARRY) === cpus.CARRY ? 1 : 0,
+  add_target_to_object_with_carry(cpu) {
+    cpu.object.load(cpu.alu1.add8(
+        cpu.object.fetch(),
+        cpu.memory.read(cpu.target.fetch()),
+        (cpu.CC.save() & cpus.CARRY) === cpus.CARRY ? 1 : 0,
     ));
   };
 
-  sub_pc_from_object = () => {
-    this.object.load(
-        this.alu1.sub8(this.object.fetch(), this.fetchNextByte()));
+  sub_pc_from_object(cpu) {
+    cpu.object.load(
+        cpu.alu1.sub8(cpu.object.fetch(), cpu.fetchNextByte()));
   };
 
-  sub_pc_with_carry_from_object = () => {
-    this.object.load(this.alu1.sub8(
-        this.object.fetch(), this.fetchNextByte(),
-        (this.CC.save() & cpus.CARRY) === cpus.CARRY ? 1 : 0,
+  sub_pc_with_carry_from_object(cpu) {
+    cpu.object.load(cpu.alu1.sub8(
+        cpu.object.fetch(), cpu.fetchNextByte(cpu),
+        (cpu.CC.save() & cpus.CARRY) === cpus.CARRY ? 1 : 0,
     ));
   };
 
-  sub_target_value_from_object = () => {
-    if (this.object.size === cpus.SHORT) {
-      this.object.load(this.alu1.sub8(this.object.fetch(),
-          this.memory.read(this.target.fetch())));
+  sub_target_value_from_object(cpu) {
+    if (cpu.object.size === cpus.SHORT) {
+      cpu.object.load(cpu.alu1.sub8(cpu.object.fetch(),
+          cpu.memory.read(cpu.target.fetch())));
     } else {
-      this.object.load(
-          this.alu1.sub16(this.object.fetch(), this.target.fetch()));
+      cpu.object.load(
+          cpu.alu1.sub16(cpu.object.fetch(), cpu.target.fetch()));
     }
   };
 
-  sub_w_from_object = () => {
-      this.object.load(
-          this.alu1.sub16(this.object.fetch(), this.W.fetch()));
+  sub_w_from_object(cpu) {
+    cpu.object.load(
+        cpu.alu1.sub16(cpu.object.fetch(), cpu.W.fetch()));
   }
 
-  sub_target_value_with_carry_from_object = () => {
-    this.object.load(this.alu1.sub8(
-        this.object.fetch(),
-        this.memory.read(this.target.fetch()),
-        (this.CC.save() & cpus.CARRY) === cpus.CARRY ? 1 : 0,
+  sub_target_value_with_carry_from_object(cpu) {
+    cpu.object.load(cpu.alu1.sub8(
+        cpu.object.fetch(),
+        cpu.memory.read(cpu.target.fetch()),
+        (cpu.CC.save() & cpus.CARRY) === cpus.CARRY ? 1 : 0,
     ));
   };
 
-  multiply = () => {
-    this.registers.get('D').set(
-        this.alu1.mul8(
-            this.registers.get('A').fetch(), this.registers.get('B').fetch()
+  multiply(cpu) {
+    cpu.registers.get('D').set(
+        cpu.alu1.mul8(
+            cpu.registers.get('A').fetch(), cpu.registers.get('B').fetch()
         )
     );
   };
 
-  test_byte = () => {
-    this.alu1.test8(this.object.fetch());
+  test_byte(cpu) {
+    cpu.alu1.test8(cpu.object.fetch());
   };
 
-  fetch_next_instruction_from_PC = () => {
-    const nextByte = this.fetchNextByte();
-    this.operation |= nextByte;
-    const action = this.instructions[this.operation];
+  fetch_next_instruction_from_PC(cpu) {
+    const nextByte = cpu.fetchNextByte(cpu);
+    cpu.operation |= nextByte;
+    const action = cpu.instructions[cpu.operation];
     if (typeof action === 'undefined') {
       // eslint-disable-next-line no-throw-literal
-      throw 'illegal instruction ' + this.operation;
+      throw 'illegal instruction ' + cpu.operation;
     }
     if (action.mode === 'fetch') {
-      this.operation = nextByte << 8;
-      this.code = [cpus.FETCH];
+      cpu.operation = nextByte << 8;
+      cpu.code = [cpus.FETCH];
     } else {
-      this.interpretInstruction(action);
+      cpu.interpretInstruction(action);
     }
   };
 
-  transfer_w_to_object = () => {
-    this.object.set(this.W.fetch());
-    this.W.set(0);
+  transfer_w_to_object(cpu) {
+    cpu.object.set(cpu.W.fetch());
+    cpu.W.set(0);
   };
 
-  transfer_w_to_target = () => {
-    this.target.set(this.W.fetch());
-    this.W.set(0);
+  transfer_w_to_target(cpu) {
+    cpu.target.set(cpu.W.fetch());
+    cpu.W.set(0);
   };
 
-  transfer_object_to_target = () => {
-    this.target.set(this.object.fetch());
+  transfer_object_to_target(cpu) {
+    cpu.target.set(cpu.object.fetch());
   };
 
-  transfer_target_to_object = () => {
-    this.object.set(this.target.fetch());
+  transfer_target_to_object(cpu) {
+    cpu.object.set(cpu.target.fetch());
   };
 
-  build_direct_page_address_in_W = () => {
-    this.W.set(
-        (this.registers.get('DP').fetch() << 8) | this.fetchNextByte());
+  build_direct_page_address_in_W(cpu) {
+    cpu.W.set(
+        (cpu.registers.get('DP').fetch() << 8) | cpu.fetchNextByte(cpu));
   };
 
-  read_next_high_data_byte_from_PC = () => {
-    this.W.set(this.fetchNextByte() << 8);
+  read_next_high_data_byte_from_PC(cpu) {
+    cpu.W.set(cpu.fetchNextByte(cpu) << 8);
   };
 
-  read_next_low_data_byte_from_PC = () => {
-    this.object.load(this.W.fetch() | this.fetchNextByte());
+  read_next_low_data_byte_from_PC(cpu) {
+    cpu.object.load(cpu.W.fetch() | cpu.fetchNextByte(cpu));
   };
 
-  read_next_high_data_byte_from_AD = () => {
-    let AD = this.AD.fetch();
-    const nextByte = this.memory.read(AD++);
-    this.W.set(nextByte << 8);
-    this.AD.set(AD);
+  read_next_high_data_byte_from_AD(cpu) {
+    let AD = cpu.AD.fetch();
+    const nextByte = cpu.memory.read(AD++);
+    cpu.W.set(nextByte << 8);
+    cpu.AD.set(AD);
   };
 
-  read_next_low_data_byte_from_AD = () => {
-    this.object.load(this.W.fetch() | this.memory.read(this.AD.fetch()));
+  read_next_low_data_byte_from_AD(cpu) {
+    cpu.object.load(cpu.W.fetch() | cpu.memory.read(cpu.AD.fetch()));
   };
 
-  read_next_low_data_byte_to_W_from_PC = () => {
-    this.W.set(this.W.fetch() | this.fetchNextByte());
+  read_next_low_data_byte_to_W_from_PC(cpu) {
+    cpu.W.set(cpu.W.fetch() | cpu.fetchNextByte(cpu));
   };
 
-  read_next_low_data_byte_to_W_from_AD = () => {
-    this.W.set(this.W.fetch() | this.memory.read(this.AD.fetch()));
+  read_next_low_data_byte_to_W_from_AD(cpu) {
+    cpu.W.set(cpu.W.fetch() | cpu.memory.read(cpu.AD.fetch()));
   };
 
-  write_object_high_byte_to_AD = () => {
-    let AD = this.AD.fetch();
-    this.memory.write(AD++, (this.object.fetch() & 0xff00) >> 8);
-    this.AD.set(AD);
+  write_object_high_byte_to_AD(cpu) {
+    let AD = cpu.AD.fetch();
+    cpu.memory.write(AD++, (cpu.object.fetch() & 0xff00) >> 8);
+    cpu.AD.set(AD);
   };
 
-  write_object_low_byte_to_AD = () => {
-    this.memory.write(this.AD.fetch(), this.object.save() & 0xff);
+  write_object_low_byte_to_AD(cpu) {
+    cpu.memory.write(cpu.AD.fetch(), cpu.object.save() & 0xff);
   };
 
-  write_w_low_byte_to_AD = () => {
-    this.memory.write(this.AD.fetch(), this.W.fetch() & 0xff);
+  write_w_low_byte_to_AD(cpu) {
+    cpu.memory.write(cpu.AD.fetch(), cpu.W.fetch() & 0xff);
   };
 
-  busy_state = () => {
+  busy_state(cpu) {
     // do nothing
   };
 
-  read_and_compare_low_byte = () => {
-    this.compare_low_byte(this.fetchNextByte());
+  read_and_compare_low_byte(cpu) {
+    cpu.compare_low_byte(cpu, cpu.fetchNextByte(cpu));
   };
 
-  read_ad_and_compare_low_byte = () => {
-    this.compare_low_byte(this.memory.read(this.AD.fetch()));
+  read_ad_and_compare_low_byte(cpu) {
+    cpu.compare_low_byte(cpu, cpu.memory.read(cpu.AD.fetch()));
   };
 
-  compare_low_byte = (n) => {
-    this.W.set(n);
-    this.twos_complement(this.W, cpus.SHORT);
-    const w = this.W.fetch();
-    const o = this.object.fetch();
+  compare_low_byte(cpu, n) {
+    cpu.W.set(n);
+    cpu.twos_complement(this.W, cpus.SHORT);
+    const w = cpu.W.fetch();
+    const o = cpu.object.fetch();
     const temp = w + o;
     const masked = temp & 0xff;
-    this.check_cc(n, w, o, temp, masked);
+    cpu.check_cc(cpu, n, w, o, temp, masked);
   };
 
-  compare_w_with_word = () => {
-    const n = this.W.fetch();
-    this.twos_complement(this.W, cpus.LONG);
-    const w = this.W.fetch();
-    const o = this.object.fetch();
+  compare_w_with_word(cpu) {
+    const n = cpu.W.fetch();
+    cpu.twos_complement(cpu.W, cpus.LONG);
+    const w = cpu.W.fetch();
+    const o = cpu.object.fetch();
     const temp = w + o;
     const masked = temp & 0xffff;
-    this.check_cc(n, w, o, temp, masked);
+    cpu.check_cc(cpu, n, w, o, temp, masked);
   };
 
-  clear_register = () => {
-    this.object.load(0);
-    this.CC.carry(false);
+  clear_register(cpu) {
+    cpu.object.load(0);
+    cpu.CC.carry(false);
   }
 
-  inc_ob = () => {
-    this.inc(this.object);
+  inc_ob(cpu) {
+    cpu.inc(cpu, cpu.object);
   };
 
-  inc_w = () => {
-    this.inc(this.W);
+  inc_w(cpu) {
+    cpu.inc(cpu, cpu.W);
   };
 
-  inc = (register) => {
+  inc(cpu, register) {
     const o = register.fetch() & 0xff;
     const temp = o + 1;
     register.set(temp & 0xff);
     const w = register.fetch();
-    this.CC.zero(w === 0);
-    this.CC.negative((w & 0x80) !== 0);
-    this.CC.overflow(w !== temp);
+    cpu.CC.zero(w === 0);
+    cpu.CC.negative((w & 0x80) !== 0);
+    cpu.CC.overflow(w !== temp);
   };
 
-  dec_ob = () => {
-    this.dec(this.object);
+  dec_ob(cpu) {
+    cpu.dec(cpu, cpu.object);
   };
 
-  dec_w = () => {
-    this.dec(this.W);
+  dec_w(cpu) {
+    cpu.dec(cpu, cpu.W);
   };
 
-  dec = (register) => {
+  dec(cpu, register) {
     const o = register.fetch() & 0xff;
     const temp = o - 1;
     register.set(temp);
     const w = register.fetch();
-    this.CC.zero(w === 0);
-    this.CC.negative((w & 0x80) !== 0);
-    this.CC.overflow(w !== temp);
+    cpu.CC.zero(w === 0);
+    cpu.CC.negative((w & 0x80) !== 0);
+    cpu.CC.overflow(w !== temp);
   };
 
-  and_target_read = () => {
-    if (this.target.name === 'PC') {
-      this.read_next_low_data_byte_to_W_from_PC();
+  and_target_read(cpu) {
+    if (cpu.target.name === 'PC') {
+      cpu.read_next_low_data_byte_to_W_from_PC(cpu);
     } else {
-      this.read_next_low_data_byte_to_W_from_AD();
+      cpu.read_next_low_data_byte_to_W_from_AD(cpu);
     }
-    this.and_ob();
+    cpu.and_ob(cpu);
   };
 
-  and_control = () => {
-    this.CC.value = this.alu1.and8(this.CC.value, this.W.fetch(), false);
+  and_control(cpu) {
+    cpu.CC.value = cpu.alu1.and8(cpu.CC.value, cpu.W.fetch(), false);
   };
 
-  and_ob = () => {
-    this.object.set(this.alu1.and8(this.object.fetch(), this.W.fetch()));
+  and_ob(cpu) {
+    cpu.object.set(cpu.alu1.and8(cpu.object.fetch(), cpu.W.fetch()));
   };
 
-  or_target_read = () => {
-    if (this.target.name === 'PC') {
-      this.read_next_low_data_byte_to_W_from_PC();
+  or_target_read(cpu) {
+    if (cpu.target.name === 'PC') {
+      cpu.read_next_low_data_byte_to_W_from_PC(cpu);
     } else {
-      this.read_next_low_data_byte_to_W_from_AD();
+      cpu.read_next_low_data_byte_to_W_from_AD(cpu);
     }
-    this.or_ob();
+    cpu.or_ob(cpu);
   };
 
-  or_control = () => {
-    this.CC.value = this.alu1.or8(this.CC.value, this.W.fetch(), false);
+  or_control(cpu) {
+    cpu.CC.value = cpu.alu1.or8(cpu.CC.value, cpu.W.fetch(), false);
   }
 
-  or_ob = () => {
-    this.object.set(this.alu1.or8(this.object.fetch(), this.W.fetch()));
+  or_ob(cpu) {
+    cpu.object.set(cpu.alu1.or8(cpu.object.fetch(), cpu.W.fetch()));
   }
 
-  eor_target_read = () => {
-    if (this.target.name === 'PC') {
-      this.read_next_low_data_byte_to_W_from_PC();
+  eor_target_read(cpu) {
+    if (cpu.target.name === 'PC') {
+      cpu.read_next_low_data_byte_to_W_from_PC(cpu);
     } else {
-      this.read_next_low_data_byte_to_W_from_AD();
+      cpu.read_next_low_data_byte_to_W_from_AD(cpu);
     }
-    this.object.set(this.alu1.eor8(this.object.fetch(), this.W.fetch()));
+    cpu.object.set(cpu.alu1.eor8(cpu.object.fetch(), cpu.W.fetch()));
   }
 
-  shift_left = () => {
-    this.object.set(this.alu1.shiftLeft8(this.object.fetch()));
+  shift_left(cpu) {
+    cpu.object.set(cpu.alu1.shiftLeft8(cpu.object.fetch()));
   }
 
-  rotate_left = () => {
-    this.object.set(this.alu1.shiftLeft8(this.object.fetch(), true));
+  rotate_left(cpu) {
+    cpu.object.set(cpu.alu1.shiftLeft8(cpu.object.fetch(), true));
   }
 
-  shift_right = () => {
-    this.object.set(this.alu1.shiftRight8(this.object.fetch()));
+  shift_right(cpu) {
+    cpu.object.set(cpu.alu1.shiftRight8(cpu.object.fetch()));
   }
 
-  rotate_right = () => {
-    this.object.set(this.alu1.shiftRight8(this.object.fetch(), true));
+  rotate_right(cpu) {
+    cpu.object.set(cpu.alu1.shiftRight8(cpu.object.fetch(), true));
   }
 
-  read_and_bit_test = () => {
-    const address = this.target.fetch();
-    if (this.target === this.PC) {
-      this.PC.set(address + 1);
+  read_and_bit_test(cpu) {
+    const address = cpu.target.fetch();
+    if (cpu.target === cpu.PC) {
+      cpu.PC.set(address + 1);
     }
-    this.alu1.and8(this.object.fetch(), this.memory.read(address));
+    cpu.alu1.and8(cpu.object.fetch(), cpu.memory.read(address));
   }
 
-  complement_byte = () => {
-    this.object.set(this.alu1.complement8(this.object.fetch()));
+  complement_byte(cpu) {
+    cpu.object.set(cpu.alu1.complement8(cpu.object.fetch()));
   }
 
-  negate_byte = () => {
-    this.object.set(this.alu1.negate8andTest(this.object.fetch()));
+  negate_byte(cpu) {
+    cpu.object.set(cpu.alu1.negate8andTest(cpu.object.fetch()));
   }
 
-  sign_extend = () => {
-    if ((this.registers.get('B').fetch() & 0x80) !== 0) {
-      this.registers.get('A').set(0xff);
-      this.CC.negative(true);
+  sign_extend(cpu) {
+    if ((cpu.registers.get('B').fetch() & 0x80) !== 0) {
+      cpu.registers.get('A').set(0xff);
+      cpu.CC.negative(true);
     } else {
-      this.registers.get('A').set(0x00);
-      this.CC.negative(false);
+      cpu.registers.get('A').set(0x00);
+      cpu.CC.negative(false);
     }
-    this.CC.zero(this.registers.get('D').fetch() === 0);
+    cpu.CC.zero(cpu.registers.get('D').fetch() === 0);
   }
 
-  decimal_adjust = () => {
-    this.object.set(this.alu1.daa(this.object.fetch()));
+  decimal_adjust(cpu) {
+    cpu.object.set(cpu.alu1.daa(cpu.object.fetch()));
   }
 
-  exchange = () => {
-    const id1 = (this.W.fetch() & 0xf0) >> 4;
-    const id2 = this.W.fetch() & 0x0f;
+  exchange(cpu) {
+    const id1 = (cpu.W.fetch() & 0xf0) >> 4;
+    const id2 = cpu.W.fetch() & 0x0f;
     if ((id1 & 8) === (id2 & 8)) {
-      const register1 = this.identifyRegister(id1);
-      const register2 = this.identifyRegister(id2);
-      const temporary = this.registers.get(register1).fetch();
-      this.registers.get(register1).set(this.registers.get(register2).fetch());
-      this.registers.get(register2).set(temporary);
+      const register1 = cpu.identifyRegister(id1);
+      const register2 = cpu.identifyRegister(id2);
+      const temporary = cpu.registers.get(register1).fetch();
+      cpu.registers.get(register1).set(cpu.registers.get(register2).fetch());
+      cpu.registers.get(register2).set(temporary);
     }
   }
 
-  transfer = () => {
-    const id1 = (this.W.fetch() & 0xf0) >> 4;
-    const id2 = this.W.fetch() & 0x0f;
+  transfer(cpu) {
+    const id1 = (cpu.W.fetch() & 0xf0) >> 4;
+    const id2 = cpu.W.fetch() & 0x0f;
     if ((id1 & 8) === (id2 & 8)) {
-      const register1 = this.identifyRegister(id1);
-      const register2 = this.identifyRegister(id2);
-      this.registers.get(register2).set(this.registers.get(register1).fetch());
+      const register1 = cpu.identifyRegister(id1);
+      const register2 = cpu.identifyRegister(id2);
+      cpu.registers.get(register2).set(cpu.registers.get(register1).fetch());
     }
   }
 
-  select_register = (stackMask) => {
-    let register = this.stackOrder[stackMask];
+  select_register(cpu, stackMask) {
+    let register = cpu.stackOrder[stackMask];
     if (register === 'US') {
-      if (this.object.name === 'U') {
+      if (cpu.object.name === 'U') {
         register = 'S';
       } else {
         register = 'U';
@@ -859,27 +859,27 @@ class Cpu {
     return register;
   };
 
-  push_reg_to_ad = () => {
+  push_reg_to_ad(cpu) {
     let mask = 0x80;
     let loop = true;
-    let w = this.W.fetch();
+    let w = cpu.W.fetch();
     while (loop) {
       if ((mask & w) === mask) {
-        this.W.set(w -= mask);
+        cpu.W.set(w -= mask);
         if (w !== 0) {
-          this.code.push(this.codes['PUSH']);
+          cpu.code.push(cpu.codes['PUSH']);
         }
-        const register = this.select_register(mask);
-        let address = this.target.fetch();
-        const nextEntry = this.registers.get(register);
+        const register = cpu.select_register(cpu, mask);
+        let address = cpu.target.fetch();
+        const nextEntry = cpu.registers.get(register);
         const lowValue = nextEntry.fetch() & 0xff;
-        this.memory.write(address--, lowValue);
+        cpu.memory.write(address--, lowValue);
         if (nextEntry.size === cpus.LONG) {
-          this.code.push(this.codes['BUSY']);
+          cpu.code.push(cpu.codes['BUSY']);
           const highValue = (nextEntry.fetch() & 0xff00) >> 8;
-          this.memory.write(address--, highValue);
+          cpu.memory.write(address--, highValue);
         }
-        this.target.set(address);
+        cpu.target.set(address);
         loop = false;
       } else {
         mask = mask >> 1;
@@ -888,27 +888,27 @@ class Cpu {
     }
   };
 
-  pull_reg_from_ad = () => {
+  pull_reg_from_ad(cpu) {
     let mask = 0x01;
     let loop = true;
-    let w = this.W.fetch();
+    let w = cpu.W.fetch();
     while (loop) {
       if ((mask & w) === mask) {
-        this.W.set(w -= mask);
+        cpu.W.set(w -= mask);
         if (w !== 0) {
-          this.code.push(this.codes['PULL']);
+          cpu.code.push(cpu.codes['PULL']);
         }
-        const register = this.select_register(mask);
-        let address = this.target.fetch();
-        const nextEntry = this.registers.get(register);
+        const register = cpu.select_register(cpu, mask);
+        let address = cpu.target.fetch();
+        const nextEntry = cpu.registers.get(register);
         let pulledValue = 0;
         if (nextEntry.size === cpus.LONG) {
-          this.code.push(this.codes['BUSY']);
-          pulledValue += this.memory.read(++address) << 8;
+          cpu.code.push(cpu.codes['BUSY']);
+          pulledValue += cpu.memory.read(++address) << 8;
         }
-        pulledValue += this.memory.read(++address);
+        pulledValue += cpu.memory.read(++address);
         nextEntry.set(pulledValue);
-        this.target.set(address);
+        cpu.target.set(address);
         loop = false;
       } else {
         mask = mask << 1;
@@ -917,74 +917,74 @@ class Cpu {
     }
   };
 
-  push_pc_to_ad = () => {
-    let address = this.registers.get('S').fetch();
-    const value = this.PC.fetch();
+  push_pc_to_ad(cpu) {
+    let address = cpu.registers.get('S').fetch();
+    const value = cpu.PC.fetch();
     const lowValue = value & 0xff;
-    this.memory.write(address--, lowValue);
+    cpu.memory.write(address--, lowValue);
     const highValue = (value & 0xff00) >> 8;
-    this.memory.write(address--, highValue);
-    this.registers.get('S').set(address);
+    cpu.memory.write(address--, highValue);
+    cpu.registers.get('S').set(address);
   };
 
-  pull_pc_from_ad = () => {
-    let address = this.target.fetch();
-    const highValue = this.memory.read(++address) << 8;
-    const lowValue = this.memory.read(++address);
-    this.PC.set(highValue | lowValue);
-    this.target.set(address);
+  pull_pc_from_ad(cpu) {
+    let address = cpu.target.fetch();
+    const highValue = cpu.memory.read(++address) << 8;
+    const lowValue = cpu.memory.read(++address);
+    cpu.PC.set(highValue | lowValue);
+    cpu.target.set(address);
   };
 
-  pull_and_test_cc = () => {
-    let address = this.target.fetch();
-    this.CC.value = this.memory.read(++address);
-    this.target.set(address);
-    if(this.CC.ifentireset()) {
-      this.code.push(this.codes['PULL']);
-      this.W.set(0x7e);
+  pull_and_test_cc(cpu) {
+    let address = cpu.target.fetch();
+    cpu.CC.value = cpu.memory.read(++address);
+    cpu.target.set(address);
+    if(cpu.CC.ifentireset()) {
+      cpu.code.push(cpu.codes['PULL']);
+      cpu.W.set(0x7e);
     }
   }
 
-  push_pc_and_cc = () => {
-    this.W.set(0x81);
-    this.push_reg_to_ad();
+  push_pc_and_cc(cpu) {
+    cpu.W.set(0x81);
+    cpu.push_reg_to_ad(cpu);
   }
 
-  set_entire_flag = () => {
-    this.CC.entire(true);
-    this.W.set(0xff);
+  set_entire_flag(cpu) {
+    cpu.CC.entire(true);
+    cpu.W.set(0xff);
   }
 
-  vector_msb = () => {
-    const msb = this.memory.read(this.vector);
-    this.PC.set(msb << 8);
+  vector_msb(cpu) {
+    const msb = cpu.memory.read(cpu.vector);
+    cpu.PC.set(msb << 8);
   }
 
-  vector_lsb = () => {
-    const lsb = this.memory.read(this.vector + 1);
-    this.PC.set(this.PC.fetch() | lsb);
+  vector_lsb(cpu) {
+    const lsb = cpu.memory.read(cpu.vector + 1);
+    cpu.PC.set(cpu.PC.fetch() | lsb);
   }
 
-  suspend_interrupts = () => {
-    this.CC.irq((this.mask & cpus.IRQ) !== 0);
-    this.CC.firq((this.mask & cpus.FIRQ) !== 0);
+  suspend_interrupts(cpu) {
+    cpu.CC.irq((cpu.mask & cpus.IRQ) !== 0);
+    cpu.CC.firq((cpu.mask & cpus.FIRQ) !== 0);
   }
 
-  wait = () => {
-    this.runState = cpus.WAITING;
+  wait(cpu) {
+    cpu.runState = cpus.WAITING;
   }
 
-  sync = () => {
-    this.runState = cpus.SYNCING;
+  sync(cpu) {
+    cpu.runState = cpus.SYNCING;
   }
 
-  calculate_index_to_ad = () => {
+  calculate_index_to_ad(cpu) {
     const OFFSET_TYPE_MASK = 0x80;
     const OFFSET_MASK = 0x1f;
     const INDIRECT_MASK = 0x10;
-    const postByte = this.W.fetch();
-    this.W.set(0);
-    const register = this.postbyte_to_register(postByte);
+    const postByte = cpu.W.fetch();
+    cpu.W.set(0);
+    const register = cpu.postbyte_to_register(cpu, postByte);
     const direct = (INDIRECT_MASK & postByte) !== INDIRECT_MASK;
     let offset = (postByte & OFFSET_MASK);
     if ((postByte & OFFSET_TYPE_MASK) === OFFSET_TYPE_MASK) {
@@ -992,169 +992,169 @@ class Cpu {
         const mode = (postByte & OFFSET_MASK);
         switch (mode) {
           case 0:
-            this.target.set(this.direct_increment(1, register));
+            cpu.target.set(cpu.direct_increment(cpu, 1, register));
             break;
           case 1:
-            this.target.set(this.direct_increment(2, register));
+            cpu.target.set(cpu.direct_increment(cpu, 2, register));
             break;
           case 2:
-            this.target.set(this.direct_decrement(1, register));
+            cpu.target.set(cpu.direct_decrement(cpu, 1, register));
             break;
           case 3:
-            this.target.set(this.direct_decrement(2, register));
+            cpu.target.set(cpu.direct_decrement(cpu, 2, register));
             break;
           case 4:
-            this.target.set(register.fetch());
+            cpu.target.set(register.fetch());
             break;
           case 5:
-            this.target.set(this.direct_byte_offset(
-                this.registers.get('B').fetch(), register
+            cpu.target.set(cpu.direct_byte_offset(cpu,
+                cpu.registers.get('B').fetch(), register
             ));
             break;
           case 6:
-            this.target.set(this.direct_byte_offset(
-                this.registers.get('A').fetch(), register
+            cpu.target.set(cpu.direct_byte_offset(cpu,
+                cpu.registers.get('A').fetch(), register
             ));
             break;
           case 8:
-            this.target.set(this.direct_byte_offset(
-                this.fetchNextByte(), register
+            cpu.target.set(cpu.direct_byte_offset(cpu,
+                cpu.fetchNextByte(cpu), register
             ));
             break;
           case 9:
-            this.target.set(this.direct_word_offset(
-                (this.fetchNextByte() << 8) + this.fetchNextByte(), register
+            cpu.target.set(cpu.direct_word_offset(cpu,
+                (cpu.fetchNextByte(cpu) << 8) + cpu.fetchNextByte(cpu), register
             ));
             break;
           case 11:
-            this.target.set(this.direct_word_offset(
-                this.registers.get('D').fetch(), register
+            cpu.target.set(cpu.direct_word_offset(cpu,
+                cpu.registers.get('D').fetch(), register
             ));
             break;
           case 12:
-            this.target.set(this.direct_byte_offset(
-                this.fetchNextByte(), this.PC
+            cpu.target.set(cpu.direct_byte_offset(cpu,
+                cpu.fetchNextByte(cpu), cpu.PC
             ));
             break;
           case 13:
-            this.target.set(this.direct_word_offset(
-                (this.fetchNextByte() << 8) + this.fetchNextByte(), this.PC
+            cpu.target.set(cpu.direct_word_offset(cpu,
+                (cpu.fetchNextByte(cpu) << 8) + cpu.fetchNextByte(cpu), cpu.PC
             ));
-            this.code.push(this.codes['BUSY']);
+            cpu.code.push(cpu.codes['BUSY']);
         }
       } else {
         const mode = (postByte & OFFSET_MASK) - INDIRECT_MASK;
         switch (mode) {
           case 1:
-            this.target.set(this.direct_increment(2, register));
+            cpu.target.set(cpu.direct_increment(cpu, 2, register));
             break;
           case 3:
-            this.target.set(this.direct_decrement(2, register));
+            cpu.target.set(cpu.direct_decrement(cpu, 2, register));
             break;
           case 4:
-            this.target.set(register.fetch());
+            cpu.target.set(register.fetch());
             break;
           case 5:
-            this.target.set(this.direct_byte_offset(
-                this.registers.get('B').fetch(), register
+            cpu.target.set(cpu.direct_byte_offset(cpu,
+                cpu.registers.get('B').fetch(), register
             ));
             break;
           case 6:
-            this.target.set(this.direct_byte_offset(
-                this.registers.get('A').fetch(), register
+            cpu.target.set(cpu.direct_byte_offset(cpu,
+                cpu.registers.get('A').fetch(), register
             ));
             break;
           case 8:
-            this.target.set(this.direct_byte_offset(
-                this.fetchNextByte(), register
+            cpu.target.set(cpu.direct_byte_offset(cpu,
+                cpu.fetchNextByte(cpu), register
             ));
             break;
           case 9:
-            this.target.set(this.direct_word_offset(
-                (this.fetchNextByte() << 8) + this.fetchNextByte(), register
+            cpu.target.set(cpu.direct_word_offset(cpu,
+                (cpu.fetchNextByte(cpu) << 8) + cpu.fetchNextByte(cpu), register
             ));
             break;
           case 11:
-            this.target.set(this.direct_word_offset(
-                this.registers.get('D').fetch(), register
+            cpu.target.set(cpu.direct_word_offset(cpu,
+                cpu.registers.get('D').fetch(), register
             ));
             break;
           case 12:
-            this.target.set(this.direct_byte_offset(
-                this.fetchNextByte(), this.PC
+            cpu.target.set(cpu.direct_byte_offset(cpu,
+                cpu.fetchNextByte(cpu), cpu.PC
             ));
             break;
           case 13:
-            this.target.set(this.direct_word_offset(
-                (this.fetchNextByte() << 8) + this.fetchNextByte(), this.PC
+            cpu.target.set(cpu.direct_word_offset(cpu,
+                (cpu.fetchNextByte(cpu) << 8) + cpu.fetchNextByte(cpu), cpu.PC
             ));
-            this.code.push(this.codes['BUSY']);
+            cpu.code.push(cpu.codes['BUSY']);
             break;
           case 15:
-            this.target.set((this.fetchNextByte() << 8) + this.fetchNextByte());
-            this.code.push(this.codes['BUSY']);
-            this.code.push(this.codes['BUSY']);
+            cpu.target.set((cpu.fetchNextByte(cpu) << 8) + cpu.fetchNextByte(cpu));
+            cpu.code.push(cpu.codes['BUSY']);
+            cpu.code.push(cpu.codes['BUSY']);
             break;
         }
-        this.code.push(this.codes['SWAPWAD']);
-        this.code.push(this.codes['READADWLOW']);
-        this.code.push(this.codes['READADHIGH']);
+        cpu.code.push(cpu.codes['SWAPWAD']);
+        cpu.code.push(cpu.codes['READADWLOW']);
+        cpu.code.push(cpu.codes['READADHIGH']);
       }
     } else {
-      this.target.set(this.direct_constant_offset(offset, register));
+      cpu.target.set(cpu.direct_constant_offset(cpu, offset, register));
     }
   }
 
-  direct_constant_offset = (offset, register) => {
-    this.code.push(this.codes['BUSY']);
-    return this.alu1.offsetEA5(offset, register.fetch());
+  direct_constant_offset(cpu, offset, register) {
+    cpu.code.push(cpu.codes['BUSY']);
+    return cpu.alu1.offsetEA5(offset, register.fetch());
   }
 
-  direct_byte_offset = (offset, register) => {
-    this.code.push(this.codes['BUSY']);
-    return this.alu1.offsetEA8(offset, register.fetch());
+  direct_byte_offset(cpu, offset, register) {
+    cpu.code.push(cpu.codes['BUSY']);
+    return cpu.alu1.offsetEA8(offset, register.fetch());
   }
 
-  direct_word_offset = (offset, register) => {
-    this.code.push(this.codes['BUSY']);
-    this.code.push(this.codes['BUSY']);
-    this.code.push(this.codes['BUSY']);
-    this.code.push(this.codes['BUSY']);
-    return this.alu1.offsetEA16(offset, register.fetch());
+  direct_word_offset(cpu, offset, register) {
+    cpu.code.push(cpu.codes['BUSY']);
+    cpu.code.push(cpu.codes['BUSY']);
+    cpu.code.push(cpu.codes['BUSY']);
+    cpu.code.push(cpu.codes['BUSY']);
+    return cpu.alu1.offsetEA16(offset, register.fetch());
   }
 
-  direct_increment = (step, register) => {
+  direct_increment(cpu, step, register) {
     for (let counter = 0; counter <= step; ++counter) {
-      this.code.push(this.codes['BUSY']);
+      cpu.code.push(cpu.codes['BUSY']);
     }
     const address = register.fetch();
     register.set(address + step);
     return address;
   }
 
-  direct_decrement = (step, register) => {
+  direct_decrement(cpu, step, register) {
     for (let counter = 0; counter <= step; ++counter) {
-      this.code.push(this.codes['BUSY']);
+      cpu.code.push(cpu.codes['BUSY']);
     }
     const address = register.fetch() - step;
     register.set(address);
     return address;
   }
 
-  postbyte_to_register = (postByte) => {
+  postbyte_to_register(cpu, postByte) {
     const REGISTER_MASK = 0x60;
     const register = (postByte & REGISTER_MASK) >> 5;
-    return this.registers.get(this.postbyteRegisters[register]);
+    return cpu.registers.get(cpu.postbyteRegisters[register]);
   }
 
-  check_cc = (initial, complement, object, sum, masked) => {
-    this.CC.zero(masked === 0);
-    this.CC.negative((masked & 0x80) !== 0);
-    this.CC.overflow(sum !== masked);
-    this.CC.carry(initial < object);
+  check_cc(cpu, initial, complement, object, sum, masked) {
+    cpu.CC.zero(masked === 0);
+    cpu.CC.negative((masked & 0x80) !== 0);
+    cpu.CC.overflow(sum !== masked);
+    cpu.CC.carry(initial < object);
   };
 
-  twos_complement = (register, scale) => {
+  twos_complement(register, scale) {
     let value = register.fetch();
     let mask = 0xffff;
     if (scale === cpus.SHORT) {
@@ -1166,7 +1166,7 @@ class Cpu {
     register.set(value);
   };
 
-  xor = (value, scale) => {
+  xor(value, scale) {
     let mask = 0x01;
     let result = 0;
     for (let index = 0; index < scale; index++) {
