@@ -36,31 +36,33 @@ PIA 2 is at $ff20 - $ff23 and repeats through to $ff39
 
 | Address | Function | Description |
 | ------- | -------- | ----------- |
-| $ff00 | PDR0A | PDR/DDR 0A |
-| $ff01 | CR0A | Control register 0A |
-| $ff02 | PDR0B | PDR/DDR 0B |
-| $ff03 | CR0B | Control register 0B |
-| $ff20 | PDR1A | PDR/DDR 1A |
-| $ff21 | CR1A | Control register 1A |
-| $ff22 | PDR1B | PDR/DDR 1B |
-| $ff23 | CR1B | Control Register 1B |
+| ff00 | PDR0A | PDR/DDR 0A |
+| ff01 | CR0A | Control register 0A |
+| ff02 | PDR0B | PDR/DDR 0B |
+| ff03 | CR0B | Control register 0B |
+| ff20 | PDR1A | PDR/DDR 1A |
+| ff21 | CR1A | Control register 1A |
+| ff22 | PDR1B | PDR/DDR 1B |
+| ff23 | CR1B | Control Register 1B |
 
 PIA 0 is used for keyboard, video sync control and selection 
 of joystick channel  
 PDR0A provides the result of a row scan with each bit 
 representing a column of the keyboard matrix  
 PDR0B allows the selection of which row to scan  
+With both registers the value supplied is an inverse
+mask of the line to be selected (or reported)
 
 CR0A b0, b1 - control horizontal sync clock  
 CR0A b2 - DDR/PDR select (0/1) for port A   
-CR0A b3 - SEL1 - LSB of analogue MUX select  
+CR0A b3 - SEL1 - LSB of analog MUX select  
 CR0A b4, b5 - always 1  
 CR0A b6 - not used  
 CR0A b7 - horizontal interrupt flag  
 
 CR0B b0, b1 - control of field sync clock  
 CR0B b2 - DDR/PDR select (0/1) for port B  
-CR0B b3 - SEL2 - MSB of analogue MUX select
+CR0B b3 - SEL2 - MSB of analog MUX select  
 CR0B b4, b5 - always 1  
 CR0B b6 - not used  
 CR0B b7 - field sync interrupt flag  
@@ -75,3 +77,19 @@ PDR1B b0 - printer busy
 PDR1B b1 - single bit sound  
 PDR1B b2 - RAM size 0=4k, 1=16k  
 PDR1B b3..b7 - VDG control lines
+
+CR1A b0 - cartridge interrupt  
+CR1A b1 - not used  
+CR1A b2 - DDR/PDR select (0/1) for port A
+CR1A b3 - cassette motor control  
+CR1A b4, b5 - always 1  
+CR1A b6 - not used  
+CR1A b7 - CD interrupt flag  
+
+CR1B b0, b1 - control of cartridge interrupts  
+CR1B b2 - DDR/PDR select (0/1) for port B  
+CR1B b3 - six bit sound enable  
+CR1B b4, b5 - always 1  
+CR1B b6 - not used  
+CR1B b7 - cartridge interrupt flag  
+
