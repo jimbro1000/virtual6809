@@ -1,5 +1,5 @@
 const each = require('jest-each').default;
-const {Keyboard, defaultMap} = require('../../src/keyboard/dragon_keyboard');
+const {Keyboard, KeyboardHandler, defaultMap} = require('../../src/keyboard/dragon_keyboard');
 
 describe('it emulates a dragon 32/64 keyboard', () => {
   it('requires a grid of 8x7 keys in the map', () => {
@@ -12,16 +12,51 @@ describe('it emulates a dragon 32/64 keyboard', () => {
     expect(() => {new Keyboard( [[],[]]);}).toThrow(EvalError);
   });
 
-  describe('turns a keypress into a rollover map', () => {
+  describe('turns a set of keys into a rollover map', () => {
     each(
         [
-            [0x13, 0, 0xbf], [0x41, 1, 0xfb],
+            [[0x13], 0, 0xbf], [[0x41], 1, 0xfb],
         ],
     ).it('accepts a js keycode and unmasks a bit in the result',
-        (keycode, column, expected) => {
+        (keycodes, column, expected) => {
           const keyboard = new Keyboard(defaultMap);
-          const rollover = keyboard.keypress(keycode);
-          expect(rollover[column]).toBe(expected);
+          const keySet = new Set(keycodes);
+          keyboard.keypress(keySet);
+          expect(keyboard.rolloverMap[column]).toBe(expected);
         });
+  });
+});
+
+describe('it handles javascript keyboard interaction', () => {
+  let subject;
+  beforeEach(() => {
+    subject = new KeyboardHandler(defaultMap);
+  });
+  it('keeps tracks of key down events', () => {
+    const keyEvent = {'code': 0x20};
+    expect(subject.keys.size).toBe(0);
+    subject.keydown(keyEvent);
+    expect(subject.keys.size).toBe(1);
+  });
+
+  each(
+    [[0x91, 0], [0x20, 1]],
+  ).it('ignores unmapped key codes',
+      (code, expected) => {
+        const keyEvent = {'code': code};
+        subject.keydown(keyEvent);
+        expect(subject.keys.size).toBe(expected);
+      });
+
+  it('clears a previously pressed keys', () => {
+    subject.keys.add(0x20);
+    subject.keyup({'code': 0x20});
+    expect(subject.keys.size).toBe(0);
+  });
+
+  it('translates keypresses into a rollover map', () => {
+    subject.keydown({'code': 0x61});
+    const map = subject.getRollover();
+    expect(map[1]).toBe(0xfb);
   });
 });
