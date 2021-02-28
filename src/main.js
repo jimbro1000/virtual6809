@@ -79,8 +79,15 @@ window.onload = () => {
   const tick = 1; // milliseconds
   const keyHandler = new KeyboardHandler(defaultMap);
 
-  canvas.addEventListener('keydown', keyHandler.keydown);
-  canvas.addEventListener('keyup', keyHandler.keyup);
+  function keyDownEventHandler(event) {
+    keyHandler.keydown(event);
+  }
+  function keyUpEventHandler(event) {
+    keyHandler.keyup(event);
+  }
+
+  window.addEventListener('keydown', keyDownEventHandler);
+  window.addEventListener('keyup', keyUpEventHandler);
 
   // set entry vector to 0x2000
   memory.burn(0xfffe, 0x20);

@@ -33,7 +33,7 @@ describe('it handles javascript keyboard interaction', () => {
     subject = new KeyboardHandler(defaultMap);
   });
   it('keeps tracks of key down events', () => {
-    const keyEvent = {'code': 0x20};
+    const keyEvent = {'keyCode': 0x20};
     expect(subject.keys.size).toBe(0);
     subject.keydown(keyEvent);
     expect(subject.keys.size).toBe(1);
@@ -43,19 +43,19 @@ describe('it handles javascript keyboard interaction', () => {
     [[0x91, 0], [0x20, 1]],
   ).it('ignores unmapped key codes',
       (code, expected) => {
-        const keyEvent = {'code': code};
+        const keyEvent = {'keyCode': code};
         subject.keydown(keyEvent);
         expect(subject.keys.size).toBe(expected);
       });
 
   it('clears a previously pressed keys', () => {
     subject.keys.add(0x20);
-    subject.keyup({'code': 0x20});
+    subject.keyup({'keyCode': 0x20});
     expect(subject.keys.size).toBe(0);
   });
 
   it('translates keypresses into a rollover map', () => {
-    subject.keydown({'code': 0x61});
+    subject.keydown({'keyCode': 0x41});
     const map = subject.getRollover();
     expect(map[1]).toBe(0xfb);
   });
