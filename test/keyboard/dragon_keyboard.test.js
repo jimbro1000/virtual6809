@@ -15,7 +15,7 @@ describe('it emulates a dragon 32/64 keyboard', () => {
   describe('turns a set of keys into a rollover map', () => {
     each(
         [
-            [[0x13], 0, 0xbf], [[0x41], 1, 0xfb],
+            [[0x13], 0, 0xbf], [[0x42], 2, 0xfb],
         ],
     ).it('accepts a js keycode and unmasks a bit in the result',
         (keycodes, column, expected) => {
