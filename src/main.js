@@ -1,6 +1,7 @@
 const Memory = require('./memory/memory_factory.js');
 const {Cpu} = require('./cpu/cpu.js');
 const Font = require('./font.js').halfSet;
+const {Keyboard, KeyboardHandler, defaultMap} = require('./keyboard/dragon_keyboard');
 
 const displayWidth = 640;
 const displayHeight = 480;
@@ -76,6 +77,10 @@ window.onload = () => {
   const machine = new Cpu(memory);
   const cyclesPerTick = 1000;
   const tick = 1; // milliseconds
+  const keyHandler = new KeyboardHandler(defaultMap);
+
+  canvas.addEventListener('keydown', keyHandler.keydown);
+  canvas.addEventListener('keyup', keyHandler.keyup);
 
   // set entry vector to 0x2000
   memory.burn(0xfffe, 0x20);
