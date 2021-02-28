@@ -8,8 +8,12 @@ describe('it emulates a dragon 32/64 keyboard', () => {
     expect(keyboard.constructor.name).toBe('Keyboard');
   });
 
-  it('throws an exception if the map is an invalid size', () => {
+  it('throws an exception if the map is an invalid number of columns', () => {
     expect(() => {new Keyboard( [[],[]]);}).toThrow(EvalError);
+  });
+
+  it('throws an exception if the map is an invalid number of rows', () => {
+    expect(() => {new Keyboard( [[],[],[],[],[],[],[],[]]);}).toThrow(EvalError);
   });
 
   describe('turns a set of keys into a rollover map', () => {
@@ -48,10 +52,17 @@ describe('it handles javascript keyboard interaction', () => {
         expect(subject.keys.size).toBe(expected);
       });
 
-  it('clears a previously pressed keys', () => {
-    subject.keys.add(0x20);
-    subject.keyup({'keyCode': 0x20});
-    expect(subject.keys.size).toBe(0);
+  it('removes unpressed keys from the list', () => {
+    subject.keys = new Set([0x64,0x65,0x66]);
+    subject.keyup({'keyCode': 0x65});
+    expect(subject.keys.size).toBe(2);
+    expect(subject.keys.has(0x65)).toBeFalsy();
+  });
+
+  it('ignores unpressed keys that arent already pressed', () => {
+    subject.keys = new Set([0x64,0x65,0x66]);
+    subject.keyup({'keyCode': 0x67});
+    expect(subject.keys.size).toBe(3);
   });
 
   it('translates keypresses into a rollover map', () => {
