@@ -1,10 +1,12 @@
 const {MemoryManager} = require('../../src/memory/memory_manager');
 const {Chip} = require('../../src/memory/memory_chip');
 const chips = require('../../src/memory/memory_constants.js');
+const {Pia} = require('./pia_chip');
 
 const models = {
   'D64': [
-    {type: chips.MAPPED, size: chips.B256, base: 0xff00},
+    {type: chips.PIA, size: chips.B32, base: 0xff00},
+    {type: chips.PIA, size: chips.B32, base: 0xff80},
     {type: chips.RAM, size: chips.K32, base: 0x0000},
     {type: chips.ROM, size: chips.K32, base: 0x8000},
   ],
@@ -37,7 +39,11 @@ const factory = (model) => {
 };
 
 transform = (type, size, base) => {
-  return [new Chip(type, size), base];
+  if (type === chips.PIA) {
+    return [new Pia(size), base];
+  } else {
+    return [new Chip(type, size), base];
+  }
 };
 
 module.exports = {factory};

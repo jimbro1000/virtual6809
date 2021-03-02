@@ -34,6 +34,20 @@ class Manager {
       this.address_map[address].burnMemory(address, byte);
     }
   };
+
+  getMappedChip(chipIndex) {
+    let counter = chipIndex;
+    let result;
+    for(let index = 0; index < this.hardware.length; ++index) {
+      if (this.hardware[index].hardmapped) {
+        counter--;
+        if (counter === 0) {
+          let result = this.hardware[index];
+        }
+      }
+    }
+    return result;
+  }
 }
 
 module.exports = {MemoryManager: Manager}

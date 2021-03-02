@@ -2,7 +2,14 @@ const define = require("node-constants")(exports);
 
 define("RAM", "ram");
 define("ROM", "rom");
-define("MAPPED", "mapped")
+define("MAPPED", "mapped");
+define("PIA", "pia");
+define('B4', 0x04);
+define('B8', 0x08);
+define('B16', 0x10);
+define('B32', 0x20);
+define('B64', 0x40);
+define('B128', 0x80);
 define("B256", 0x100);
 define("B512", 0x200);
 define("K1", 0x400);

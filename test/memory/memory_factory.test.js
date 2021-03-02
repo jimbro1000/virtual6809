@@ -4,7 +4,7 @@ const each = require('jest-each').default;
 
 describe('Memory hardware factory', () => {
   each([
-    ['D64', 3, [256, 32768, 32768]],
+    ['D64', 4, [32, 32, 32768, 32768]],
     ['D4', 2, [256, 4096]],
   ]).it(
       'accepts a shorthand machine name and returns a memory manager',

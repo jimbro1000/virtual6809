@@ -166,7 +166,7 @@ printover:
     rts
 
 messagetext:
-    fcb "VIRTUAL 6809 V0.4.1",0
+    fcb "VIRTUAL 6809 V0.4.3",0
 ```
 
 The reset vector is set to the code origin so in theory it should always 
