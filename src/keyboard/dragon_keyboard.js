@@ -1,9 +1,10 @@
 class Keyboard {
-  constructor(map) {
+  constructor(map, pia) {
     this.KEYBOARD_COLUMNS = 8;
     this.KEYBOARD_ROWS = 7;
     this.translationMap = map;
     this.rolloverMap = this.blankMap();
+    this.pia = pia;
     if (map.length !== 8) {
       throw new EvalError("invalid keyboard map " + map);
     } else {
@@ -20,6 +21,37 @@ class Keyboard {
         throw new EvalError("invalid keyboard map " + map);
       }
     }
+    if (typeof this.pia !== 'undefined') {
+      this.pia.bindListener('pdb_write', this.readRow(), 0x7f);
+    }
+  }
+
+  readRow() {
+    const columnSelect = this.pia.readPdb();
+    let column;
+    switch(columnSelect) {
+      case 0x40:
+        column = 0;
+        break;
+      case 0x20:
+        column = 1;
+        break;
+      case 0x10:
+        column = 2;
+        break;
+      case 0x8:
+        column = 3;
+        break;
+      case 0x4:
+        column = 4;
+        break;
+      case 0x2:
+        column = 5;
+        break;
+      default:
+        column = 6;
+    }
+    this.pia.writePda(this.rolloverMap[column]);
   }
 
   blankMap() {
