@@ -140,7 +140,7 @@ class ControlRegister extends CpuRegister {
         const carry = (cc.value & cpus.CARRY) > 0;
         const zero = (cc.value & cpus.ZERO) > 0;
         return (carry || zero);
-    }
+    } // if ((cc & this.cpu.flagBits.C) || (cc & this.cpu.flagBits.Z)) {this.condition=1}
 
     iflessorequal(cc) {
         const negative = (cc.value & cpus.NEGATIVE) > 0;
@@ -154,7 +154,7 @@ class ControlRegister extends CpuRegister {
         const overflow = (cc.value & cpus.OVERFLOW) > 0;
         return (negative && !overflow) || (overflow && !negative);
     }
-//
+
     ifhalfcarry() {
         return (this.value & cpus.HALFCARRY) > 0;
     }
