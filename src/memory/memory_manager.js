@@ -16,11 +16,12 @@ class Manager {
   }
 
   read(address) {
+    let result = 0;
     if (this.address_map[address] !== undefined) {
-      return this.address_map[address].getMemory(address);
-    } else {
-      return 0;
+      result = this.address_map[address].getMemory(address);
     }
+    //console.log("memory read at " + address.toString(16) + " = " + result.toString(16));
+    return result;
   };
 
   write(address, byte) {

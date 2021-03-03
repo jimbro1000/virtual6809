@@ -271,6 +271,14 @@ class Cpu {
     }
   }
 
+  logOperandCodes(mnemonic, instructionCode) {
+    let result = mnemonic + " code stack: ";
+    for (let index=0; index<instructionCode.length; ++index) {
+      result += instructionCode[index] + " ";
+    }
+    console.debug(result);
+  }
+
   /**
    * populate the named register
    * @param {string|CpuRegister} register
@@ -340,6 +348,7 @@ class Cpu {
     this.operation = 0;
     this.condition = '';
     this.vector = 0xfffe;
+    console.debug("operand completed");
   }
 
   /**
@@ -388,6 +397,7 @@ class Cpu {
   executeNext() {
     const microcode = this.code.pop();
     const lambda = this.lambdas[microcode];
+    // console.log("execute microcode " + microcode);
     if (typeof lambda === 'function') {
       lambda(this);
     } else {
@@ -464,6 +474,7 @@ class Cpu {
       this.mask = action.mask;
     }
     this.populateCodeStack(action.code);
+    this.logOperandCodes(action.operation, action.code);
   }
 
   swap_internal_registers(cpu) {
@@ -583,6 +594,7 @@ class Cpu {
   };
 
   fetch_next_instruction_from_PC(cpu) {
+    console.debug("fetch next instruction byte from " + cpu.PC.fetch().toString(16));
     const nextByte = cpu.fetchNextByte(cpu);
     cpu.operation |= nextByte;
     const action = cpu.instructions[cpu.operation];
@@ -674,25 +686,26 @@ class Cpu {
     cpu.compare_low_byte(cpu, cpu.memory.read(cpu.AD.fetch()));
   };
 
-  compare_low_byte(cpu, n) {
-    cpu.W.set(n);
-    cpu.twos_complement(this.W, cpus.SHORT);
-    const w = cpu.W.fetch();
+  compare_low_byte(cpu, w) {
     const o = cpu.object.fetch();
-    const temp = w + o;
-    const masked = temp & 0xff;
-    cpu.check_cc(cpu, n, w, o, temp, masked);
+    cpu.compare_values(cpu, o, w, 0x80, 0x100, 0xff);
   };
 
   compare_w_with_word(cpu) {
-    const n = cpu.W.fetch();
-    cpu.twos_complement(cpu.W, cpus.LONG);
     const w = cpu.W.fetch();
     const o = cpu.object.fetch();
-    const temp = w + o;
-    const masked = temp & 0xffff;
-    cpu.check_cc(cpu, n, w, o, temp, masked);
+    cpu.compare_values(cpu, o, w, 0x8000, 0x10000, 0xffff);
   };
+
+  compare_values(cpu, o, w, msb_mask, ovb_mask, value_mask) {
+    const mask = o ^ w;
+    const result = o - w;
+    const masked_result = result & value_mask;
+    cpu.CC.overflow(((mask & (o ^ result)) & msb_mask) !== 0);
+    cpu.CC.zero(masked_result === 0);
+    cpu.CC.negative((masked_result & msb_mask) !== 0);
+    cpu.CC.carry((result & ovb_mask) !== 0);
+  }
 
   clear_register(cpu) {
     cpu.object.load(0);
@@ -1150,6 +1163,13 @@ class Cpu {
   check_cc(cpu, initial, complement, object, sum, masked) {
     cpu.CC.zero(masked === 0);
     cpu.CC.negative((masked & 0x80) !== 0);
+    cpu.CC.overflow(sum !== masked);
+    cpu.CC.carry(initial < object);
+  };
+
+  check_cc_w(cpu, initial, complement, object, sum, masked) {
+    cpu.CC.zero(masked === 0);
+    cpu.CC.negative((masked & 0x8000) !== 0);
     cpu.CC.overflow(sum !== masked);
     cpu.CC.carry(initial < object);
   };
