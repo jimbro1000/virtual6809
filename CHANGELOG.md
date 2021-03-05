@@ -1,6 +1,9 @@
 # Virtual 6809 CHANGELOG #
 
 ## Unreleased ##
+* Fix control register flag logic for compare operations
+* Pia implementation (incomplete)
+* Keyboard interaction in demo
 
 ## V0.4.4 - Sept 17 2021 ##
 * Update dependencies
