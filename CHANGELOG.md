@@ -1,6 +1,9 @@
 # Virtual 6809 CHANGELOG #
 
 ## Unreleased ##
+* Fix control register flag logic for compare operations
+* Pia implementation (incomplete)
+* Keyboard interaction in demo
 
 ## V0.4.2 - Feb 23 2021 ##
 * Change to default port number for Heroku

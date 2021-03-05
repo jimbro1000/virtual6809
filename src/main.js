@@ -11,8 +11,9 @@ const zoom = 2;
 
 window.onload = () => {
   const vdgTranslate = (char, row) => {
-    const fontIndex = char * 8 + row % 8;
-    return Font[fontIndex];
+    const mask = char > 127 ? 0xff : 0x00;
+    let fontIndex = (char & 0x7f) * 8 + row % 8;
+    return Font[fontIndex] ^ mask;
   };
   const div = (a, b) => {
     return Math.floor(a / b);
@@ -76,9 +77,35 @@ window.onload = () => {
   const memory = Memory.factory('D64');
   const machine = new Cpu(memory);
   const pia1 = memory.getMappedChip(1);
-  const cyclesPerTick = 2000;
+  const cyclesPerTick = 1000;
   const tick = 1; // milliseconds
   const keyHandler = new KeyboardHandler(defaultMap, pia1);
+
+  // provide cpu state feedback without log
+
+  // const state = document.createElement('div');
+  // state.id = 'cpustate';
+  // bodyNode.append(state);
+  // const statetext = document.createElement('textarea');
+  // statetext.id = 'cpustatedesc';
+  // state.append(statetext);
+  // state.style.width = "100pc";
+  //
+  // const registerList = ['A', 'B', 'D', 'X', 'Y', 'U', 'S', 'PC', 'DP', 'CC'];
+  //
+  // function stateReport() {
+  //   let result = '';
+  //   registerList.forEach((registerName) => {
+  //     result += appendRegister(registerName) + "\n";
+  //   });
+  //   statetext.textContent = result;
+  // }
+  //
+  // function appendRegister(registerName) {
+  //   let result = registerName + " : 0x";
+  //   result = result + machine.registers.get(registerName).fetch().toString(16);
+  //   return result;
+  // }
 
   function keyDownEventHandler(event) {
     keyHandler.keydown(event);
@@ -133,17 +160,17 @@ window.onload = () => {
     0x20, 0x20, 0x08, 0x55, 0x4d, 0x45, 0x2d, 0x35,
     0x20, 0x20, 0x3f, 0x56, 0x4e, 0x46, 0x2e, 0x36,
     0x20, 0x26, 0x20, 0x57, 0x4f, 0x47, 0x2f, 0x37,
-    0x61, 0x20,
+    0x21, 0x20,
     0x44, 0x4f, 0x57, 0x4e, 0x20, 0x41, 0x52, 0x52, 0x4f, 0x57, 0x00,
-    0x7f, 0x20,
+    0x3f, 0x20,
     0x52, 0x49, 0x47, 0x48, 0x54, 0x20, 0x41, 0x52, 0x52, 0x4f, 0x57, 0x00,
-    0x63, 0x20,
+    0x23, 0x20,
     0x45, 0x4e, 0x54, 0x45, 0x52, 0x00,
-    0x64, 0x20,
+    0x24, 0x20,
     0x43, 0x4c, 0x45, 0x41, 0x52, 0x00,
-    0x64, 0x20,
+    0x24, 0x20,
     0x42, 0x52, 0x45, 0x41, 0x4b, 0x00,
-    0x64, 0x20,
+    0x24, 0x20,
     0x53, 0x48, 0x49, 0x46, 0x54, 0x00,
     0x10, 0x8e, 0xff, 0x00,
     0xa6, 0x21,
@@ -210,12 +237,12 @@ window.onload = () => {
     0x20, 0xca,
     0x34, 0x06,
     0xe6, 0x84,
-    0xc8, 0x40,
+    0xc8, 0x80,
     0xe7, 0x84,
     0x4f,
     0x4a,
     0x26, 0xfd,
-    0xc8, 0x40,
+    0xc8, 0x80,
     0xe7, 0x84,
     0x35, 0x86,
     0x39
@@ -225,6 +252,7 @@ window.onload = () => {
   for(let index = 0; index < codePiaTest.length; ++index) {
     memory.write(codeAddress + index, codePiaTest[index]);
   }
+  machine.registers.get('S').load(0x7fff);
 
   const videoAddress = 0x0400;
 
@@ -242,6 +270,7 @@ window.onload = () => {
     while (cycles-- > 0) {
       machine.cycle();
     }
+    // stateReport();
   }
 
   main(0);
