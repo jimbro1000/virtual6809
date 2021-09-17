@@ -2,6 +2,14 @@
 
 ## Unreleased ##
 
+## V0.4.4 - Sept 17 2021 ##
+* Update dependencies
+
+## V0.4.3 - Feb 23 2021 ##
+* Isolate production start script
+* Create local run script (`npm run local`)
+* Refactor code to play nicely with webpack
+
 ## V0.4.2 - Feb 23 2021 ##
 * Change to default port number for Heroku
 
