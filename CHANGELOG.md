@@ -1,5 +1,10 @@
 # Virtual 6809 CHANGELOG #
 
+## Unreleased ##
+
+## V0.4.4 - Sept 17 2021 ##
+* Update dependencies
+
 ## V0.4.3 - Feb 23 2021 ##
 * Isolate production start script
 * Create local run script (`npm run local`)
