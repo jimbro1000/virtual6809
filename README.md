@@ -136,7 +136,7 @@ start:
     ldx #screenbase
     bsr cls
     bsr message
-    leax 32,x
+    leax 40,x
 cycle:
     inc ,x
     bra cycle
@@ -149,7 +149,7 @@ cls:
     lda #$20
 clsloop:
     sta ,x+
-    cmpx #$0600
+    cmpx #$08B0
     bne clsloop
     puls a,x
     rts
@@ -166,7 +166,7 @@ printover:
     rts
 
 messagetext:
-    fcb "VIRTUAL 6809 V0.4.1",0
+    fcb "VIRTUAL 6809 V0.4.6",0
 ```
 
 The reset vector is set to the code origin so in theory it should always 
