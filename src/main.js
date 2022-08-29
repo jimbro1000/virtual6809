@@ -2,10 +2,10 @@ const Memory = require('./memory/memory_factory.js');
 const {Cpu} = require('./cpu/cpu.js');
 const Font = require('./font.js').halfSet;
 
-const displayWidth = 640;
-const displayHeight = 480;
-const screenWidth = 256;
-const screenHeight = 192;
+const displayWidth = 720;
+const displayHeight = 568;
+const screenWidth = 320;
+const screenHeight = 240;
 const zoom = 2;
 
 window.onload = () => {
@@ -35,7 +35,7 @@ window.onload = () => {
           const column = div(screenX, 8);
           const row = div(screenY, 8);
           const charRow = screenY % 8;
-          const screenAddress = videoAddress + column + row * 32;
+          const screenAddress = videoAddress + column + row * 40;
           const memByte = memory.read(screenAddress);
           const lookup = vdgTranslate(memByte, charRow);
           const mask = 0x80 >> (screenX % 8);
@@ -86,7 +86,7 @@ window.onload = () => {
     0x8e, 0x04, 0x00, // LDX #$0400
     0x8d, 0x10, // BSR +16 (clr)
     0x8d, 0x07, // BSR +7 (message)
-    0x30, 0x88, 0x20, // LEAX 32,X
+    0x30, 0x88, 0x28, // LEAX 40,X
     0x6c, 0x84, // INC ,X
     0x20, 0xfc, // BRA -4
     0x31, 0x8d, 0x00, 0x1e, // LEAY +30, PC
@@ -107,7 +107,7 @@ window.onload = () => {
     0x35, 0x32, // PULS A,X,Y
     0x39, // RTS
     0x56, 0x49, 0x52, 0x54, 0x55, 0x41, 0x4C, 0x20, 0x36, 0x38,
-    0x30, 0x39, 0x20, 0x56, 0x30, 0x2E, 0x34, 0x2E, 0x34, 0x00,
+    0x30, 0x39, 0x20, 0x56, 0x30, 0x2E, 0x34, 0x2E, 0x36, 0x00,
   ];
 
   const codeAddress = 0x2000;
